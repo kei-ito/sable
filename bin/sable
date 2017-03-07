@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+
+const program = require('commander');
+const console = require('j1/console').create('sable');
+
+program
+	.version(require('../package').version)
+	.usage('[options] [documentRoots ...]')
+	.option('-p --port <n>', 'A port number to listen HTTP request', parseInt)
+	.option('-w --wsport <n>', 'A port number to listen WebSocket request', parseInt)
+	.parse(process.argv);
+
+require('../sable')({
+	port: program.port,
+	wsport: program.wsport,
+	documentRoot: program.args
+})
+.catch(console.onError);

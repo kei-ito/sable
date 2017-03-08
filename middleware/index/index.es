@@ -15,7 +15,6 @@ function respondFileList(dir, req, res, next) {
 	.then((files) => {
 		files.unshift('..');
 		res.writeHead(HTTP_OK, {'Content-Type': mime('index.html')});
-		mu.clearCache();
 		mu.compileAndRender(templatePath, {
 			dir: url.parse(req.url).pathname,
 			files: files.map((file) => {

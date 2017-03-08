@@ -15,13 +15,14 @@ function replaceCSS(file) {
 	}
 }
 const RETRY_INTERVAL = 1000;
+const RELOAD_DEBOUNCE = 500;
 const endpoint = `ws://${location.hostname}:${document.getElementById('wsport').textContent}`;
 const connect = debounce(function () {
 	const ws = new WebSocket(endpoint);
 	if (this && this.close) {
 		this.close();
 	}
-	ws.onmessage = function (event) {
+	ws.onmessage = debounce(function (event) {
 		const file = event.data;
 		const ext = file.replace(/^.*\./, '');
 		switch (ext) {
@@ -31,7 +32,7 @@ const connect = debounce(function () {
 		default:
 			location.reload();
 		}
-	};
+	}, RELOAD_DEBOUNCE);
 	ws.onerror = connect;
 	ws.onclose = connect;
 }, RETRY_INTERVAL);

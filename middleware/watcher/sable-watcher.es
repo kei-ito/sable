@@ -8,6 +8,12 @@ function debounce(fn, delay = 0, thisArg = this) {
 		}, delay);
 	};
 }
+function replaceCSS(file) {
+	const link = document.querySelector(`link[href^=${file}]`);
+	if (link) {
+		link.href = link.href.replace(/(\?.*)?$/, `?d=${Date.now()}`);
+	}
+}
 const RETRY_INTERVAL = 1000;
 const endpoint = `ws://${location.hostname}:${document.getElementById('wsport').textContent}`;
 const connect = debounce(function () {
@@ -16,7 +22,15 @@ const connect = debounce(function () {
 		this.close();
 	}
 	ws.onmessage = function (event) {
-		console.log(event);
+		const file = event.data;
+		const ext = file.replace(/^.*\./, '');
+		switch (ext) {
+		case 'css':
+			replaceCSS(file);
+			break;
+		default:
+			location.reload();
+		}
 	};
 	ws.onerror = connect;
 	ws.onclose = connect;

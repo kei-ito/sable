@@ -7,7 +7,9 @@ const listen = require('j1/listen');
 const chokidar = require('chokidar');
 const {Server: WebSocketServer} = require('ws');
 
+const middlewareWatcher = require('./middleware/watcher');
 const middlewareStaticFile = require('./middleware/staticFile');
+const middlewareIndex = require('./middleware/index');
 const middlewareError = require('./middleware/error');
 
 const DEFAULT_PORT = 4000;
@@ -62,25 +64,45 @@ function sable({
 		startWatcher(documentRoot, chokidarOption)
 	])
 	.then(([server, wss, watcher]) => {
+		const getId = (() => {
+			let count = 0;
+			return () => {
+				count += 1;
+				return count;
+			};
+		})();
 		watcher
 			.on('error', console.onError)
 			.on('all', function (event, file) {
+				const matchedRoot = documentRoot.find((dir) => {
+					return file.startsWith(dir);
+				});
+				const relativePath = path.relative(matchedRoot, file);
 				console.info(event, file);
 				wss.clients.forEach((client) => {
-					client.send(file);
+					client.send(relativePath);
 				});
 			});
 		server
 			.on('error', console.onError)
 			.on('request', function (req, res) {
+				const id = getId();
 				const middlewareList = middleware.slice();
 				function next() {
 					middlewareList.shift().call(server, req, res, next);
 				}
-				console.debug(req.method, req.url);
+				console.debug(id, req.method, req.url);
+				res
+					.on('finish', function () {
+						const {statusCode, statusMessage} = res;
+						console.debug(id, statusCode, statusMessage, req.url);
+					});
 				next();
 			});
+		server.wss = wss;
+		middleware.push(middlewareWatcher());
 		middleware.push(middlewareStaticFile(documentRoot));
+		middleware.push(middlewareIndex(documentRoot));
 		middleware.push(middlewareError());
 	})
 	.catch(console.onError);

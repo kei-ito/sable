@@ -1,6 +1,6 @@
 {
   "name": "sable",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Starts a server and a file watcher",
   "author": {
     "name": "Kei Ito",
@@ -15,7 +15,8 @@
   "scripts": {
     "build": "node build/index.es",
     "test": "mocha */test",
-    "test_coverage": "istanbul cover _mocha */test"
+    "test_coverage": "istanbul cover _mocha */test",
+    "prepublish": "npm run build"
   },
   "dependencies": {
     "chokidar": "^1.6.1",

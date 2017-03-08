@@ -1,6 +1,6 @@
 {
   "name": "sable",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Starts a server and a file watcher",
   "author": {
     "name": "Kei Ito",
@@ -12,6 +12,7 @@
     "node": ">=6"
   },
   "repository": "kei-ito/sable",
+  "main": "sable.js",
   "scripts": {
     "build": "node build/index.es",
     "test": "mocha */test",

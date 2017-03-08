@@ -34,16 +34,15 @@ function startWebSocketServer(port) {
 function startWatcher(documentRoot, options = {}) {
 	console.debug(`watching: ${documentRoot}`);
 	options.ignoreInitial = true;
-	return chokidar.watch(documentRoot.map((dir) => {
-		return path.join(dir, '**', '*');
-	}), options);
+	options.ignored = /[/\\]\.|node_modules/;
+	return chokidar.watch(documentRoot, options);
 }
 
 function sable({
 	port = DEFAULT_PORT,
 	wsport = port + DEFAULT_WSPORT_OFFSET,
 	documentRoot = process.cwd(),
-	chokidar: chokidarOption = {},
+	chokidar: chokidarOption,
 	middleware = []
 }) {
 	if (isString(documentRoot)) {

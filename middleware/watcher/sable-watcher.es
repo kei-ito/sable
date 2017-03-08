@@ -1,4 +1,10 @@
 /* global document, location, WebSocket */
+import path from 'path';
+const RETRY_INTERVAL = 1000;
+const RELOAD_DEBOUNCE = 300;
+const CHECKLOAD_INTERVAL = 300;
+const endpoint = `ws://${location.hostname}:${document.getElementById('wsport').textContent}`;
+
 function debounce(fn, delay = 0, thisArg = this) {
 	let timer = null;
 	return (...args) => {
@@ -8,15 +14,34 @@ function debounce(fn, delay = 0, thisArg = this) {
 		}, delay);
 	};
 }
+
+function checkLoad(link, onload) {
+	function check() {
+		if (link.parentNode) {
+			if (link.sheet && 0 < link.sheet.cssRules.length) {
+				onload();
+			} else {
+				setTimeout(check, CHECKLOAD_INTERVAL);
+			}
+		}
+	}
+	check();
+}
+
 function replaceCSS(file) {
-	const link = document.querySelector(`link[href^=${file}]`);
+	const cssPath = path.relative(path.dirname(location.pathname), `/${file}`);
+	const link = document.querySelector(`link[href^=${JSON.stringify(cssPath)}]`);
 	if (link) {
-		link.href = link.href.replace(/(\?.*)?$/, `?d=${Date.now()}`);
+		const newLink = document.createElement('link');
+		const newHref = link.getAttribute('href').replace(/(\?.*)?$/, `?d=${Date.now()}`);
+		newLink.setAttribute('href', newHref);
+		newLink.setAttribute('rel', 'stylesheet');
+		link.parentNode.appendChild(newLink);
+		checkLoad(newLink, function () {
+			link.parentNode.removeChild(link);
+		});
 	}
 }
-const RETRY_INTERVAL = 1000;
-const RELOAD_DEBOUNCE = 500;
-const endpoint = `ws://${location.hostname}:${document.getElementById('wsport').textContent}`;
 const connect = debounce(function () {
 	const ws = new WebSocket(endpoint);
 	if (this && this.close) {

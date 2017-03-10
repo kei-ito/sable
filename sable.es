@@ -35,6 +35,7 @@ function startWatcher(documentRoot, options = {}) {
 	console.debug(`watching: ${documentRoot}`);
 	options.ignoreInitial = true;
 	options.ignored = /[/\\]\.|node_modules/;
+	options.awaitWriteFinish = {stabilityThreshold: 100};
 	return chokidar.watch(documentRoot, options);
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "sable",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Starts a server and a file watcher",
   "author": {
     "name": "Kei Ito",
@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "buble": "^0.15.2",
+    "doctrine": "^2.0.0",
     "glob": "^7.1.1",
     "istanbul": "^0.4.5",
     "j1": "0.0.21",

@@ -77,11 +77,21 @@ function sable({
 				const matchedRoot = documentRoot.find((dir) => {
 					return file.startsWith(dir);
 				});
-				const relativePath = path.relative(matchedRoot, file);
-				console.info(event, file);
-				wss.clients.forEach((client) => {
-					client.send(relativePath);
-				});
+				const relativePath = `/${
+					path.relative(matchedRoot, file)
+					.split(path.sep)
+					.join('/')
+				}`;
+				switch (event) {
+				case 'add':
+				case 'change':
+					console.info(event, file);
+					wss.clients.forEach((client) => {
+						client.send(relativePath);
+					});
+					break;
+				default:
+				}
 			});
 		server
 			.on('error', console.onError)

@@ -15,7 +15,15 @@ function rollupFile(filePath) {
 			builtins(),
 			nodeResolve(),
 			commonjs({include: path.join(__dirname, '..', 'node_modules')}),
-			rollupBuble()
+			rollupBuble(),
+			{
+				intro: function () {
+					return [
+						'// sable watcher',
+						'window.global = window;'
+					].join('\n');
+				}
+			}
 		]
 	})
 	.then((bundle) => {

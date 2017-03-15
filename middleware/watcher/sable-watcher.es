@@ -46,8 +46,13 @@ function findElement(file, query, attrName, fn) {
 	const {length} = elements;
 	for (let i = 0; i < length; i += 1) {
 		const script = elements[i];
-		const {pathname} = url.parse(`${dir}/${script.getAttribute(attrName)}`.replace(/\/\//g, '/'));
-		if (pathname === file) {
+		const {pathname} = url.parse(`${dir}/${script.getAttribute(attrName)}`.replace(/\/\.?\//g, '/'));
+		const pathFragments = pathname.split('/');
+		while (pathFragments.includes('..')) {
+			const index = pathFragments.indexOf('..');
+			pathFragments.splice(index - 1, 2);
+		}
+		if (pathFragments.join('/') === file) {
 			fn(script);
 			break;
 		}

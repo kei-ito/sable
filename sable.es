@@ -71,6 +71,19 @@ function sable({
 				return count;
 			};
 		})();
+		function onChange(file) {
+			const matchedRoot = documentRoot.find((dir) => {
+				return file.startsWith(dir);
+			});
+			const relativePath = `/${
+				path.relative(matchedRoot, file)
+				.split(path.sep)
+				.join('/')
+			}`;
+			wss.clients.forEach((client) => {
+				client.send(relativePath);
+			});
+		}
 		watcher
 			.on('error', console.onError)
 			.on('all', function (event, file) {
@@ -82,17 +95,10 @@ function sable({
 					.split(path.sep)
 					.join('/')
 				}`;
-				switch (event) {
-				case 'add':
-				case 'change':
-					console.info(event, file);
-					wss.clients.forEach((client) => {
-						client.send(relativePath);
-					});
-					break;
-				default:
-				}
-			});
+				console.info(event, relativePath);
+			})
+			.on('add', onChange)
+			.on('change', onChange);
 		server
 			.on('error', console.onError)
 			.on('request', function (req, res) {
@@ -114,8 +120,12 @@ function sable({
 		middleware.push(middlewareStaticFile(documentRoot));
 		middleware.push(middlewareIndex(documentRoot));
 		middleware.push(middlewareError());
-	})
-	.catch(console.onError);
+		return {
+			server: server,
+			wss: wss,
+			watcher: watcher
+		};
+	});
 }
 
 module.exports = sable;

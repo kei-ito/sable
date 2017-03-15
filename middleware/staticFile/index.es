@@ -5,7 +5,7 @@ const console = require('j1/console').create('sable-staticFile');
 const promisify = require('j1/promisify');
 const mime = require('j1/mime');
 const stat = promisify(fs.stat, fs);
-const SnippetInjector = require('./SnippetInjector');
+const SnippetInjector = require('../../SnippetInjector');
 
 const HTTP_OK = 200;
 const HTTP_MOVED_PERMANENTLY = 301;

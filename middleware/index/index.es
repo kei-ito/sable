@@ -7,7 +7,7 @@ const console = require('j1/console').create('sable-index');
 const promisify = require('j1/promisify');
 const readdir = promisify(fs.readdir, fs);
 
-const SnippetInjector = require('../staticFile/SnippetInjector');
+const SnippetInjector = require('../../SnippetInjector');
 const templatePath = path.join(__dirname, 'template.html');
 const HTTP_OK = 200;
 

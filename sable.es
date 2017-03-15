@@ -120,11 +120,6 @@ function sable({
 		middleware.push(middlewareStaticFile(documentRoot));
 		middleware.push(middlewareIndex(documentRoot));
 		middleware.push(middlewareError());
-		return {
-			server: server,
-			wss: wss,
-			watcher: watcher
-		};
 	});
 }
 

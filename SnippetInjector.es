@@ -12,6 +12,10 @@ function append(match) {
 	return `${match}\n${getScript(this.wsport)}`;
 }
 
+function prepend(match) {
+	return `${getScript(this.wsport)}\n${match}`;
+}
+
 class SnippetInjector extends Transform {
 
 	constructor({wsport, encoding}) {
@@ -20,6 +24,10 @@ class SnippetInjector extends Transform {
 		this.watching = true;
 		this.wsport = wsport;
 		this.patterns = [
+			{
+				regex: /<meta/i,
+				fn: prepend
+			},
 			{
 				regex: /<!doctype.*?>/i,
 				fn: append
@@ -47,5 +55,6 @@ class SnippetInjector extends Transform {
 }
 
 SnippetInjector.append = append;
+SnippetInjector.prepend = prepend;
 
 module.exports = SnippetInjector;

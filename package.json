@@ -15,7 +15,6 @@
   "main": "sable.js",
   "scripts": {
     "build": "node build/index.es",
-    "test": "mocha */test",
     "test_coverage": "istanbul cover _mocha */test",
     "prepublish": "npm run build"
   },

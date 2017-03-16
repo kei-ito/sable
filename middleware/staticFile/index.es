@@ -1,7 +1,6 @@
 const path = require('path');
 const fs = require('fs');
 const url = require('url');
-const console = require('j1/console').create('sable-staticFile');
 const promisify = require('j1/promisify');
 const mime = require('j1/mime');
 const stat = promisify(fs.stat, fs);
@@ -13,7 +12,6 @@ const HTTP_NOT_FOUND = 404;
 
 function getPathName(req) {
 	const {pathname} = url.parse(req.url);
-	console.info(pathname);
 	return pathname.replace(/\/$/, '/index.html');
 }
 

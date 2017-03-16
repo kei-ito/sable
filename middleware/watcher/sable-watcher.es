@@ -45,17 +45,34 @@ function findElement(file, query, attrName, fn) {
 	const elements = document.querySelectorAll(query);
 	const {length} = elements;
 	for (let i = 0; i < length; i += 1) {
-		const script = elements[i];
-		const {pathname} = url.parse(`${dir}/${script.getAttribute(attrName)}`.replace(/\/\.?\//g, '/'));
+		const element = elements[i];
+		const {pathname} = url.parse(`${dir}/${element.getAttribute(attrName)}`.replace(/\/\.?\//g, '/'));
 		const pathFragments = pathname.split('/');
 		while (pathFragments.includes('..')) {
 			const index = pathFragments.indexOf('..');
 			pathFragments.splice(index - 1, 2);
 		}
 		if (pathFragments.join('/') === file) {
-			fn(script);
+			fn(element);
 			break;
 		}
+	}
+}
+
+function insertBefore(newNode, referenceNode, parentNode = referenceNode.parentNode) {
+	if (parentNode) {
+		parentNode.insertBefore(newNode, referenceNode);
+	}
+}
+
+function insertAfter(newNode, referenceNode) {
+	insertBefore(newNode, referenceNode.nextSibling, referenceNode.parentNode);
+}
+
+function removeNode(node) {
+	const {parentNode} = node;
+	if (parentNode) {
+		parentNode.removeChild(node);
 	}
 }
 
@@ -66,8 +83,9 @@ function replaceCSS(file) {
 		newLink.setAttribute('href', newHref);
 		newLink.setAttribute('rel', 'stylesheet');
 		cssLink.parentNode.appendChild(newLink);
+		insertAfter(newLink, cssLink);
 		checkCSSLoad(newLink, function () {
-			cssLink.parentNode.removeChild(cssLink);
+			removeNode(cssLink);
 		});
 	});
 }

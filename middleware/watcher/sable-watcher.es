@@ -48,7 +48,7 @@ function findElement(file, query, attrName, fn) {
 		const element = elements[i];
 		const {pathname} = url.parse(`${dir}/${element.getAttribute(attrName)}`.replace(/\/\.?\//g, '/'));
 		const pathFragments = pathname.split('/');
-		while (pathFragments.includes('..')) {
+		while (0 <= pathFragments.indexOf('..')) {
 			const index = pathFragments.indexOf('..');
 			pathFragments.splice(index - 1, 2);
 		}

@@ -13,6 +13,9 @@
   },
   "repository": "kei-ito/sable",
   "main": "sable.js",
+  "bin": {
+    "sable": "./bin/sable"
+  },
   "scripts": {
     "build": "node build/index.es",
     "test_coverage": "istanbul cover _mocha */test",

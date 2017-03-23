@@ -81,7 +81,9 @@ function sable({
 				.join('/')
 			}`;
 			wss.clients.forEach((client) => {
-				client.send(relativePath);
+				if (client.readyState === 1) {
+					client.send(relativePath);
+				}
 			});
 		}
 		watcher

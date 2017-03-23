@@ -20,7 +20,7 @@ function currentLocation() {
 
 function currentDir() {
 	return currentLocation()
-	.replace(/\/[^/]+/, '');
+	.replace(/\/[^/]+$/, '');
 }
 
 function reloadPage() {
@@ -48,6 +48,10 @@ function findElement(file, query, attrName, fn) {
 		const element = elements[i];
 		const {pathname} = url.parse(`${dir}/${element.getAttribute(attrName)}`.replace(/\/\.?\//g, '/'));
 		const pathFragments = pathname.split('/');
+		while (0 <= pathFragments.indexOf('')) {
+			const index = pathFragments.indexOf('');
+			pathFragments.splice(index, 1);
+		}
 		while (0 <= pathFragments.indexOf('..')) {
 			const index = pathFragments.indexOf('..');
 			pathFragments.splice(index - 1, 2);

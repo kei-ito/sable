@@ -56,7 +56,7 @@ function findElement(file, query, attrName, fn) {
 			const index = pathFragments.indexOf('..');
 			pathFragments.splice(index - 1, 2);
 		}
-		if (pathFragments.join('/') === file) {
+		if (pathFragments.join('/') === file.replace(/^\//, '')) {
 			fn(element);
 			break;
 		}

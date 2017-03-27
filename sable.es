@@ -39,12 +39,21 @@ function startWatcher(documentRoot, options = {}) {
 	return chokidar.watch(documentRoot, options);
 }
 
+const getId = (() => {
+	let count = 0;
+	return () => {
+		count += 1;
+		return count;
+	};
+})();
+
 function sable({
 	port = DEFAULT_PORT,
 	wsport = port + DEFAULT_WSPORT_OFFSET,
 	documentRoot = process.cwd(),
 	chokidar: chokidarOption,
-	middleware = []
+	middleware = [],
+	noWatch = false
 }) {
 	if (isString(documentRoot)) {
 		documentRoot = [documentRoot];
@@ -60,17 +69,10 @@ function sable({
 	});
 	return Promise.all([
 		startHTTPServer(port),
-		startWebSocketServer(wsport),
-		startWatcher(documentRoot, chokidarOption)
+		noWatch ? null : startWebSocketServer(wsport),
+		noWatch ? null : startWatcher(documentRoot, chokidarOption)
 	])
 	.then(([server, wss, watcher]) => {
-		const getId = (() => {
-			let count = 0;
-			return () => {
-				count += 1;
-				return count;
-			};
-		})();
 		function onChange(file) {
 			const matchedRoot = documentRoot.find((dir) => {
 				return file.startsWith(dir);
@@ -86,21 +88,23 @@ function sable({
 				}
 			});
 		}
-		watcher
-			.on('error', console.onError)
-			.on('all', function (event, file) {
-				const matchedRoot = documentRoot.find((dir) => {
-					return file.startsWith(dir);
-				});
-				const relativePath = `/${
-					path.relative(matchedRoot, file)
-					.split(path.sep)
-					.join('/')
-				}`;
-				console.info(event, relativePath);
-			})
-			.on('add', onChange)
-			.on('change', onChange);
+		if (watcher) {
+			watcher
+				.on('error', console.onError)
+				.on('all', function (event, file) {
+					const matchedRoot = documentRoot.find((dir) => {
+						return file.startsWith(dir);
+					});
+					const relativePath = `/${
+						path.relative(matchedRoot, file)
+						.split(path.sep)
+						.join('/')
+					}`;
+					console.info(event, relativePath);
+				})
+				.on('add', onChange)
+				.on('change', onChange);
+		}
 		server
 			.on('error', console.onError)
 			.on('request', function (req, res) {
@@ -117,8 +121,10 @@ function sable({
 					});
 				next();
 			});
-		server.wss = wss;
-		middleware.push(middlewareWatcher());
+		if (wss) {
+			server.wss = wss;
+			middleware.push(middlewareWatcher());
+		}
 		middleware.push(middlewareStaticFile(documentRoot));
 		middleware.push(middlewareIndex(documentRoot));
 		middleware.push(middlewareError());

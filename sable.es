@@ -67,12 +67,33 @@ function sable({
 		}
 		return dir;
 	});
-	return Promise.all([
+	const promise = Promise.all([
 		startHTTPServer(port),
 		noWatch ? null : startWebSocketServer(wsport),
 		noWatch ? null : startWatcher(documentRoot, chokidarOption)
 	])
-	.then(([server, wss, watcher]) => {
+	.then(function attachModules([server, wss, watcher]) {
+		server.wss = wss;
+		server.watcher = watcher;
+		return server;
+	})
+	.then(function setClose(server) {
+		const {wss, watcher} = server;
+		function close() {
+			if (watcher) {
+				watcher.close();
+			}
+			return Promise.all([
+				promisify(server.close, server)(),
+				wss ? promisify(wss.close, wss)() : null
+			]);
+		}
+		promise.close = close;
+		server.on('close', close);
+		return server;
+	})
+	.then(function setWatchers(server) {
+		const {wss, watcher} = server;
 		function onChange(file) {
 			const matchedRoot = documentRoot.find((dir) => {
 				return file.startsWith(dir);
@@ -105,6 +126,10 @@ function sable({
 				.on('add', onChange)
 				.on('change', onChange);
 		}
+		return server;
+	})
+	.then(function setServers(server) {
+		const {wss} = server;
 		server
 			.on('error', console.onError)
 			.on('request', function (req, res) {
@@ -128,7 +153,9 @@ function sable({
 		middleware.push(middlewareStaticFile(documentRoot));
 		middleware.push(middlewareIndex(documentRoot));
 		middleware.push(middlewareError());
+		return server;
 	});
+	return promise;
 }
 
 module.exports = sable;

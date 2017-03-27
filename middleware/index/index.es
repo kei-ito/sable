@@ -16,17 +16,19 @@ function respondFileList(dir, req, res, next) {
 	.then((files) => {
 		files.unshift('..');
 		res.writeHead(HTTP_OK, {'Content-Type': mime('index.html')});
-		mu.compileAndRender(templatePath, {
+		let stream = mu.compileAndRender(templatePath, {
 			dir: url.parse(req.url).pathname,
 			files: files.map((file) => {
 				return {title: file};
 			})
-		})
-		.pipe(new SnippetInjector({
-			encoding: 'utf8',
-			wsport: this.wss.options.port
-		}))
-		.pipe(res);
+		});
+		if (this.wss) {
+			stream = stream.pipe(new SnippetInjector({
+				encoding: 'utf8',
+				wsport: this.wss.options.port
+			}));
+		}
+		stream.pipe(res);
 	})
 	.catch((error) => {
 		console.error(error);

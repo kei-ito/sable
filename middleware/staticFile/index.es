@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const url = require('url');
+const console = require('j1/console').create('staticFile');
 const promisify = require('j1/promisify');
 const mime = require('j1/mime');
 const stat = promisify(fs.stat, fs);
@@ -20,15 +21,18 @@ function respondFile(file, req, res, next) {
 	.then((stats) => {
 		if (stats.isFile()) {
 			const contentType = mime(file);
+			let stream;
 			switch (contentType.split(/\s*;\s*/)[0]) {
 			case 'text/html':
 				res.writeHead(HTTP_OK, {'Content-Type': contentType});
-				fs.createReadStream(file)
-					.pipe(new SnippetInjector({
+				stream = fs.createReadStream(file);
+				if (this.wss) {
+					stream = stream.pipe(new SnippetInjector({
 						encoding: 'utf8',
 						wsport: this.wss.options.port
-					}))
-					.pipe(res);
+					}));
+				}
+				stream.pipe(res);
 				break;
 			default:
 				res.writeHead(HTTP_OK, {
@@ -46,7 +50,10 @@ function respondFile(file, req, res, next) {
 			next();
 		}
 	})
-	.catch(next);
+	.catch(function (error) {
+		console.error(error);
+		next();
+	});
 }
 
 function staticFile(documentRoot) {

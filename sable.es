@@ -53,7 +53,8 @@ function sable({
 	documentRoot = process.cwd(),
 	chokidar: chokidarOption,
 	middleware = [],
-	noWatch = false
+	noWatch = false,
+	quiet = false
 }) {
 	if (isString(documentRoot)) {
 		documentRoot = [documentRoot];
@@ -121,7 +122,9 @@ function sable({
 						.split(path.sep)
 						.join('/')
 					}`;
-					console.info(event, relativePath);
+					if (!quiet) {
+						console.info(event, relativePath);
+					}
 				})
 				.on('add', onChange)
 				.on('change', onChange);
@@ -138,11 +141,15 @@ function sable({
 				function next() {
 					middlewareList.shift().call(server, req, res, next);
 				}
-				console.debug(id, req.method, req.url);
+				if (!quiet) {
+					console.debug(id, req.method, req.url);
+				}
 				res
 					.on('finish', function () {
 						const {statusCode, statusMessage} = res;
-						console.debug(id, statusCode, statusMessage, req.url);
+						if (!quiet) {
+							console.debug(id, statusCode, statusMessage, req.url);
+						}
 					});
 				next();
 			});

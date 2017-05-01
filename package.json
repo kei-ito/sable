@@ -12,7 +12,6 @@
     "node": ">=6"
   },
   "repository": "kei-ito/sable",
-  "main": "sable.js",
   "bin": {
     "sable": "./bin/sable"
   },

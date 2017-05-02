@@ -1,20 +1,47 @@
 const http = require('http');
 const console = require('j1/console').create('SableServer');
+const isArray = require('j1/isArray');
 
+const staticFile = require('./middleware/staticFile');
+const watcher = require('./middleware/watcher');
 const MAX_PORT_NUMBER = 0xffff;
 
 class SableServer extends http.Server {
 
-	constructor(config) {
+	constructor(config = {}) {
 		super();
 		this.config = config;
-		this.middlewares = [];
-		if (config.middlewares) {
-			this.middlewares.push(...config.middlewares);
-		}
 		this.on('request', (...args) => {
 			this.onRequest(...args);
 		});
+		this.resetConfig();
+	}
+
+	resetConfig() {
+		this.resetMiddlewares();
+		this.resetDocumentRoot();
+	}
+
+	resetMiddlewares() {
+		const {middlewares} = this.config;
+		this.middlewares = [watcher];
+		if (middlewares) {
+			this.middlewares.push(...middlewares);
+		}
+		this.middlewares.push(staticFile);
+	}
+
+	resetDocumentRoot() {
+		const {documentRoot} = this.config;
+		this.documentRoot = [];
+		if (isArray(documentRoot)) {
+			this.documentRoot.push(...documentRoot);
+		} else if (documentRoot) {
+			this.documentRoot.push(documentRoot);
+		}
+		if (this.documentRoot.length === 0) {
+			this.documentRoot.push(process.cwd());
+		}
 	}
 
 	listen(...args) {
@@ -41,6 +68,9 @@ class SableServer extends http.Server {
 					reject(error);
 				}
 			}
+			if (args.length === 0) {
+				args.push(this.config.port);
+			}
 			this
 			.once('listening', onListen)
 			.once('error', onError);
@@ -50,7 +80,7 @@ class SableServer extends http.Server {
 
 	onRequest(req, res) {
 		const middlewares = this.middlewares.slice();
-		function next() {
+		const next = () => {
 			const middleware = middlewares.shift();
 			if (middleware) {
 				middleware.call(this, req, res, next);
@@ -58,7 +88,7 @@ class SableServer extends http.Server {
 				res.statusCode = 500;
 				res.end('No middlewares matched');
 			}
-		}
+		};
 		next();
 	}
 

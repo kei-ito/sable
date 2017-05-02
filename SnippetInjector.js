@@ -54,7 +54,9 @@ class SnippetInjector extends Transform {
 
 }
 
-SnippetInjector.append = append;
-SnippetInjector.prepend = prepend;
+Object.assign(SnippetInjector, {
+	append,
+	prepend
+});
 
 module.exports = SnippetInjector;

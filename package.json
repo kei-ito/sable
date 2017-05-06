@@ -30,7 +30,7 @@
   "devDependencies": {
     "babel-core": "^6.24.1",
     "babel-preset-env": "^1.4.0",
-    "istanbul": "^0.4.5",
+    "istanbul": "^1.1.0-alpha.1",
     "j0": "^0.2.10",
     "j1": "0.0.31",
     "mocha": "^3.2.0",

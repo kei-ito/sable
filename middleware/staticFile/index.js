@@ -84,7 +84,7 @@ function staticFile(req, res) {
 				]);
 				res.end(template.replace(/\{\{\s*([\w-.]+)\s*\}\}/g, (match, expression) => {
 					const context = {
-						rows: rows.join(''),
+						rows: rows.join('\n'),
 						now: formatDate(new Date(), dateFormat)
 					};
 					vm.runInNewContext(`result = ${expression};`, context);

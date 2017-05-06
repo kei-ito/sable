@@ -1,6 +1,6 @@
 {
   "name": "sable",
-  "version": "0.0.21",
+  "version": "0.1.0",
   "description": "Starts a server and a file watcher",
   "author": {
     "name": "Kei Ito",

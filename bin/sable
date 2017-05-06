@@ -7,13 +7,12 @@ const {version} = require('../package');
 
 program
 	.version(version)
-	.usage('[options] [documentRoots ...]')
+	.usage('[options] [documentRoot1, documentRoot2, ...]')
 	.option('-p --port <n>', 'A port number to which the web server listens', parseInt)
 	.option('-w --wsport <n>', 'A port number to which the websocket server listens', parseInt)
-	.option('--documentRoot <paths>', 'A comma separated list of directories set as documentRoot', function (param) {
-		return param.trim().split(/\s*,\s*/);
-	})
 	.parse(process.argv);
+
+program.documentRoot = program.args;
 
 new SableServer(program).start()
 .catch(console.onError);

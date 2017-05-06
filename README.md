@@ -18,10 +18,10 @@ npm install sable --save-dev
 ```sh
 $ sable
 $ sable --port 4444
-$ sable --port 4444 --documentRoot release
-$ sable --port 4444 --documentRoot release --wsport 5000
+$ sable --port 4444 release
+$ sable --port 4444 --wsport 5000 release
 $ sable --help
-Usage: sable [options] [documentRoots ...]
+Usage: sable [options] [documentRoot1, documentRoot2, ...]
 
 Options:
 
@@ -29,7 +29,6 @@ Options:
   -V, --version           output the version number
   -p --port <n>           A port number to which the web server listens
   -w --wsport <n>         A port number to which the websocket server listens
-  --documentRoot <paths>  A comma separated list of directories set as documentRoot
 ```
 
 ## Javascript API

@@ -4,6 +4,8 @@ const {StringDecoder} = require('string_decoder');
 function getScript(wsport) {
 	return [
 		`<script id="wsport" type="text/plain">${wsport}</script>`,
+		'<script>window.global = window</script>',
+		'<script src="/sable-polyfill.js"></script>',
 		'<script src="/sable-watcher.js"></script>'
 	].join('\n');
 }
@@ -54,7 +56,9 @@ class SnippetInjector extends Transform {
 
 }
 
-SnippetInjector.append = append;
-SnippetInjector.prepend = prepend;
+Object.assign(SnippetInjector, {
+	append,
+	prepend
+});
 
 module.exports = SnippetInjector;

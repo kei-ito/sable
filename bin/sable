@@ -2,6 +2,7 @@
 
 const program = require('commander');
 const console = require('j1/console').create('sable');
+const SableServer = require('..');
 
 program
 	.version(require('../package').version)
@@ -10,9 +11,5 @@ program
 	.option('-w --wsport <n>', 'A port number to listen WebSocket request', parseInt)
 	.parse(process.argv);
 
-require('../sable')({
-	port: program.port,
-	wsport: program.wsport,
-	documentRoot: program.args
-})
+new SableServer(program).start()
 .catch(console.onError);

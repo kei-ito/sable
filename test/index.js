@@ -94,8 +94,7 @@ describe('SableServer', function () {
 	});
 
 	it('should send a message when a file is updated', async function () {
-		server = new SableServer({port: PORT});
-		await server.start();
+		server = await SableServer.start({port: PORT});
 		ws = new WebSocket(`ws://127.0.0.1:${server.wss.options.port}`);
 		await new Promise((resolve, reject) => {
 			ws

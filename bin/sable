@@ -3,12 +3,16 @@
 const program = require('commander');
 const console = require('j1/console').create('sable');
 const SableServer = require('..');
+const {version} = require('../package');
 
 program
-	.version(require('../package').version)
+	.version(version)
 	.usage('[options] [documentRoots ...]')
-	.option('-p --port <n>', 'A port number to listen HTTP request', parseInt)
-	.option('-w --wsport <n>', 'A port number to listen WebSocket request', parseInt)
+	.option('-p --port <n>', 'A port number to which the web server listens', parseInt)
+	.option('-w --wsport <n>', 'A port number to which the websocket server listens', parseInt)
+	.option('--documentRoot <paths>', 'A comma separated list of directories set as documentRoot', function (param) {
+		return param.trim().split(/\s*,\s*/);
+	})
 	.parse(process.argv);
 
 new SableServer(program).start()

@@ -50,7 +50,7 @@ function staticFile(req, res) {
 				}
 			};
 		}),
-		...(/index\.html$/.test(pathname) ? this.documentRoot.map((documentRoot) => {
+		...((/index\.html$/).test(pathname) ? this.documentRoot.map((documentRoot) => {
 			return async () => {
 				const dirPath = path.join(documentRoot, path.dirname(pathname));
 				const dateFormat = '%YYYY-%MM-%DD %hh:%mm:%ss';

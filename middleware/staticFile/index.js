@@ -11,20 +11,15 @@ const mime = require('j1/mime');
 const stat = promisify(fs.stat, fs);
 const readdir = promisify(fs.readdir, fs);
 const readFile = promisify(fs.readFile, fs);
+
 const SnippetInjector = require('../../SnippetInjector');
-
-const HTTP_OK = 200;
-const HTTP_MOVED_PERMANENTLY = 301;
-const HTTP_NOT_FOUND = 404;
-const HTTP_SERVER_ERROR = 500;
-
-function waitStream(stream) {
-	return new Promise((resolve, reject) => {
-		stream
-		.once('error', reject)
-		.once('finish', resolve);
-	});
-}
+const waitStream = require('../../waitStream');
+const {
+	OK: HTTP_OK,
+	MOVED_PERMANENTLY: HTTP_MOVED_PERMANENTLY,
+	NOT_FOUND: HTTP_NOT_FOUND,
+	SERVER_ERROR: HTTP_SERVER_ERROR
+} = require('../../statusCodes');
 
 function staticFile(req, res) {
 	const pathname = url.parse(req.url).pathname.replace(/\/$/, '/index.html');

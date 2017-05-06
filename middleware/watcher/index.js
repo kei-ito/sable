@@ -1,9 +1,14 @@
+const fs = require('fs');
 const path = require('path');
-const {respondFile} = require('../staticFile');
+const mime = require('j1/mime');
+const waitStream = require('../../waitStream');
 
-function watcher(req, res, next) {
-	if (req.url === '/sable-watcher.js') {
-		respondFile(path.join(__dirname, 'sable-watcher.js'), req, res, next);
+const {OK: HTTP_OK} = require('../../statusCodes');
+
+function watcher({url}, res, next) {
+	if (/^\/sable-\w+\.js$/.test(url)) {
+		res.writeHead(HTTP_OK, {'Content-Type': mime('.js')});
+		waitStream(fs.createReadStream(path.join(__dirname, url)).pipe(res));
 		return;
 	}
 	next();

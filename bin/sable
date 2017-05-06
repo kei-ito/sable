@@ -11,10 +11,5 @@ program
 	.option('-w --wsport <n>', 'A port number to listen WebSocket request', parseInt)
 	.parse(process.argv);
 
-new SableServer({
-	port: program.port,
-	wsport: program.wsport,
-	documentRoot: program.args
-})
-.listen()
+new SableServer(program).start()
 .catch(console.onError);

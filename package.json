@@ -16,27 +16,28 @@
     "sable": "./bin/sable"
   },
   "scripts": {
-    "build": "node build/index.es",
-    "test_coverage": "istanbul cover _mocha */test",
+    "build": "node build",
+    "test": "mocha",
+    "test_coverage": "istanbul cover _mocha",
     "prepublish": "npm run build"
   },
   "dependencies": {
     "chokidar": "^1.6.1",
     "commander": "^2.9.0",
-    "j1": "0.0.27",
-    "mu2": "^0.5.21",
-    "ws": "^2.2.0"
+    "j1": "0.0.31",
+    "ws": "^2.3.1"
   },
   "devDependencies": {
-    "buble": "^0.15.2",
-    "doctrine": "^2.0.0",
-    "glob": "^7.1.1",
+    "babel-core": "^6.24.1",
+    "babel-preset-env": "^1.4.0",
     "istanbul": "^0.4.5",
+    "j0": "^0.2.10",
+    "j1": "0.0.31",
     "mocha": "^3.2.0",
-    "rollup": "^0.41.4",
-    "rollup-plugin-buble": "^0.15.0",
-    "rollup-plugin-commonjs": "^7.1.0",
-    "rollup-plugin-node-builtins": "^2.1.0",
-    "rollup-plugin-node-resolve": "^2.0.0"
+    "rollup": "^0.41.6",
+    "rollup-plugin-commonjs": "^8.0.2",
+    "rollup-plugin-node-builtins": "^2.1.1",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "whatwg-url": "^4.7.1"
   }
 }

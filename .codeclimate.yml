@@ -6,7 +6,7 @@ engines:
     duplication:
         enabled: true
         exclude_paths:
-            - "*/test/**"
+            - "./middleware/watcher/sable-*.js"
         config:
             languages:
                 - javascript

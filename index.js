@@ -101,7 +101,11 @@ class SableServer extends http.Server {
 				case 'change':
 					if (this.wss) {
 						for (const client of this.wss.clients) {
-							client.send(pathname);
+							if (client.readyState === client.OPEN) {
+								client.send(pathname);
+							} else {
+								console.error(`Client state is ${client.readyState}`);
+							}
 						}
 					}
 					break;

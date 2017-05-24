@@ -1,6 +1,6 @@
 {
   "name": "sable",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Starts a server and a file watcher",
   "author": {
     "name": "Kei Ito",
@@ -36,8 +36,6 @@
     "mocha": "^3.2.0",
     "rollup": "^0.41.6",
     "rollup-plugin-commonjs": "^8.0.2",
-    "rollup-plugin-node-builtins": "^2.1.1",
-    "rollup-plugin-node-resolve": "^3.0.0",
-    "whatwg-url": "^4.7.1"
+    "rollup-plugin-node-resolve": "^3.0.0"
   }
 }

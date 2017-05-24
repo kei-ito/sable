@@ -3,7 +3,6 @@ const fs = require('fs');
 const {rollup} = require('rollup');
 const nodeResolve = require('rollup-plugin-node-resolve');
 const commonjs = require('rollup-plugin-commonjs');
-const builtins = require('rollup-plugin-node-builtins');
 const babel = require('babel-core');
 const promisify = require('j1/promisify');
 const readFile = promisify(fs.readFile, fs);
@@ -76,7 +75,6 @@ async function buildJS({entry, dest}) {
 		plugins: [
 			nodeResolve(),
 			json(),
-			builtins(),
 			commonjs(),
 			transpile()
 		]

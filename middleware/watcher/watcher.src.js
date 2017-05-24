@@ -5,7 +5,7 @@ import getAttribute from 'j0/dom/getAttribute';
 import document from 'j0/document';
 import location from 'j0/location';
 import debounce from 'j0/debounce';
-import {URL} from 'whatwg-url';
+import URL from './URL';
 
 const RETRY_INTERVAL = 1000;
 const endpoint = `ws://${location.hostname}:${document.getElementById('wsport').textContent}`;
@@ -17,7 +17,8 @@ function replaceCSS(file) {
 	const href = `${location.protocol}//${location.host}/${file}`;
 	for (let i = 0; i < length; i++) {
 		const linkElement = linkElements[i];
-		const url = new URL(getAttribute(linkElement, 'href'), currentURL);
+		const hrefAttr = getAttribute(linkElement, 'href');
+		const url = new URL(hrefAttr, currentURL);
 		url.search = '';
 		url.hash = '';
 		if (href === url.toString()) {

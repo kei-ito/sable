@@ -6,10 +6,6 @@ const transpile = require('./transpile');
 Promise.all(
 	[
 		{
-			entry: path.join(projectRoot, 'middleware', 'watcher', 'polyfill.src.js'),
-			dest: path.join(projectRoot, 'middleware', 'watcher', 'sable-polyfill.js')
-		},
-		{
 			entry: path.join(projectRoot, 'middleware', 'watcher', 'watcher.src.js'),
 			dest: path.join(projectRoot, 'middleware', 'watcher', 'sable-watcher.js')
 		}

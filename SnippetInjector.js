@@ -5,7 +5,6 @@ function getScript(wsport) {
 	return [
 		`<script id="wsport" type="text/plain">${wsport}</script>`,
 		'<script>window.global = window</script>',
-		'<script src="/sable-polyfill.js"></script>',
 		'<script src="/sable-watcher.js"></script>'
 	].join('\n');
 }

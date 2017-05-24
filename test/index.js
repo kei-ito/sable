@@ -146,10 +146,7 @@ describe('SableServer', function () {
 		server = new SableServer({port: PORT});
 		await server.listen();
 		await server.startWebSocketServer();
-		let res;
-		res = await get(server, '/sable-watcher.js');
-		assert.equal(res.statusCode, HTTP_OK);
-		res = await get(server, '/sable-polyfill.js');
+		const res = await get(server, '/sable-watcher.js');
 		assert.equal(res.statusCode, HTTP_OK);
 	});
 

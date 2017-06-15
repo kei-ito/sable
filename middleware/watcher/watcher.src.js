@@ -1,35 +1,38 @@
+/* eslint-disable no-console */
 /* global WebSocket */
-import Date from 'j0/Date';
-import setAttribute from 'j0/dom/setAttribute';
-import getAttribute from 'j0/dom/getAttribute';
-import document from 'j0/document';
-import location from 'j0/location';
-import debounce from 'j0/debounce';
-import URL from './URL';
+import {debounce} from 'j0';
+import URL from 'j0/URL/j0polyfill';
 
 const RETRY_INTERVAL = 1000;
 const endpoint = `ws://${location.hostname}:${document.getElementById('wsport').textContent}`;
+const baseURL = new URL(location);
+baseURL.pathname = '';
+baseURL.search = '';
+baseURL.hash = '';
 
 function replaceCSS(file) {
 	const linkElements = document.querySelectorAll('link[rel="stylesheet"]');
-	const {length} = linkElements;
-	const currentURL = new URL(location.href);
-	const href = `${location.protocol}//${location.host}/${file}`;
-	for (let i = 0; i < length; i++) {
+	const fileURL = new URL(file, baseURL);
+	fileURL.search = '';
+	fileURL.hash = '';
+	const {href} = fileURL;
+	for (let i = 0; i < linkElements.length; i++) {
 		const linkElement = linkElements[i];
-		const hrefAttr = getAttribute(linkElement, 'href');
-		const url = new URL(hrefAttr, currentURL);
+		const hrefAttr = linkElement.getAttribute('href');
+		const url = new URL(hrefAttr, location);
 		url.search = '';
 		url.hash = '';
-		if (href === url.toString()) {
+		console.log(href, url.href, href === url.href);
+		if (href === url.href) {
 			url.search = `?d=${Date.now()}`;
-			setAttribute(linkElement, 'href', url.toString());
+			linkElement.setAttribute('href', url.href);
 		}
 	}
 }
 
 function onMessage(event) {
 	const {data: file} = event;
+	console.log(`Watcher received: ${file}`);
 	switch (file.replace(/^.*\.([\w]+)$/, '$1')) {
 	case 'css':
 		replaceCSS(file);
@@ -48,5 +51,4 @@ const connect = debounce(function () {
 	ws.onerror = connect;
 	ws.onclose = connect;
 }, RETRY_INTERVAL);
-
 connect();

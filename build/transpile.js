@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const {rollup} = require('rollup');
+const j0 = require('j0');
 const nodeResolve = require('rollup-plugin-node-resolve');
 const commonjs = require('rollup-plugin-commonjs');
 const babel = require('babel-core');
@@ -73,6 +74,7 @@ async function buildJS({entry, dest}) {
 	const bundle = await rollup({
 		entry,
 		plugins: [
+			j0(),
 			nodeResolve(),
 			json(),
 			commonjs(),

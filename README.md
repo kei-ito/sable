@@ -1,8 +1,8 @@
 # sable
 
 [![Build Status](https://travis-ci.org/kei-ito/sable.svg?branch=master)](https://travis-ci.org/kei-ito/sable)
-[![Code Climate](https://codeclimate.com/github/kei-ito/sable/badges/gpa.svg)](https://codeclimate.com/github/kei-ito/sable)
-[![Test Coverage](https://codeclimate.com/github/kei-ito/sable/badges/coverage.svg)](https://codeclimate.com/github/kei-ito/sable/coverage)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f1a8a21fbb504968a095dbd6e1b01cbb)](https://www.codacy.com/app/kei.itof/sable?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kei-ito/sable&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/f1a8a21fbb504968a095dbd6e1b01cbb)](https://www.codacy.com/app/kei.itof/sable?utm_source=github.com&utm_medium=referral&utm_content=kei-ito/sable&utm_campaign=Badge_Coverage)
 [![dependencies Status](https://david-dm.org/kei-ito/sable/status.svg)](https://david-dm.org/kei-ito/sable)
 [![devDependencies Status](https://david-dm.org/kei-ito/sable/dev-status.svg)](https://david-dm.org/kei-ito/sable?type=dev)
 

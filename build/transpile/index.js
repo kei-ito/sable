@@ -8,6 +8,9 @@ const babel = require('babel-core');
 const promisify = require('j1/promisify');
 const readFile = promisify(fs.readFile, fs);
 
+/* eslint-disable no-control-regex */
+const CONTROL_CHARACTERS = /[\x00-\x1F\x7F-\x9F]/g;
+/* eslint-enable no-control-regex */
 
 function transpile() {
 	return {
@@ -19,23 +22,22 @@ function transpile() {
 	};
 }
 
+function normalizeImporteeName(importee) {
+	return importee
+	.split('commonjs-proxy:').join('')
+	.replace(CONTROL_CHARACTERS, '');
+}
+
+async function loadJSON({importee, importer}) {
+	const filePath = path.join(path.dirname(importer), importee);
+	const data = JSON.parse(await readFile(filePath, 'utf8'));
+	const code = `export default ${JSON.stringify(data)};`;
+	return code;
+}
+
 function json() {
 	const entries = [];
 	const sep = 'json-proxy:';
-	/* eslint-disable no-control-regex */
-	const CONTROL_CHARACTERS = /[\x00-\x1F\x7F-\x9F]/g;
-	/* eslint-enable no-control-regex */
-	function normalize(importee) {
-		return importee
-		.split('commonjs-proxy:').join('')
-		.replace(CONTROL_CHARACTERS, '');
-	}
-	async function loadJSON({importee, importer}) {
-		const filePath = path.join(path.dirname(importer), importee);
-		const data = JSON.parse(await readFile(filePath, 'utf8'));
-		const code = `export default ${JSON.stringify(data)};`;
-		return code;
-	}
 	return {
 		resolveId: (importee, importer) => {
 			if (!(/\.json/).test(importee)) {
@@ -47,7 +49,7 @@ function json() {
 			})) {
 				entries.push({
 					id,
-					importee: normalize(importee),
+					importee: normalizeImporteeName(importee),
 					importer
 				});
 			}

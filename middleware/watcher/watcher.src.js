@@ -1,17 +1,21 @@
-/* eslint-disable no-console */
-/* global WebSocket */
-import {debounce} from 'j0';
+import {
+	debounce,
+	location,
+	document,
+	WebSocket,
+	console
+} from 'j0';
 import URL from 'j0/URL/j0polyfill';
 
 const RETRY_INTERVAL = 1000;
 const endpoint = `ws://${location.hostname}:${document.getElementById('wsport').textContent}`;
-const baseURL = new URL(location);
-baseURL.pathname = '';
-baseURL.search = '';
-baseURL.hash = '';
 
 function replaceCSS(file) {
 	const linkElements = document.querySelectorAll('link[rel="stylesheet"]');
+	const baseURL = new URL(location);
+	baseURL.pathname = '';
+	baseURL.search = '';
+	baseURL.hash = '';
 	const fileURL = new URL(file, baseURL);
 	fileURL.search = '';
 	fileURL.hash = '';

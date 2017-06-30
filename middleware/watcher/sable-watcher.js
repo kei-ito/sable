@@ -24,15 +24,23 @@ function debounce(fn) {
 	};
 }
 
-var x = URL;
+var x = location;
 
-var x$1 = Object;
+var x$1 = document;
+
+var x$2 = WebSocket;
+
+var x$3 = console;
+
+var x$4 = URL;
+
+var x$5 = Object;
 
 function isUndefined(x) {
 	return typeof x === 'undefined';
 }
 
-var x$2 = encodeURIComponent;
+var x$6 = encodeURIComponent;
 
 /* eslint-disable no-undefined, complexity, max-statements, max-lines */
 /* eslint-disable no-magic-numbers, no-continue, no-labels, no-lonely-if */
@@ -41,8 +49,8 @@ var EOF = undefined;
 var ALPHA = /[a-zA-Z]/;
 var ALPHANUMERIC = /[a-zA-Z0-9+\-.]/;
 
-var relative = x$1.create(null);
-x$1.assign(relative, {
+var relative = x$5.create(null);
+x$5.assign(relative, {
 	ftp: 21,
 	file: 0,
 	gopher: 70,
@@ -52,8 +60,8 @@ x$1.assign(relative, {
 	wss: 443
 });
 
-var relativePathDotMapping = x$1.create(null);
-x$1.assign(relative, {
+var relativePathDotMapping = x$5.create(null);
+x$5.assign(relative, {
 	'%2e': '.',
 	'.%2e': '..',
 	'%2e.': '..',
@@ -83,7 +91,7 @@ function percentEscape(c) {
 	![0x22, 0x23, 0x3C, 0x3E, 0x3F, 0x60].includes(unicode)) {
 		return c;
 	}
-	return x$2(c);
+	return x$6(c);
 }
 
 function percentEscapeQuery(c) {
@@ -94,7 +102,7 @@ function percentEscapeQuery(c) {
 	![0x22, 0x23, 0x3C, 0x3E, 0x60].includes(unicode)) {
 		return c;
 	}
-	return x$2(c);
+	return x$6(c);
 }
 
 function parse(input, stateOverride, base) {
@@ -636,22 +644,20 @@ var URL$1 = function () {
 	return URL$1;
 }();
 
-x$1.defineProperties(URL$1, {
-	createObjectURL: { value: x.createObjectURL },
-	revokeObjectURL: { value: x.revokeObjectURL }
+x$5.defineProperties(URL$1, {
+	createObjectURL: { value: x$4.createObjectURL },
+	revokeObjectURL: { value: x$4.revokeObjectURL }
 });
 
-/* eslint-disable no-console */
-/* global WebSocket */
 var RETRY_INTERVAL = 1000;
-var endpoint = 'ws://' + location.hostname + ':' + document.getElementById('wsport').textContent;
-var baseURL = new URL$1(location);
-baseURL.pathname = '';
-baseURL.search = '';
-baseURL.hash = '';
+var endpoint = 'ws://' + x.hostname + ':' + x$1.getElementById('wsport').textContent;
 
 function replaceCSS(file) {
-	var linkElements = document.querySelectorAll('link[rel="stylesheet"]');
+	var linkElements = x$1.querySelectorAll('link[rel="stylesheet"]');
+	var baseURL = new URL$1(x);
+	baseURL.pathname = '';
+	baseURL.search = '';
+	baseURL.hash = '';
 	var fileURL = new URL$1(file, baseURL);
 	fileURL.search = '';
 	fileURL.hash = '';
@@ -660,10 +666,10 @@ function replaceCSS(file) {
 	for (var i = 0; i < linkElements.length; i++) {
 		var linkElement = linkElements[i];
 		var hrefAttr = linkElement.getAttribute('href');
-		var url = new URL$1(hrefAttr, location);
+		var url = new URL$1(hrefAttr, x);
 		url.search = '';
 		url.hash = '';
-		console.log(href, url.href, href === url.href);
+		x$3.log(href, url.href, href === url.href);
 		if (href === url.href) {
 			url.search = '?d=' + Date.now();
 			linkElement.setAttribute('href', url.href);
@@ -674,18 +680,18 @@ function replaceCSS(file) {
 function onMessage(event) {
 	var file = event.data;
 
-	console.log('Watcher received: ' + file);
+	x$3.log('Watcher received: ' + file);
 	switch (file.replace(/^.*\.([\w]+)$/, '$1')) {
 		case 'css':
 			replaceCSS(file);
 			break;
 		default:
-			location.reload();
+			x.reload();
 	}
 }
 
 var connect = debounce(function () {
-	var ws = new WebSocket(endpoint);
+	var ws = new x$2(endpoint);
 	if (this && this.close) {
 		this.close();
 	}

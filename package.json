@@ -31,7 +31,7 @@
     "babel-core": "^6.25.0",
     "babel-preset-env": "^1.5.2",
     "istanbul": "^1.1.0-alpha.1",
-    "j0": "^0.3.2",
+    "j0": "^0.3.5",
     "mocha": "^3.4.2",
     "rollup": "^0.43.0",
     "rollup-plugin-commonjs": "^8.0.2",

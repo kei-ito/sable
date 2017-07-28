@@ -7,9 +7,6 @@ import {
 } from 'j0';
 import URL from 'j0/URL/j0polyfill';
 
-const RETRY_INTERVAL = 1000;
-const endpoint = `ws://${location.hostname}:${document.getElementById('wsport').textContent}`;
-
 function replaceCSS(file) {
 	const linkElements = document.querySelectorAll('link[rel="stylesheet"]');
 	const baseURL = new URL(location);
@@ -46,13 +43,20 @@ function onMessage(event) {
 	}
 }
 
-const connect = debounce(function () {
-	const ws = new WebSocket(endpoint);
-	if (this && this.close) {
-		this.close();
-	}
-	ws.onmessage = onMessage;
-	ws.onerror = connect;
-	ws.onclose = connect;
-}, RETRY_INTERVAL);
-connect();
+if (WebSocket) {
+	const RETRY_INTERVAL = 1000;
+	const endpoint = `ws://${location.hostname}:${document.getElementById('wsport').textContent}`;
+	const connect = debounce(function () {
+		const ws = new WebSocket(endpoint);
+		if (this && this.close) {
+			this.close();
+		}
+		ws.onmessage = onMessage;
+		ws.onerror = connect;
+		ws.onclose = connect;
+	}, RETRY_INTERVAL);
+	connect();
+} else {
+	console.info('Watcher failed to start: WebSocket is undefined');
+}
+

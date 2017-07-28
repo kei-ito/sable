@@ -647,9 +647,6 @@ x$5.defineProperties(URL$1, {
 	revokeObjectURL: { value: x$4.revokeObjectURL }
 });
 
-var RETRY_INTERVAL = 1000;
-var endpoint = 'ws://' + x.hostname + ':' + x$1.getElementById('wsport').textContent;
-
 function replaceCSS(file) {
 	var linkElements = x$1.querySelectorAll('link[rel="stylesheet"]');
 	var baseURL = new URL$1(x);
@@ -688,14 +685,20 @@ function onMessage(event) {
 	}
 }
 
-var connect = debounce(function () {
-	var ws = new x$2(endpoint);
-	if (this && this.close) {
-		this.close();
-	}
-	ws.onmessage = onMessage;
-	ws.onerror = connect;
-	ws.onclose = connect;
-}, RETRY_INTERVAL);
-connect();
+if (x$2) {
+	var RETRY_INTERVAL = 1000;
+	var endpoint = 'ws://' + x.hostname + ':' + x$1.getElementById('wsport').textContent;
+	var connect = debounce(function () {
+		var ws = new x$2(endpoint);
+		if (this && this.close) {
+			this.close();
+		}
+		ws.onmessage = onMessage;
+		ws.onerror = connect;
+		ws.onclose = connect;
+	}, RETRY_INTERVAL);
+	connect();
+} else {
+	x$3.info('Watcher failed to start: WebSocket is undefined');
+}
 }())

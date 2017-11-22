@@ -1,10 +1,12 @@
 require('./replace-stream');
 require('./snippet-injector');
 const assert = require('assert');
-const test = require('@nlib/test');
-const SableServer = require('..');
 const path = require('path');
+const fs = require('fs');
+const WebSocket = require('ws');
+const test = require('@nlib/test');
 const cp = require('@nlib/cp');
+const SableServer = require('..');
 const request = require('./request');
 const readStream = require('./read-stream');
 
@@ -257,6 +259,63 @@ test('SableServer', (test) => {
 				});
 			});
 
+		});
+
+		test('close()', () => {
+			return server.close();
+		});
+
+	});
+
+	test('file watcher', (test) => {
+
+		const testDirectory = path.join(testRootDirectory, 'file-watcher');
+		let ws;
+
+		const server = new SableServer({
+			documentRoot: testDirectory,
+		});
+
+		test(`copy ${srcDirectory} to ${testDirectory}`, () => {
+			return cp(srcDirectory, testDirectory);
+		});
+
+		test('returns Promise<SableServer>', () => {
+			return server.start()
+			.then((resolved) => {
+				assert(server === resolved);
+			});
+		});
+
+		test('has a port', () => {
+			assert(0 < server.address().port);
+		});
+
+		test('has a websocket server', () => {
+			return new Promise((resolve, reject) => {
+				ws = new WebSocket(`ws://127.0.0.1:${server.wsPort}`)
+				.once('error', reject)
+				.once('open', resolve);
+			});
+		});
+
+		test('has a file watcher', () => {
+			const targetFile = path.join(testDirectory, 'index.html');
+			ws.removeAllListeners();
+			return new Promise((resolve, reject) => {
+				ws
+				.once('error', reject)
+				.once('message', resolve);
+				fs.utimes(targetFile, new Date(), new Date(), (error) => {
+					if (error) {
+						reject(error);
+					}
+				});
+			})
+			.then((actual) => {
+				const expected = `/${path.relative(testDirectory, targetFile)}`;
+				assert.equal(actual, expected);
+			});
 		});
 
 		test('close()', () => {

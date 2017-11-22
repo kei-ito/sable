@@ -1,18 +1,71 @@
 #!/usr/bin/env node
 
-const program = require('commander');
-const console = require('j1/console').create('sable');
+const console = require('console');
+const {runInNewContext} = require('vm');
 const SableServer = require('..');
-const {version} = require('../package');
+const packageJSON = require('../package.json');
 
-program
-	.version(version)
-	.usage('[options] [documentRoot1, documentRoot2, ...]')
-	.option('-p --port <n>', 'A port number to which the web server listens', parseInt)
-	.option('-w --wsport <n>', 'A port number to which the websocket server listens', parseInt)
-	.parse(process.argv);
+const args = process.argv.slice(2);
 
-program.documentRoot = program.args;
+const help = args.find((arg) => {
+	return (/^-*h(?:elp)?$/i).test(arg);
+}) && `
+Usage: sable [options] [documentRoot1, documentRoot2, ...]
 
-new SableServer(program).start()
-.catch(console.onError);
++ Command-1 -------------------------------+
+| sable \\                                  |
+|  --listen={host:localhost, port:5000} \\  |
+|  --ws={port:20000} \\                     |
+|  /document/root1 \\                       |
+|  /document/root2                         |
++------------------------------------------+
+
+The Command-1 above runs the Script-1 below.
+
++ Script-1 --------------------------------+
+| new SableServer({                        |
+|   listen: {                              |
+|     host: 'localhost',                   |
+|     port: 5000,                          |
+|   },                                     |
+|   ws: {port: 20000},                     |
+|   documentRoot: [                        |
+|     '/document/root1',                   |
+|     '/document/root2',                   |
+|   ],                                     |
+| }).start()                               |
+| .catch((error) => {                      |
+|   console.error(error);                  |
+|   process.exit(1);                       |
+| });                                      |
++------------------------------------------+
+`;
+
+const version = args.find((arg) => {
+	return (/^-*v(?:ersion)?$/i).test(arg);
+}) && packageJSON.version;
+
+if (help) {
+	console.log(help);
+} else if (version) {
+	console.log(version);
+} else {
+	const params = {};
+	while (args[0].startsWith('--')) {
+		const arg = args.shift().replace(/^-+/, '');
+		const index = arg.indexOf('=');
+		const key = arg.slice(0, index);
+		const value = arg.slice(index + 1);
+		runInNewContext(`params[${JSON.stringify(key)}] = ${value};`, {params});
+	}
+	params.documentRoot = args;
+	console.log(params);
+	new SableServer(params).start()
+	.then((server) => {
+		console.log(`listening ${server.address().port}`);
+	})
+	.catch((error) => {
+		console.error(error);
+		process.exit(1);
+	});
+}

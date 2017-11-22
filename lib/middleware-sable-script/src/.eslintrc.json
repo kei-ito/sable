@@ -1,0 +1,13 @@
+{
+  "env": {
+    "node": false,
+    "browser": true
+  },
+  "rules": {
+    "prefer-spread": "OFF",
+    "prefer-template": "OFF",
+    "prefer-destructuring": "OFF",
+    "prefer-arrow-callback": "OFF",
+    "no-console": "OFF"
+  }
+}

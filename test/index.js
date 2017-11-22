@@ -241,6 +241,20 @@ test('SableServer', (test) => {
 						assert.equal(actual, expected);
 					});
 				});
+				[
+					'..',
+					'index/',
+					'sub-directory/',
+					'file.txt',
+					'no-extension',
+				]
+				.forEach((fileName) => {
+					test(`has a link to ${fileName}`, () => {
+						assert(lines.find((line) => {
+							return line.includes(`<a href="${fileName}"`);
+						}));
+					});
+				});
 			});
 
 		});

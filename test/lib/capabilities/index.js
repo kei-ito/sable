@@ -1,6 +1,6 @@
 const env = require('../env');
 const capabilities = [];
-if (env.BROWSERSTACK) {
+if (env.BROWSERSTACK && env.TRAVIS_NODE_VERSION === '9') {
 	capabilities.push(
 		{
 			os: 'OS X',
@@ -43,7 +43,7 @@ if (env.BROWSERSTACK) {
 			device: 'iPhone 6S',
 		}
 	);
-} else {
+} else if (!env.CI) {
 	capabilities.push(
 		{
 			browserName: 'chrome',

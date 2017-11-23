@@ -217,7 +217,7 @@ function testCapability({test, server, capability, prefix}) {
 					return req.parsedURL.pathname.endsWith('style.css');
 				}),
 				new Promise((resolve, reject) => {
-					fs.writeFile(targetFile, 'h1 {font-size: 32px}', (error) => {
+					fs.writeFile(targetFile, 'h1 {height: 100px}', (error) => {
 						if (error) {
 							reject(error);
 						} else {
@@ -245,8 +245,16 @@ function testCapability({test, server, capability, prefix}) {
 			});
 		});
 
-		test(`${prefix} compare h1`, () => {
-			assert(params.beforeSize.height < params.afterSize.height);
+		test(`${prefix} compare h1`, (test) => {
+
+			test(`beforeSize.height: ${params.beforeSize.height}`, () => {
+				assert(0 < params.beforeSize.height);
+			});
+
+			test(`afterSize.height: ${params.afterSize.height}`, () => {
+				assert(params.beforeSize.height < params.afterSize.height);
+			});
+
 		});
 
 		if (env.BROWSERSTACK) {

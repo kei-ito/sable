@@ -43,7 +43,8 @@ test('sable script', (test) => {
 		session.build = `${session.project}#${env.TRAVIS_BUILD_NUMBER || dateString()}`;
 		session.localIdentifier = `${session.build}@${dateString}`;
 
-		test('setup bsLocal', () => {
+		test('setup bsLocal', function () {
+			this.timeout = 30000;
 			return new Promise((resolve, reject) => {
 				// https://github.com/browserstack/browserstack-local-nodejs/blob/master/lib/Local.js
 				session.bsLocal = new Local();
@@ -67,13 +68,14 @@ test('sable script', (test) => {
 			});
 		});
 
-		test('wait for bsLocal.isRunning', () => {
+		test('wait for bsLocal.isRunning', function () {
+			this.timeout = 30000;
 			return new Promise((resolve) => {
 				let count = 0;
 				function check() {
 					if (session.bsLocal.isRunning()) {
 						resolve();
-					} else if (count++ < 60) {
+					} else if (count++ < 30) {
 						setTimeout(check, 1000);
 					} else {
 						throw new Error('Failed to start browserstack-local');
@@ -93,7 +95,9 @@ test('sable script', (test) => {
 				return Promise.resolve();
 			}
 			const prefix = `[${capabilities.length - queue.length}/${capabilities.length}]`;
-			return test(`${prefix} ${capabilityTitle(capability)}`, (test) => {
+			return test(`${prefix} ${capabilityTitle(capability)}`, function (test) {
+
+				this.timeout = 30000;
 
 				let builder;
 				let driver;

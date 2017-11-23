@@ -3,3 +3,11 @@
 <link rel="stylesheet" href="style.css">
 <h1>Title</h1>
 <p>paragraph</p>
+<script>
+window.onerror = function (event) {
+	var error = event && event.error ? event.error : event;
+	var element = document.createElement('pre');
+	document.body.insertBefore(element, document.body.firstChild);
+	element.textContent = (error.stack || error).toString();
+};
+</script>

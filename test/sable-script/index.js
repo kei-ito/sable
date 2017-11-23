@@ -71,12 +71,12 @@ function testCapability({test, server, capability, prefix}) {
 
 			const project = packageJSON.name;
 			const build = `${project}#${env.TRAVIS_BUILD_NUMBER || dateString()}`;
-			const localIdentifier = (`${build}${dateString}`).replace(/[^\w-]/g, '');
+			const localIdentifier = (`${prefix}${build}${dateString}`).replace(/[^\w-]/g, '');
 
 			test('setup bsLocal', function () {
+				// https://github.com/browserstack/browserstack-local-nodejs/blob/master/lib/Local.js
 				this.timeout = 30000;
 				return new Promise((resolve, reject) => {
-					// https://github.com/browserstack/browserstack-local-nodejs/blob/master/lib/Local.js
 					bsLocal = new Local();
 					bsLocal.start(
 						{

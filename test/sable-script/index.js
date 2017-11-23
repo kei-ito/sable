@@ -70,7 +70,7 @@ function testCapability({test, server, capability, prefix}) {
 
 			const project = packageJSON.name;
 			const build = `${project}#${env.TRAVIS_BUILD_NUMBER || dateString()}`;
-			const localIdentifier = `${build}@${dateString}`;
+			const localIdentifier = (`${build}${dateString}`).replace(/[^\w-]/g, '');
 
 			test('setup bsLocal', function () {
 				this.timeout = 30000;

@@ -32,6 +32,7 @@ if (0 < capabilities.length) {
 
 		test('run tests', (test) => {
 			const queue = capabilities.slice();
+			const errors = [];
 			function run() {
 				const capability = queue.shift();
 				if (!capability) {
@@ -43,9 +44,18 @@ if (0 < capabilities.length) {
 					prefix: `[${capabilities.length - queue.length}/${capabilities.length}]`,
 					capability,
 				})
+				.catch((error) => {
+					capability.error = error;
+					errors.push(capability);
+				})
 				.then(run);
 			}
-			return run();
+			return run()
+			.then(() => {
+				if (0 < errors.length) {
+					throw new Error(`${errors.length} capabilities failed`);
+				}
+			});
 		});
 
 		test('close()', () => {
@@ -239,10 +249,6 @@ function testCapability({test, server, capability, prefix}) {
 			assert(params.beforeSize.height < params.afterSize.height);
 		});
 
-		test(`${prefix} quit`, () => {
-			return driver.quit();
-		});
-
 		if (env.BROWSERSTACK) {
 			test(`${prefix} report`, (test) => {
 				const failedTests = this.children
@@ -267,6 +273,10 @@ function testCapability({test, server, capability, prefix}) {
 				}
 			});
 		}
+
+		test(`${prefix} quit`, () => {
+			return driver.quit();
+		});
 
 	});
 }

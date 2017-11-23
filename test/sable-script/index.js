@@ -12,45 +12,46 @@ const directories = require('../lib/directories');
 const capabilities = require('../lib/capabilities');
 const capabilityTitle = require('../lib/capability-title');
 
-test('sable script', (test) => {
+if (0 < capabilities.length) {
+	test('sable script', (test) => {
 
-	const testDirectory = path.join(directories.temp, 'sable-script');
-	const server = new SableServer({
-		documentRoot: testDirectory,
-	});
+		const testDirectory = path.join(directories.temp, 'sable-script');
+		const server = new SableServer({
+			documentRoot: testDirectory,
+		});
 
-	test(`copy ${directories.src} to ${testDirectory}`, () => {
-		return cp(directories.src, testDirectory);
-	});
+		test(`copy ${directories.src} to ${testDirectory}`, () => {
+			return cp(directories.src, testDirectory);
+		});
 
-	test('start a server', () => {
-		return server.start();
-	});
+		test('start a server', () => {
+			return server.start();
+		});
 
-	test('run tests', (test) => {
-		const queue = capabilities.slice();
-		function run() {
-			const capability = queue.shift();
-			if (!capability) {
-				return Promise.resolve();
+		test('run tests', (test) => {
+			const queue = capabilities.slice();
+			function run() {
+				const capability = queue.shift();
+				if (!capability) {
+					return Promise.resolve();
+				}
+				return testCapability({
+					test,
+					server,
+					prefix: `[${capabilities.length - queue.length}/${capabilities.length}]`,
+					capability,
+				})
+				.then(run);
 			}
-			return testCapability({
-				test,
-				server,
-				prefix: `[${capabilities.length - queue.length}/${capabilities.length}]`,
-				capability,
-			})
-			.then(run);
-		}
-		return run();
+			return run();
+		});
+
+		test('close()', () => {
+			return server.close();
+		});
+
 	});
-
-	test('close()', () => {
-		return server.close();
-	});
-
-});
-
+}
 
 function testCapability({test, server, capability, prefix}) {
 

@@ -17,19 +17,6 @@ const markResult = require('../lib/mark-result');
 if (0 < capabilities.length) {
 	test('sable script', (test) => {
 
-		const testDirectory = path.join(directories.temp, 'sable-script');
-		const server = new SableServer({
-			documentRoot: testDirectory,
-		});
-
-		test(`copy ${directories.src} to ${testDirectory}`, () => {
-			return cp(directories.src, testDirectory);
-		});
-
-		test('start a server', () => {
-			return server.start();
-		});
-
 		test('run tests', (test) => {
 			const queue = capabilities.slice();
 			const errors = [];
@@ -38,10 +25,11 @@ if (0 < capabilities.length) {
 				if (!capability) {
 					return Promise.resolve();
 				}
+				const index = capabilities.length - queue.length;
 				return testCapability({
 					test,
-					server,
-					prefix: `[${capabilities.length - queue.length}/${capabilities.length}]`,
+					index,
+					prefix: `[${index}/${capabilities.length}]`,
 					capability,
 				})
 				.catch((error) => {
@@ -58,28 +46,33 @@ if (0 < capabilities.length) {
 			});
 		});
 
-		test('close()', () => {
-			return server.close();
-		});
-
 	});
 }
 
-function testCapability({test, server, capability, prefix}) {
-
-	function localURL(pathname) {
-		return `http://127.0.0.1:${server.address().port}${pathname}`;
-	}
+function testCapability({test, capability, prefix, index}) {
 
 	return test(`${prefix} ${capabilityTitle(capability)}`, function (test) {
 
 		this.timeout = 20000;
+		const testDirectory = path.join(directories.temp, `sable-script-${index}`);
 		const params = {
 			key: `_${Date.now()}`,
 		};
 		let bsLocal;
 		let builder;
 		let driver;
+
+		const server = new SableServer({
+			documentRoot: testDirectory,
+		});
+
+		test(`copy ${directories.src} to ${testDirectory}`, () => {
+			return cp(directories.src, testDirectory);
+		});
+
+		test('start a server', () => {
+			return server.start();
+		});
 
 		if (env.BROWSERSTACK) {
 
@@ -156,14 +149,14 @@ function testCapability({test, server, capability, prefix}) {
 			driver = builder.build();
 		});
 
-		test(`${prefix} GET ${localURL('/')}`, function () {
+		test(`${prefix} GET /`, function () {
 			this.timeout = 120000;
 			return Promise.all([
 				server.nextWebSocketConnection(({req}) => {
 					params.ua0 = req.headers['user-agent'];
 					return true;
 				}),
-				driver.get(localURL('/')),
+				driver.get(`http://127.0.0.1:${server.address().port}/`),
 			]);
 		});
 
@@ -285,6 +278,10 @@ function testCapability({test, server, capability, prefix}) {
 
 		test(`${prefix} quit`, () => {
 			return driver.quit();
+		});
+
+		test('close()', () => {
+			return server.close();
 		});
 
 	});

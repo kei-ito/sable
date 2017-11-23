@@ -155,6 +155,11 @@ function testCapability({test, capability, prefix, index}) {
 			driver = builder.build();
 		});
 
+		test(`${prefix} wait a while`, function () {
+			this.timeout = 20000;
+			return wait(10000);
+		});
+
 		test(`${prefix} GET /`, function () {
 			this.timeout = 120000;
 			return Promise.all([

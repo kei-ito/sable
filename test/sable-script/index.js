@@ -66,11 +66,11 @@ function testCapability({test, capability, prefix, index}) {
 			documentRoot: testDirectory,
 		});
 
-		test(`copy ${directories.src} to ${testDirectory}`, () => {
+		test(`${prefix} copy ${directories.src} to ${testDirectory}`, () => {
 			return cp(directories.src, testDirectory);
 		});
 
-		test('start a server', () => {
+		test(`${prefix} start a server`, () => {
 			return server.start();
 		});
 
@@ -80,7 +80,7 @@ function testCapability({test, capability, prefix, index}) {
 			const build = `${project}#${env.TRAVIS_BUILD_NUMBER || dateString()}`;
 			const localIdentifier = (`${prefix}${build}${dateString}`).replace(/[^\w-]/g, '');
 
-			test('setup bsLocal', () => {
+			test(`${prefix} setup bsLocal`, () => {
 				// https://github.com/browserstack/browserstack-local-nodejs/blob/master/lib/Local.js
 				return new Promise((resolve, reject) => {
 					bsLocal = new Local();
@@ -104,7 +104,7 @@ function testCapability({test, capability, prefix, index}) {
 				});
 			});
 
-			test('wait for bsLocal.isRunning()', () => {
+			test(`${prefix} wait for bsLocal.isRunning()`, () => {
 				return new Promise((resolve, reject) => {
 					let count = 0;
 					function check() {
@@ -150,7 +150,7 @@ function testCapability({test, capability, prefix, index}) {
 		});
 
 		test(`${prefix} getSession()`, function () {
-			this.timeout = 60000;
+			this.timeout = 120000;
 			return driver.getSession()
 			.then((session) => {
 				params.session = session;

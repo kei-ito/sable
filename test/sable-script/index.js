@@ -73,7 +73,7 @@ function testCapability({test, server, capability, prefix}) {
 
 	return test(`${prefix} ${capabilityTitle(capability)}`, function (test) {
 
-		this.timeout = 60000;
+		this.timeout = 20000;
 		const params = {
 			key: `_${Date.now()}`,
 		};
@@ -156,7 +156,8 @@ function testCapability({test, server, capability, prefix}) {
 			driver = builder.build();
 		});
 
-		test(`${prefix} GET ${localURL('/')}`, () => {
+		test(`${prefix} GET ${localURL('/')}`, function () {
+			this.timeout = 120000;
 			return Promise.all([
 				server.nextWebSocketConnection(({req}) => {
 					params.ua0 = req.headers['user-agent'];

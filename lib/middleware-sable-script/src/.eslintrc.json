@@ -1,0 +1,23 @@
+{
+  "parserOptions": {
+    "ecmaVersion": 3
+  },
+  "env": {
+    "es6": false,
+    "node": false,
+    "browser": true
+  },
+  "rules": {
+    "no-restricted-syntax": [
+      "ERROR",
+      "RestElement",
+      "ArrowFunctionExpression",
+      "TemplateLiteral",
+      "SpreadElement",
+      "ObjectPattern"
+    ],
+    "prefer-arrow-callback": "OFF",
+    "prefer-spread": "OFF",
+    "no-console": "OFF"
+  }
+}

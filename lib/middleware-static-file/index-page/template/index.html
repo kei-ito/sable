@@ -1,0 +1,38 @@
+<!doctype html>
+<meta charset="utf-8">
+<style id="sable-index-page">
+* {
+	margin: 0;
+	padding: 0;
+	border-collapse: collapse;
+	font: inherit;
+	text-decoration: none;
+	text-align: left;
+}
+body {
+	font-family: sans-serif;
+}
+body>* {
+	margin: 16px;
+}
+h1 {
+	font-size: 18px;
+	font-weight: bold;
+}
+h1>a::before {
+	content: '/';
+}
+td, th {
+	border: solid 1px #ddd;
+	padding: 4px 10px;
+}
+.size {
+	text-align: right;
+}
+</style>
+<title>[title]</title>
+<h1>[breadcrumbs]</h1>
+<table>
+[files]
+</table>
+<footer>Created at [createdAt] ([duration]ms)</footer>

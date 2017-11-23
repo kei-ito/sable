@@ -14,6 +14,12 @@ const capabilities = require('../lib/capabilities');
 const capabilityTitle = require('../lib/capability-title');
 const markResult = require('../lib/mark-result');
 
+function wait(duration) {
+	return new Promise((resolve) => {
+		setTimeout(resolve, duration);
+	});
+}
+
 if (0 < capabilities.length) {
 	test('sable script', (test) => {
 
@@ -156,7 +162,10 @@ function testCapability({test, capability, prefix, index}) {
 					params.ua0 = req.headers['user-agent'];
 					return true;
 				}),
-				driver.get(`http://127.0.0.1:${server.address().port}/`),
+				wait(100)
+				.then(() => {
+					return driver.get(`http://127.0.0.1:${server.address().port}/`);
+				}),
 			]);
 		});
 
@@ -167,13 +176,16 @@ function testCapability({test, capability, prefix, index}) {
 					params.ua1 = req.headers['user-agent'];
 					return true;
 				}),
-				new Promise((resolve, reject) => {
-					fs.utimes(targetFile, new Date(), new Date(), (error) => {
-						if (error) {
-							reject(error);
-						} else {
-							resolve();
-						}
+				wait(100)
+				.then(() => {
+					return new Promise((resolve, reject) => {
+						fs.utimes(targetFile, new Date(), new Date(), (error) => {
+							if (error) {
+								reject(error);
+							} else {
+								resolve();
+							}
+						});
 					});
 				}),
 			]);
@@ -210,13 +222,16 @@ function testCapability({test, capability, prefix, index}) {
 				server.nextResponse(({req}) => {
 					return req.parsedURL.pathname.endsWith('style.css');
 				}),
-				new Promise((resolve, reject) => {
-					fs.writeFile(targetFile, 'h1 {height: 100px}', (error) => {
-						if (error) {
-							reject(error);
-						} else {
-							resolve();
-						}
+				wait(100)
+				.then(() => {
+					return new Promise((resolve, reject) => {
+						fs.writeFile(targetFile, 'h1 {height: 100px}', (error) => {
+							if (error) {
+								reject(error);
+							} else {
+								resolve();
+							}
+						});
 					});
 				}),
 			]);

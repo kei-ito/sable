@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/kei-ito/sable.svg?branch=master)](https://travis-ci.org/kei-ito/sable)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f1a8a21fbb504968a095dbd6e1b01cbb)](https://www.codacy.com/app/kei.itof/sable?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kei-ito/sable&amp;utm_campaign=Badge_Grade)
+[![BrowserStack Status](https://www.browserstack.com/automate/badge.svg?badge_key=clRVWTBmQVdFcHNGaDFvMDlxanRoZllsMGN1RU9JNW1CRUtEVjkxQ2NMZz0tLUVMdFpUZnJKajltN0FSTWlJeXBCbVE9PQ==--046a5961a5e492a5b38e13d34a12a6ca2a8c1139)](https://www.browserstack.com/automate/public-build/clRVWTBmQVdFcHNGaDFvMDlxanRoZllsMGN1RU9JNW1CRUtEVjkxQ2NMZz0tLUVMdFpUZnJKajltN0FSTWlJeXBCbVE9PQ==--046a5961a5e492a5b38e13d34a12a6ca2a8c1139)
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/f1a8a21fbb504968a095dbd6e1b01cbb)](https://www.codacy.com/app/kei.itof/sable?utm_source=github.com&utm_medium=referral&utm_content=kei-ito/sable&utm_campaign=Badge_Coverage)
 [![dependencies Status](https://david-dm.org/kei-ito/sable/status.svg)](https://david-dm.org/kei-ito/sable)
 [![devDependencies Status](https://david-dm.org/kei-ito/sable/dev-status.svg)](https://david-dm.org/kei-ito/sable?type=dev)

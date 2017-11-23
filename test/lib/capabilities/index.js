@@ -36,11 +36,6 @@ if (env.BROWSERSTACK && env.TRAVIS_NODE_VERSION === '9') {
 			os: 'Windows',
 			os_version: '10',
 			browserName: 'Firefox',
-		},
-		{
-			browserName: 'iPhone',
-			platform: 'MAC',
-			device: 'iPhone 6S',
 		}
 	);
 } else if (!env.CI) {

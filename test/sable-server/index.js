@@ -167,7 +167,6 @@ test('SableServer', (test) => {
 					'<link rel="stylesheet" href="style.css">',
 					'<h1>Title</h1>',
 					'<p>paragraph</p>',
-					'',
 				]
 				.forEach((expected, index) => {
 					const actual = lines[index];

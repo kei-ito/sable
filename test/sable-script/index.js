@@ -237,6 +237,10 @@ function testCapability({test, capability, prefix, index}) {
 			});
 		});
 
+		test(`${prefix} wait a while`, () => {
+			return driver.sleep(500);
+		});
+
 		test(`${prefix} get h1 again`, () => {
 			return driver.findElement(By.tagName('h1'))
 			.then((webElement) => {

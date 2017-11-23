@@ -63,6 +63,7 @@ function testCapability({test, server, capability, prefix}) {
 
 	return test(`${prefix} ${capabilityTitle(capability)}`, function (test) {
 
+		this.timeout = 60000;
 		const params = {
 			key: `_${Date.now()}`,
 		};
@@ -76,9 +77,8 @@ function testCapability({test, server, capability, prefix}) {
 			const build = `${project}#${env.TRAVIS_BUILD_NUMBER || dateString()}`;
 			const localIdentifier = (`${prefix}${build}${dateString}`).replace(/[^\w-]/g, '');
 
-			test('setup bsLocal', function () {
+			test('setup bsLocal', () => {
 				// https://github.com/browserstack/browserstack-local-nodejs/blob/master/lib/Local.js
-				this.timeout = 30000;
 				return new Promise((resolve, reject) => {
 					bsLocal = new Local();
 					bsLocal.start(
@@ -146,8 +146,7 @@ function testCapability({test, server, capability, prefix}) {
 			driver = builder.build();
 		});
 
-		test(`${prefix} GET ${localURL('/')}`, function () {
-			this.timeout = 60000;
+		test(`${prefix} GET ${localURL('/')}`, () => {
 			return Promise.all([
 				server.nextWebSocketConnection(({req}) => {
 					params.ua0 = req.headers['user-agent'];
@@ -157,8 +156,7 @@ function testCapability({test, server, capability, prefix}) {
 			]);
 		});
 
-		test(`${prefix} change index.html`, function () {
-			this.timeout = 60000;
+		test(`${prefix} change index.html`, () => {
 			const targetFile = path.join(server.documentRoot[0], 'index.html');
 			return Promise.all([
 				server.nextWebSocketConnection(({req}) => {
@@ -181,21 +179,18 @@ function testCapability({test, server, capability, prefix}) {
 			assert.equal(params.ua0, params.ua1);
 		});
 
-		test(`${prefix} put a value`, function () {
-			this.timeout = 10000;
+		test(`${prefix} put a value`, () => {
 			return driver.executeScript(`window.${params.key} = '${params.key}';`);
 		});
 
-		test(`${prefix} get a value`, function () {
-			this.timeout = 10000;
+		test(`${prefix} get a value`, () => {
 			return driver.executeScript(`return window.${params.key};`)
 			.then((returned) => {
 				assert.equal(returned, params.key);
 			});
 		});
 
-		test(`${prefix} get h1`, function () {
-			this.timeout = 10000;
+		test(`${prefix} get h1`, () => {
 			return driver.findElement(By.tagName('h1'))
 			.then((webElement) => {
 				return webElement.getSize();
@@ -205,8 +200,7 @@ function testCapability({test, server, capability, prefix}) {
 			});
 		});
 
-		test(`${prefix} change style.css`, function () {
-			this.timeout = 60000;
+		test(`${prefix} change style.css`, () => {
 			const targetFile = path.join(server.documentRoot[0], 'style.css');
 			return Promise.all([
 				server.nextResponse(({req}) => {
@@ -224,16 +218,14 @@ function testCapability({test, server, capability, prefix}) {
 			]);
 		});
 
-		test(`${prefix} confirm no reload was occurred`, function () {
-			this.timeout = 10000;
+		test(`${prefix} confirm no reload was occurred`, () => {
 			return driver.executeScript(`return window.${params.key};`)
 			.then((returned) => {
 				assert.equal(returned, params.key);
 			});
 		});
 
-		test(`${prefix} get h1 again`, function () {
-			this.timeout = 10000;
+		test(`${prefix} get h1 again`, () => {
 			return driver.findElement(By.tagName('h1'))
 			.then((webElement) => {
 				return webElement.getSize();

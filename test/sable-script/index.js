@@ -145,9 +145,12 @@ function testCapability({test, capability, prefix, index}) {
 			});
 		}
 
-		test(`${prefix} build a driver`, function () {
-			this.timeout = 30000;
+		test(`${prefix} builder.build()`, () => {
 			driver = builder.build();
+		});
+
+		test(`${prefix} getSession`, function () {
+			this.timeout = 60000;
 			return driver.getSession()
 			.then((session) => {
 				params.session = session;
@@ -265,6 +268,7 @@ function testCapability({test, capability, prefix, index}) {
 				if (failedTests.length === 0) {
 					test('mark as "passed"', () => {
 						return markResult({
+							session: params.session,
 							driver,
 							status: 'passed',
 						});

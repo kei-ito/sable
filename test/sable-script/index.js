@@ -149,7 +149,7 @@ function testCapability({test, capability, prefix, index}) {
 			driver = builder.build();
 		});
 
-		test(`${prefix} getSession`, function () {
+		test(`${prefix} getSession()`, function () {
 			this.timeout = 60000;
 			return driver.getSession()
 			.then((session) => {

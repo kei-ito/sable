@@ -4,17 +4,17 @@ if (env.BROWSERSTACK && env.TRAVIS_NODE_VERSION === '9') {
 	capabilities.push(
 		{
 			os: 'OS X',
-			os_version: 'Sierra',
+			os_version: 'High Sierra',
 			browserName: 'Chrome',
 		},
 		{
 			os: 'OS X',
-			os_version: 'Sierra',
+			os_version: 'High Sierra',
 			browserName: 'Firefox',
 		},
 		{
 			os: 'OS X',
-			os_version: 'Sierra',
+			os_version: 'High Sierra',
 			browserName: 'Safari',
 		},
 		{

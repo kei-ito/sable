@@ -59,9 +59,7 @@ function testCapability({test, server, capability, prefix}) {
 		return `http://127.0.0.1:${server.address().port}${pathname}`;
 	}
 
-	return test(`${prefix} ${capabilityTitle(capability)}`, function (test) {
-
-		this.timeout = 30000;
+	return test(`${prefix} ${capabilityTitle(capability)}`, (test) => {
 
 		let bsLocal;
 		let builder;
@@ -98,8 +96,7 @@ function testCapability({test, server, capability, prefix}) {
 				});
 			});
 
-			test('wait for bsLocal.isRunning()', function () {
-				this.timeout = 30000;
+			test('wait for bsLocal.isRunning()', () => {
 				return new Promise((resolve, reject) => {
 					let count = 0;
 					function check() {
@@ -144,7 +141,8 @@ function testCapability({test, server, capability, prefix}) {
 			driver = builder.build();
 		});
 
-		test(`${prefix} GET ${localURL('/')}`, () => {
+		test(`${prefix} GET ${localURL('/')}`, function () {
+			this.timeout = 60000;
 			return driver.get(localURL('/'));
 		});
 

@@ -1,8 +1,9 @@
-// const assert = require('assert');
+const assert = require('assert');
 const path = require('path');
+const fs = require('fs');
 const test = require('@nlib/test');
 const cp = require('@nlib/cp');
-const {Builder} = require('selenium-webdriver');
+const {Builder, By} = require('selenium-webdriver');
 const {Local} = require('browserstack-local');
 const packageJSON = require('../../package.json');
 const SableServer = require('../..');
@@ -11,6 +12,7 @@ const dateString = require('../lib/date-string');
 const directories = require('../lib/directories');
 const capabilities = require('../lib/capabilities');
 const capabilityTitle = require('../lib/capability-title');
+const markResult = require('../lib/mark-result');
 
 if (0 < capabilities.length) {
 	test('sable script', (test) => {
@@ -59,8 +61,11 @@ function testCapability({test, server, capability, prefix}) {
 		return `http://127.0.0.1:${server.address().port}${pathname}`;
 	}
 
-	return test(`${prefix} ${capabilityTitle(capability)}`, (test) => {
+	return test(`${prefix} ${capabilityTitle(capability)}`, function (test) {
 
+		const params = {
+			key: `_${Date.now()}`,
+		};
 		let bsLocal;
 		let builder;
 		let driver;
@@ -143,12 +148,133 @@ function testCapability({test, server, capability, prefix}) {
 
 		test(`${prefix} GET ${localURL('/')}`, function () {
 			this.timeout = 60000;
-			return driver.get(localURL('/'));
+			return Promise.all([
+				server.nextWebSocketConnection(({req}) => {
+					params.ua0 = req.headers['user-agent'];
+					return true;
+				}),
+				driver.get(localURL('/')),
+			]);
 		});
 
-		test(`${prefix} quit}`, () => {
+		test(`${prefix} change index.html`, function () {
+			this.timeout = 60000;
+			const targetFile = path.join(server.documentRoot[0], 'index.html');
+			return Promise.all([
+				server.nextWebSocketConnection(({req}) => {
+					params.ua1 = req.headers['user-agent'];
+					return true;
+				}),
+				new Promise((resolve, reject) => {
+					fs.utimes(targetFile, new Date(), new Date(), (error) => {
+						if (error) {
+							reject(error);
+						} else {
+							resolve();
+						}
+					});
+				}),
+			]);
+		});
+
+		test(`${prefix} compare requesters`, () => {
+			assert.equal(params.ua0, params.ua1);
+		});
+
+		test(`${prefix} put a value`, function () {
+			this.timeout = 10000;
+			return driver.executeScript(`window.${params.key} = '${params.key}';`);
+		});
+
+		test(`${prefix} get a value`, function () {
+			this.timeout = 10000;
+			return driver.executeScript(`return window.${params.key};`)
+			.then((returned) => {
+				assert.equal(returned, params.key);
+			});
+		});
+
+		test(`${prefix} get h1`, function () {
+			this.timeout = 10000;
+			return driver.findElement(By.tagName('h1'))
+			.then((webElement) => {
+				return webElement.getSize();
+			})
+			.then((size) => {
+				params.beforeSize = size;
+			});
+		});
+
+		test(`${prefix} change style.css`, function () {
+			this.timeout = 60000;
+			const targetFile = path.join(server.documentRoot[0], 'style.css');
+			return Promise.all([
+				server.nextResponse(({req}) => {
+					return req.parsedURL.pathname.endsWith('style.css');
+				}),
+				new Promise((resolve, reject) => {
+					fs.writeFile(targetFile, 'h1 {font-size: 32px}', (error) => {
+						if (error) {
+							reject(error);
+						} else {
+							resolve();
+						}
+					});
+				}),
+			]);
+		});
+
+		test(`${prefix} confirm no reload was occurred`, function () {
+			this.timeout = 10000;
+			return driver.executeScript(`return window.${params.key};`)
+			.then((returned) => {
+				assert.equal(returned, params.key);
+			});
+		});
+
+		test(`${prefix} get h1 again`, function () {
+			this.timeout = 10000;
+			return driver.findElement(By.tagName('h1'))
+			.then((webElement) => {
+				return webElement.getSize();
+			})
+			.then((size) => {
+				params.afterSize = size;
+			});
+		});
+
+		test(`${prefix} compare h1`, () => {
+			assert(params.beforeSize.height < params.afterSize.height);
+		});
+
+		test(`${prefix} quit`, () => {
 			return driver.quit();
 		});
+
+		if (env.BROWSERSTACK) {
+			test(`${prefix} report`, (test) => {
+				const failedTests = this.children
+				.filter(({failed}) => {
+					return failed;
+				});
+				if (failedTests.length === 0) {
+					test('mark as "passed"', () => {
+						return markResult({
+							driver,
+							status: 'passed',
+						});
+					});
+				} else {
+					test('mark as "failed"', () => {
+						return markResult({
+							driver,
+							status: 'failed',
+							reason: `${failedTests[0].error}`,
+						});
+					});
+				}
+			});
+		}
 
 	});
 }

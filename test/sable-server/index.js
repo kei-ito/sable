@@ -289,7 +289,9 @@ test('SableServer', (test) => {
 
 		test('has a websocket server', () => {
 			return new Promise((resolve, reject) => {
-				ws = new WebSocket(`ws://127.0.0.1:${server.wsPort}`)
+				ws = new WebSocket(`ws://127.0.0.1:${server.wsPort}`, {
+					headers: {'user-agent': 'sable-test'},
+				})
 				.once('error', reject)
 				.once('open', resolve);
 			});
@@ -312,6 +314,10 @@ test('SableServer', (test) => {
 				const expected = `/${path.relative(testDirectory, targetFile)}`;
 				assert.equal(actual, expected);
 			});
+		});
+
+		test('close ws', () => {
+			ws.close();
 		});
 
 		test('close()', () => {

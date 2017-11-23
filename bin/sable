@@ -51,6 +51,9 @@ if (help) {
 	console.log(version);
 } else {
 	const params = {};
+	if (args.length === 0) {
+		args.push(process.cwd());
+	}
 	while (args[0].startsWith('--')) {
 		const arg = args.shift().replace(/^-+/, '');
 		const index = arg.indexOf('=');

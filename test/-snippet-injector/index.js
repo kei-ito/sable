@@ -1,4 +1,5 @@
 const assert = require('assert');
+const console = require('console');
 const {PassThrough} = require('stream');
 const SnippetInjector = require('../../src/-snippet-injector');
 

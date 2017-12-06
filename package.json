@@ -18,7 +18,7 @@
   },
   "scripts": {
     "lint": "nlib-lint bin src test",
-    "test": "node test && npm run lint",
+    "test": "node test",
     "test_coverage": "nyc --reporter=lcov npm test"
   },
   "dependencies": {

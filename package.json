@@ -28,13 +28,13 @@
     "@nlib/template-string": "^1.3.0",
     "chalk": "^2.3.0",
     "chokidar": "^1.7.0",
-    "ws": "^3.3.1"
+    "ws": "^3.3.2"
   },
   "devDependencies": {
-    "@nlib/cp": "^1.0.0",
+    "@nlib/cp": "^1.0.1",
     "@nlib/lint": "^0.2.1",
     "browserstack-local": "^1.3.0",
-    "nyc": "^11.3.0",
+    "nyc": "^11.4.0",
     "selenium-webdriver": "^3.6.0"
   }
 }

@@ -1,11 +1,10 @@
 const path = require('path');
 const url = require('url');
-
 const asyncForEach = require('../async-for-each');
 const indexPage = require('./index-page');
 const serveFile = require('./serve-file');
 
-function staticFile(req, res, next, server) {
+module.exports = function staticFile(req, res, next, server) {
 	req.parsedURL = url.parse(req.url, true);
 	const {pathname} = req.parsedURL;
 	return asyncForEach(server.documentRoot, (directory, index, directories, next) => {
@@ -24,6 +23,4 @@ function staticFile(req, res, next, server) {
 			res.end();
 		}
 	});
-}
-
-module.exports = staticFile;
+};

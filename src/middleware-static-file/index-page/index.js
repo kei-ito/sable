@@ -6,16 +6,16 @@ const humanReadable = require('@nlib/human-readable');
 const DateString = require('@nlib/date-string');
 const ContentType = require('@nlib/content-type');
 const TemplateString = require('@nlib/template-string');
+const SnippetInjector = require('../../-snippet-injector');
+const serveFile = require('../serve-file');
+
 const stat = promisify(fs.stat, fs);
 const readdir = promisify(fs.readdir, fs);
 const readFile = promisify(fs.readFile, fs);
-
-const SnippetInjector = require('../../snippet-injector');
-const serveFile = require('../serve-file');
 const contentType = new ContentType();
 const date = new DateString('[YYYY]-[MM]-[DD] [hh]:[mm]:[ss]');
 
-function indexPage(directoryPath, req, res, server) {
+module.exports = function indexPage(directoryPath, req, res, server) {
 	const startedAt = Date.now();
 	return readdir(directoryPath)
 	.then((fileNames) => {
@@ -111,6 +111,4 @@ function indexPage(directoryPath, req, res, server) {
 			});
 		});
 	});
-}
-
-module.exports = indexPage;
+};

@@ -1,7 +1,7 @@
 const {Transform} = require('stream');
 const {StringDecoder} = require('string_decoder');
 
-class ReplaceStream extends Transform {
+module.exports = class ReplaceStream extends Transform {
 
 	constructor(replacers, encoding = 'utf-8') {
 		super();
@@ -25,6 +25,4 @@ class ReplaceStream extends Transform {
 		callback();
 	}
 
-}
-
-module.exports = ReplaceStream;
+};

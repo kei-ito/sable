@@ -1,4 +1,4 @@
-function readStream(readable) {
+module.exports = function readStream(readable) {
 	return new Promise((resolve, reject) => {
 		const buffers = [];
 		let length = 0;
@@ -12,6 +12,4 @@ function readStream(readable) {
 			resolve(Buffer.concat(buffers, length));
 		});
 	});
-}
-
-module.exports = readStream;
+};

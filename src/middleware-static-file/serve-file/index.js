@@ -2,12 +2,12 @@ const fs = require('fs');
 const url = require('url');
 const promisify = require('@nlib/promisify');
 const ContentType = require('@nlib/content-type');
-const stat = promisify(fs.stat, fs);
-const SnippetInjector = require('../../snippet-injector');
+const SnippetInjector = require('../../-snippet-injector');
 
+const stat = promisify(fs.stat, fs);
 const contentType = new ContentType();
 
-function serveFile(filePath, req, res, server) {
+module.exports = function serveFile(filePath, req, res, server) {
 	return stat(filePath)
 	.then((stats) => {
 		if (stats.isDirectory()) {
@@ -31,6 +31,4 @@ function serveFile(filePath, req, res, server) {
 			});
 		}
 	});
-}
-
-module.exports = serveFile;
+};

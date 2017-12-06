@@ -4,28 +4,72 @@ const console = require('console');
 const chalk = require('chalk');
 const chokidar = require('chokidar');
 const {Server: WebSocketServer} = require('ws');
-const getNextPort = require('./get-next-port');
-const getMsFromHrtime = require('./get-ms-from-hrtime');
-const staticFile = require('./middleware-static-file');
-const sableScript = require('./middleware-sable-script');
+const getNextPort = require('../get-next-port');
+const getMsFromHrtime = require('../get-ms-from-hrtime');
+const staticFile = require('../middleware-static-file');
+const sableScript = require('../middleware-sable-script');
 
-function trueFn() {
-	return true;
-}
+/**
+ * A HTTP Server for web development.
+ */
+module.exports = class SableServer extends Server {
 
-class SableServer extends Server {
-
-	constructor(config = {}) {
-		if (typeof config !== 'object') {
-			throw new TypeError(`Config is not an object: ${typeof config}`);
+	/**
+	 * Filter config.documentRoot.
+	 * @private
+	 * @param {*} input config.documentRoot.
+	 * @return {Array.<String>} An array of file paths to root directories.
+	 */
+	static filterDocumentRoot(input) {
+		const documentRoot = [];
+		switch (typeof input) {
+		case 'string':
+			documentRoot.push(input);
+			break;
+		case 'object':
+			documentRoot.push(...input);
+			break;
+		default:
 		}
-		super().config = config;
-		this.count = 0;
-		this.middlewares = [sableScript, ...(this.config.middlewares || []), staticFile];
-		this.documentRoot = [].concat(config.documentRoot || process.cwd())
-		.map((filePath) => {
-			return path.isAbsolute(filePath) ? filePath : path.join(process.cwd(), filePath);
-		});
+		if (documentRoot.length === 0) {
+			documentRoot.push(process.cwd());
+		}
+		for (let i = 0; i < documentRoot.length; i++) {
+			const filePath = documentRoot[i];
+			documentRoot[i] = path.isAbsolute(filePath) ? filePath : path.join(process.cwd(), filePath);
+		}
+		return documentRoot;
+	}
+
+	/**
+	 * Filter config.middlewares.
+	 * @param  {*} input config.middlewares.
+	 * @return {Array.<Function>}       [descriptin]
+	 */
+	static filterMiddlewares(input) {
+		const middlewares = [sableScript, staticFile];
+		if (input) {
+			middlewares.splice(1, 0, ...input);
+		}
+		return middlewares;
+	}
+
+	/**
+	 * Create a server instance.
+	 * @param {Object} [config={}] - An object for configuration.
+	 * @param {String|Iterable.<String>} [config.documentRoot=[process.cwd()]] - An iterable object of file paths to root directories.
+	 * @return {undefined}
+	 */
+	constructor(config = {}) {
+		Object.assign(
+			super(),
+			{
+				documentRoot: SableServer.filterDocumentRoot(config.documentRoot),
+				middlewares: SableServer.filterMiddlewares(config.middlewares),
+				config,
+				count: 0,
+			}
+		);
 	}
 
 	get wsPort() {
@@ -70,7 +114,7 @@ class SableServer extends Server {
 		if (this.wss) {
 			this.wss.close();
 		}
-		return new Promise((resolve, reject) => {
+		return this.listening && new Promise((resolve, reject) => {
 			this
 			.once('close', resolve)
 			.once('error', reject);
@@ -211,25 +255,25 @@ class SableServer extends Server {
 		}
 	}
 
-	nextRequest(filter = trueFn) {
+	nextRequest(filter) {
 		return new Promise((resolve) => {
 			this
 			.once('request', (req, res) => {
-				if (filter({req, res})) {
+				if (!filter || filter({req, res})) {
 					resolve({req, res});
 				}
 			});
 		});
 	}
 
-	nextResponse(resFilter = trueFn, reqFilter = trueFn) {
+	nextResponse(resFilter, reqFilter) {
 		return this.nextRequest(reqFilter)
 		.then(({req, res}) => {
 			return new Promise((resolve, reject) => {
 				res
 				.once('error', reject)
 				.once('finish', () => {
-					if (resFilter({req, res})) {
+					if (!resFilter || resFilter({req, res})) {
 						resolve({req, res});
 					}
 				});
@@ -237,17 +281,15 @@ class SableServer extends Server {
 		});
 	}
 
-	nextWebSocketConnection(filter = trueFn) {
+	nextWebSocketConnection(filter) {
 		return new Promise((resolve) => {
 			this.wss
 			.once('connection', (client, req) => {
-				if (filter({client, req})) {
+				if (!filter || filter({client, req})) {
 					resolve({client, req});
 				}
 			});
 		});
 	}
 
-}
-
-module.exports = SableServer;
+};

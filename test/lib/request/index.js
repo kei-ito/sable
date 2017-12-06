@@ -1,6 +1,6 @@
 const http = require('http');
 
-function request(server, path) {
+module.exports = function request(server, path) {
 	return new Promise((resolve, reject) => {
 		http.request({
 			host: '127.0.0.1',
@@ -11,6 +11,4 @@ function request(server, path) {
 		.once('response', resolve)
 		.end();
 	});
-}
-
-module.exports = request;
+};

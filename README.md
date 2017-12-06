@@ -1,73 +1,57 @@
 # sable
 
 [![Build Status](https://travis-ci.org/kei-ito/sable.svg?branch=master)](https://travis-ci.org/kei-ito/sable)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f1a8a21fbb504968a095dbd6e1b01cbb)](https://www.codacy.com/app/kei.itof/sable?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kei-ito/sable&amp;utm_campaign=Badge_Grade)
+[![Build status](https://ci.appveyor.com/api/projects/status/github/kei-ito/sable?branch=master&svg=true)](https://ci.appveyor.com/project/kei-ito/sable/branch/master)
 [![BrowserStack Status](https://www.browserstack.com/automate/badge.svg?badge_key=clRVWTBmQVdFcHNGaDFvMDlxanRoZllsMGN1RU9JNW1CRUtEVjkxQ2NMZz0tLUVMdFpUZnJKajltN0FSTWlJeXBCbVE9PQ==--046a5961a5e492a5b38e13d34a12a6ca2a8c1139)](https://www.browserstack.com/automate/public-build/clRVWTBmQVdFcHNGaDFvMDlxanRoZllsMGN1RU9JNW1CRUtEVjkxQ2NMZz0tLUVMdFpUZnJKajltN0FSTWlJeXBCbVE9PQ==--046a5961a5e492a5b38e13d34a12a6ca2a8c1139)
-[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/f1a8a21fbb504968a095dbd6e1b01cbb)](https://www.codacy.com/app/kei.itof/sable?utm_source=github.com&utm_medium=referral&utm_content=kei-ito/sable&utm_campaign=Badge_Coverage)
+[![codecov](https://codecov.io/gh/kei-ito/sable/branch/master/graph/badge.svg)](https://codecov.io/gh/kei-ito/sable)
 [![dependencies Status](https://david-dm.org/kei-ito/sable/status.svg)](https://david-dm.org/kei-ito/sable)
 [![devDependencies Status](https://david-dm.org/kei-ito/sable/dev-status.svg)](https://david-dm.org/kei-ito/sable?type=dev)
 
-It creates a server for development.
+Creates a server for development.
 
 ## Install
 
-```sh
+```
 npm install sable --save-dev
 ```
 
 ## CLI
 
-```sh
-$ sable
-$ sable --port 4444
-$ sable --port 4444 release
-$ sable --port 4444 --wsport 5000 release
-$ sable --help
+```
 Usage: sable [options] [documentRoot1, documentRoot2, ...]
 
-Options:
++ Command-1 -------------------------------+
+| sable \                                  |
+|  --listen={host:localhost, port:5000} \  |
+|  --ws={port:20000} \                     |
+|  /document/root1 \                       |
+|  /document/root2                         |
++------------------------------------------+
 
-  -h, --help              output usage information
-  -V, --version           output the version number
-  -p --port <n>           A port number to which the web server listens
-  -w --wsport <n>         A port number to which the websocket server listens
+The Command-1 above runs the Script-1 below.
+
++ Script-1 --------------------------------+
+| new SableServer({                        |
+|   listen: {                              |
+|     host: 'localhost',                   |
+|     port: 5000,                          |
+|   },                                     |
+|   ws: {port: 20000},                     |
+|   documentRoot: [                        |
+|     '/document/root1',                   |
+|     '/document/root2',                   |
+|   ],                                     |
+| }).start()                               |
+| .catch((error) => {                      |
+|   console.error(error);                  |
+|   process.exit(1);                       |
+| });                                      |
++------------------------------------------+
 ```
 
 ## Javascript API
 
-```javascript
-const SableServer = require('sable');
-const server = new SableServer({
-  port: 4000,
-  wsport: 30000,
-  documentRoot: [
-    'release',
-    'temp'
-  ],
-  chokidar: {
-    ignored: [
-      /\/temp\//,
-      /\/node_modules\//,
-      /\/\.git\//
-    ]
-  },
-  middlewares: [
-    function (req, res, next) {
-      console.log(req.url);
-      next();
-    }
-  ]
-});
-
-```
-
-| option       | default         | description                                                             |
-|--------------|-----------------|-------------------------------------------------------------------------|
-| port         | `4000`          | A port number to which the web server listens.                          |
-| wsport       | `port + 1`      | A port number to which the websocket server listens.                    |
-| documentRoot | `process.cwd()` | An array of directories set as documentRoot.                            |
-| chokidar     | `undefined`     | An object passed to [chokidar](https://www.npmjs.com/package/chokidar). |
-| middlewares  | []              | An array of [middlewares](#middlewares).                                |
+WIP
 
 ### middleware
 

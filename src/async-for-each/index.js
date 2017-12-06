@@ -1,4 +1,4 @@
-function asyncForEach(list, asyncFn, index = 0) {
+module.exports = function asyncForEach(list, asyncFn, index = 0) {
 	return index < list.length
 	? asyncFn(
 		list[index],
@@ -9,6 +9,4 @@ function asyncForEach(list, asyncFn, index = 0) {
 		}
 	)
 	: Promise.resolve();
-}
-
-module.exports = asyncForEach;
+};

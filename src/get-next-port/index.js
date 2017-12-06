@@ -1,4 +1,4 @@
-function getNextPort(error) {
+module.exports = function getNextPort(error) {
 	switch (error.code) {
 	case 'EADDRINUSE':
 	case 'EACCES':
@@ -6,6 +6,4 @@ function getNextPort(error) {
 	default:
 		return 0;
 	}
-}
-
-module.exports = getNextPort;
+};

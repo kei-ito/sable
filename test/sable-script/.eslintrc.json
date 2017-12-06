@@ -1,5 +1,5 @@
 {
   "rules": {
-    "no-invalid-this": "OFF"
+    "no-invalid-this": "off"
   }
 }

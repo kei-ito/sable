@@ -2,7 +2,7 @@
 
 const console = require('console');
 const {runInNewContext} = require('vm');
-const SableServer = require('..');
+const {SableServer} = require('..');
 const packageJSON = require('../package.json');
 
 const args = process.argv.slice(2);
@@ -50,20 +50,18 @@ if (help) {
 } else if (version) {
 	console.log(version);
 } else {
-	const params = {};
+	const config = {};
 	if (args.length === 0) {
 		args.push(process.cwd());
 	}
 	while (args[0].startsWith('--')) {
 		const arg = args.shift().replace(/^-+/, '');
-		const index = arg.indexOf('=');
-		const key = arg.slice(0, index);
-		const value = arg.slice(index + 1);
-		runInNewContext(`params[${JSON.stringify(key)}] = ${value};`, {params});
+		const [key, ...value] = arg.split('=');
+		runInNewContext(`config[${JSON.stringify(key)}] = ${value.join('=')};`, {config});
 	}
-	params.documentRoot = args;
-	console.log(params);
-	new SableServer(params).start()
+	console.log(config);
+	config.documentRoot = args;
+	new SableServer(config).start()
 	.then((server) => {
 		console.log(`listening ${server.address().port}`);
 	})

@@ -1,7 +1,7 @@
 const env = require('../env');
-const capabilities = [];
+module.exports = [];
 if (env.BROWSERSTACK && env.TRAVIS_NODE_VERSION === '9') {
-	capabilities.push(
+	module.exports.push(
 		{
 			os: 'OS X',
 			os_version: 'High Sierra',
@@ -39,7 +39,7 @@ if (env.BROWSERSTACK && env.TRAVIS_NODE_VERSION === '9') {
 		}
 	);
 } else if (!env.CI) {
-	capabilities.push(
+	module.exports.push(
 		{
 			browserName: 'chrome',
 			chromeOptions: {
@@ -50,5 +50,3 @@ if (env.BROWSERSTACK && env.TRAVIS_NODE_VERSION === '9') {
 		}
 	);
 }
-
-module.exports = capabilities;

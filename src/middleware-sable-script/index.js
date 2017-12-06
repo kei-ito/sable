@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-function sableScript({url}, res, next) {
+module.exports = function sableScript({url}, res, next) {
 	return url.endsWith('sable-script.js')
 	? new Promise((resolve, reject) => {
 		res.writeHead(200, {'Content-Type': 'application/javascript'});
@@ -11,6 +11,4 @@ function sableScript({url}, res, next) {
 		.once('finish', resolve);
 	})
 	: next();
-}
-
-module.exports = sableScript;
+};

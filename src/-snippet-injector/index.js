@@ -1,6 +1,6 @@
-const ReplaceStream = require('../replace-stream');
+const ReplaceStream = require('../-replace-stream');
 
-class SnippetInjector extends ReplaceStream {
+module.exports = class SnippetInjector extends ReplaceStream {
 
 	constructor(server) {
 		super([
@@ -17,6 +17,4 @@ class SnippetInjector extends ReplaceStream {
 		]);
 	}
 
-}
-
-module.exports = SnippetInjector;
+};

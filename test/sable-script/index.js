@@ -234,29 +234,15 @@ function testCapability({capability, prefix, index}) {
 		assert(params.beforeSize.height < params.afterSize.height);
 	})
 	.then(() => {
-		if (!env.BROWSERSTACK) {
-			return Promise.resolve();
-		}
-		console.log(`${prefix} report`);
-		const failedTests = this.children
-		.filter(({failed}) => {
-			return failed;
-		});
-		if (failedTests.length === 0) {
+		if (env.BROWSERSTACK) {
 			console.log('mark as "passed"');
 			return markResult({
 				session: params.session,
 				driver,
 				status: 'passed',
 			});
-		} else {
-			console.log('mark as "failed"');
-			return markResult({
-				session: params.session,
-				status: 'failed',
-				reason: `${failedTests[0].error}`,
-			});
 		}
+		return Promise.resolve();
 	})
 	.then(() => {
 		console.log(`${prefix} quit`);
@@ -270,8 +256,25 @@ function testCapability({capability, prefix, index}) {
 		console.log('closed');
 	})
 	.catch((error) => {
+		if (env.BROWSERSTACK) {
+			console.log('mark as "failed"');
+			return markResult({
+				session: params.session,
+				status: 'failed',
+				reason: `${error}`,
+			})
+			.then(() => {
+				throw error;
+			});
+		}
+		throw error;
+	})
+	.catch((error) => {
 		if (driver) {
-			driver.quit();
+			return driver.quit()
+			.then(() => {
+				throw error;
+			});
 		}
 		throw error;
 	});

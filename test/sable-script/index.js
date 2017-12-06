@@ -34,6 +34,7 @@ function run() {
 	if (!capability) {
 		return Promise.resolve();
 	}
+	console.log(capability);
 	const index = capabilities.length - queue.length;
 	return testCapability({
 		index,
@@ -249,11 +250,8 @@ function testCapability({capability, prefix, index}) {
 		return driver.quit();
 	})
 	.then(() => {
-		console.log('close()');
+		console.log(`${prefix} close()`);
 		return server.close();
-	})
-	.then(() => {
-		console.log('closed');
 	})
 	.catch((error) => {
 		if (env.BROWSERSTACK) {

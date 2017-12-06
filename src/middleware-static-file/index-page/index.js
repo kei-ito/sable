@@ -5,7 +5,7 @@ const promisify = require('@nlib/promisify');
 const humanReadable = require('@nlib/human-readable');
 const DateString = require('@nlib/date-string');
 const ContentType = require('@nlib/content-type');
-const TemplateString = require('@nlib/template-string');
+const {TemplateString} = require('@nlib/template-string');
 const SnippetInjector = require('../../-snippet-injector');
 const serveFile = require('../serve-file');
 

@@ -74,6 +74,14 @@ test('SableServer', (test) => {
 		});
 	});
 
+	test('sendMessage', (test) => {
+		test('use available connections', () => {
+			assert.doesNotThrow(() => {
+				new SableServer().sendMessage('message');
+			});
+		});
+	});
+
 	test('listen/close', () => {
 		const server = new SableServer();
 		return server.listen()
@@ -103,6 +111,20 @@ test('SableServer', (test) => {
 
 		test('check state', () => {
 			assert(0 < server.address().port);
+		});
+
+		test('startWatcher returns current watcher', () => {
+			return server.startWatcher()
+			.then((watcher) => {
+				assert.equal(watcher, server.watcher);
+			});
+		});
+
+		test('startWebSocketServer returns current watcher', () => {
+			return server.startWebSocketServer()
+			.then((wss) => {
+				assert.equal(wss, server.wss);
+			});
 		});
 
 		test('GET /', (test) => {
@@ -158,6 +180,22 @@ test('SableServer', (test) => {
 			test('response status/headers', () => {
 				assert.equal(res.statusCode, 301);
 				assert(res.headers.location.endsWith('/directory/'));
+			});
+
+		});
+
+		test('GET /not-found', (test) => {
+			let res;
+
+			test('request', () => {
+				return request(server, '/not-found')
+				.then((response) => {
+					res = response;
+				});
+			});
+
+			test('response status/headers', () => {
+				assert.equal(res.statusCode, 404);
 			});
 
 		});

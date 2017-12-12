@@ -19,7 +19,7 @@
   "scripts": {
     "lint": "nlib-lint bin src test",
     "test": "node test",
-    "test_coverage": "nyc --reporter=lcov npm test"
+    "test_coverage": "nyc --reporter=lcov --reporter=text npm test"
   },
   "dependencies": {
     "@nlib/content-type": "^1.0.1",

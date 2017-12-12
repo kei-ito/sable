@@ -1,5 +1,4 @@
 const assert = require('assert');
-const console = require('console');
 const path = require('path');
 const fs = require('fs');
 const cp = require('@nlib/cp');
@@ -16,7 +15,8 @@ const markResult = require('../lib/mark-result');
 
 test('sable-script', (test) => {
 
-	capabilities.forEach((capability) => {
+	capabilities
+	.forEach((capability) => {
 		test(JSON.stringify(capability), (test) => {
 			const index = capabilities.indexOf(capability);
 			const testDirectory = path.join(directories.temp, `sable-script-${index}`);
@@ -105,12 +105,9 @@ test('sable-script', (test) => {
 			test('create a builder', () => {
 				builder = new Builder().withCapabilities(capability);
 				if (env.BROWSERSTACK) {
-					console.log('set an endpoint');
 					builder.usingServer('http://hub-cloud.browserstack.com/wd/hub');
 				}
-				console.log('builder.build()');
 				driver = builder.build();
-				console.log('getSession()');
 			});
 
 			test('get session', () => {
@@ -221,11 +218,16 @@ test('sable-script', (test) => {
 				});
 			});
 
-			test('compare sizes', () => {
-				console.log(`beforeSize.height: ${params.beforeSize.height}`);
-				console.log(`afterSize.height: ${params.afterSize.height}`);
-				assert(0 < params.beforeSize.height);
-				assert(params.beforeSize.height < params.afterSize.height);
+			test('compare sizes', (test) => {
+				test(`beforeSize: ${params.beforeSize.height}`, () => {
+					assert(0 < params.beforeSize.height);
+				});
+				test(`afterSize: ${params.afterSize.height}`, () => {
+					assert(0 < params.afterSize.height);
+				});
+				test('compare', () => {
+					assert(params.beforeSize.height < params.afterSize.height);
+				});
 			});
 
 			if (env.BROWSERSTACK) {

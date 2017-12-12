@@ -46,7 +46,8 @@ module.exports = class ReplaceStream extends Transform {
 	}
 
 	_flush(callback) {
-		callback(null, this.buffer);
+		this.push(this.buffer);
+		callback();
 	}
 
 };

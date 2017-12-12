@@ -231,7 +231,7 @@ test('sable-script', (test) => {
 			});
 
 			if (env.BROWSERSTACK) {
-				test('mark the result', () => {
+				test('mark the result', (test) => {
 					const errors = test.children.filter(({failed}) => {
 						return failed;
 					});

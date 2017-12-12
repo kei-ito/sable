@@ -15,8 +15,6 @@ const markResult = require('../lib/mark-result');
 
 test('sable-script', (test) => {
 
-	let bsLocal;
-
 	capabilities
 	.forEach((capability) => {
 		test(JSON.stringify(capability), (test) => {
@@ -27,6 +25,7 @@ test('sable-script', (test) => {
 			};
 			let builder;
 			let driver;
+			let bsLocal;
 
 			const server = new SableServer({
 				documentRoot: testDirectory,
@@ -40,7 +39,7 @@ test('sable-script', (test) => {
 				return server.start();
 			});
 
-			if (env.BROWSERSTACK && !bsLocal) {
+			if (env.BROWSERSTACK) {
 				test('setup BrowserStack', (test) => {
 					const project = packageJSON.name;
 					const build = `${project}#${env.TRAVIS_BUILD_NUMBER || dateString()}`;
@@ -251,6 +250,12 @@ test('sable-script', (test) => {
 				return driver.quit();
 			});
 
+			test('stop bsLocal', () => {
+				return bsLocal && new Promise((resolve) => {
+					bsLocal.stop(resolve);
+				});
+			});
+
 			test('close', () => {
 				return server.close();
 			});
@@ -262,9 +267,4 @@ test('sable-script', (test) => {
 		}, {timeout: 60000});
 	});
 
-	test('stop bsLocal', () => {
-		return bsLocal && new Promise((resolve) => {
-			bsLocal.stop(resolve);
-		});
-	});
 });

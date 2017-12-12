@@ -236,13 +236,12 @@ test('sable-script', (test) => {
 						return failed;
 					});
 					const status = errors.length === 0 ? 'passed' : 'failed';
-					test(`errors: ${errors.length} -> ${status}`, () => {
-						assert(status);
-					});
-					return markResult({
-						session: params.session,
-						driver,
-						status,
+					test(`mark "${status}"`, () => {
+						return markResult({
+							session: params.session,
+							driver,
+							status,
+						});
 					});
 				});
 			}
@@ -253,6 +252,10 @@ test('sable-script', (test) => {
 
 			test('close', () => {
 				return server.close();
+			});
+
+			test('wait a while', () => {
+				return driver.sleep(1000);
 			});
 
 		}, {timeout: 60000});

@@ -15,6 +15,8 @@ const markResult = require('../lib/mark-result');
 
 test('sable-script', (test) => {
 
+	let bsLocal;
+
 	capabilities
 	.forEach((capability) => {
 		test(JSON.stringify(capability), (test) => {
@@ -23,7 +25,6 @@ test('sable-script', (test) => {
 			const params = {
 				key: `_${Date.now()}`,
 			};
-			let bsLocal;
 			let builder;
 			let driver;
 
@@ -39,7 +40,7 @@ test('sable-script', (test) => {
 				return server.start();
 			});
 
-			if (env.BROWSERSTACK) {
+			if (env.BROWSERSTACK && !bsLocal) {
 				test('setup BrowserStack', (test) => {
 					const project = packageJSON.name;
 					const build = `${project}#${env.TRAVIS_BUILD_NUMBER || dateString()}`;

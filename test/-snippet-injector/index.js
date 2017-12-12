@@ -1,5 +1,6 @@
 const assert = require('assert');
 const console = require('console');
+const test = require('@nlib/test');
 const {PassThrough} = require('stream');
 const SnippetInjector = require('../../src/-snippet-injector');
 
@@ -31,47 +32,41 @@ const tests = [
 	},
 ];
 
-Promise.all(
-	tests
-	.map(({server, source, expected}) => {
-		const replaceStream = new SnippetInjector(server);
-		return new Promise((resolve, reject) => {
-			const writer = new PassThrough();
-			const chunks = [];
-			let length = 0;
-			writer
-			.pipe(replaceStream)
-			.once('error', reject)
-			.on('data', (chunk) => {
-				chunks.push(chunk);
-				length += chunk.length;
-			})
-			.once('end', () => {
-				resolve(Buffer.concat(chunks, length).toString());
-			});
-			source
-			.reduce((promise, source) => {
-				return promise
-				.then(() => {
-					writer.write(source);
-					return new Promise((resolve) => {
-						setTimeout(resolve, 50);
-					});
+test('SnippetInjector', (test) => {
+	for (const {server, source, expected} of tests) {
+		test(source, () => {
+			const replaceStream = new SnippetInjector(server);
+			return new Promise((resolve, reject) => {
+				const writer = new PassThrough();
+				const chunks = [];
+				let length = 0;
+				writer
+				.pipe(replaceStream)
+				.once('error', reject)
+				.on('data', (chunk) => {
+					chunks.push(chunk);
+					length += chunk.length;
+				})
+				.once('end', () => {
+					resolve(Buffer.concat(chunks, length).toString());
 				});
-			}, Promise.resolve())
-			.then(() => {
-				writer.end();
+				source
+				.reduce((promise, source) => {
+					return promise
+					.then(() => {
+						writer.write(source);
+						return new Promise((resolve) => {
+							setTimeout(resolve, 50);
+						});
+					});
+				}, Promise.resolve())
+				.then(() => {
+					writer.end();
+				});
+			})
+			.then((actual) => {
+				assert.equal(actual, expected);
 			});
-		})
-		.then((actual) => {
-			assert.equal(actual, expected);
 		});
-	})
-)
-.then(() => {
-	console.log('done: SnippetInjector');
-})
-.catch((error) => {
-	console.error(error);
-	process.exit(1);
+	}
 });

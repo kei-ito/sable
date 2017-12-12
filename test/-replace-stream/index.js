@@ -1,5 +1,5 @@
 const assert = require('assert');
-const console = require('console');
+const test = require('@nlib/test');
 const {PassThrough} = require('stream');
 const ReplaceStream = require('../../src/-replace-stream');
 
@@ -23,7 +23,18 @@ const tests = [
 			},
 		],
 		source: ['abcabc', 'abcabc'],
-		expected: 'αbcabcαbcabc',
+		expected: 'αbcαbcαbcαbc',
+	},
+	{
+		replacers: [
+			{
+				pattern: 'abc',
+				replacement: 'αβγ',
+				once: false,
+			},
+		],
+		source: ['ab', 'ca', 'bc', 'ab', 'ca', 'bc'],
+		expected: 'αβγαβγαβγαβγ',
 	},
 	{
 		replacers: [
@@ -35,7 +46,7 @@ const tests = [
 			},
 		],
 		source: ['abcabc', 'abcabc'],
-		expected: 'ABCABCabcabc',
+		expected: 'Abcabcabcabc',
 	},
 	{
 		replacers: [
@@ -52,47 +63,41 @@ const tests = [
 	},
 ];
 
-Promise.all(
-	tests
-	.map(({replacers, source, expected}) => {
-		const replaceStream = new ReplaceStream(replacers);
-		return new Promise((resolve, reject) => {
-			const writer = new PassThrough();
-			const chunks = [];
-			let length = 0;
-			writer
-			.pipe(replaceStream)
-			.once('error', reject)
-			.on('data', (chunk) => {
-				chunks.push(chunk);
-				length += chunk.length;
-			})
-			.once('end', () => {
-				resolve(Buffer.concat(chunks, length).toString());
-			});
-			source
-			.reduce((promise, source) => {
-				return promise
-				.then(() => {
-					writer.write(source);
-					return new Promise((resolve) => {
-						setTimeout(resolve, 50);
-					});
+test('ReplaceStream', (test) => {
+	for (const {replacers, source, expected} of tests) {
+		test(JSON.stringify(replacers), () => {
+			const replaceStream = new ReplaceStream(replacers);
+			return new Promise((resolve, reject) => {
+				const writer = new PassThrough();
+				const chunks = [];
+				let length = 0;
+				writer
+				.pipe(replaceStream)
+				.once('error', reject)
+				.on('data', (chunk) => {
+					chunks.push(chunk);
+					length += chunk.length;
+				})
+				.once('end', () => {
+					resolve(Buffer.concat(chunks, length).toString());
 				});
-			}, Promise.resolve())
-			.then(() => {
-				writer.end();
+				source
+				.reduce((promise, source) => {
+					return promise
+					.then(() => {
+						writer.write(source);
+						return new Promise((resolve) => {
+							setTimeout(resolve, 50);
+						});
+					});
+				}, Promise.resolve())
+				.then(() => {
+					writer.end();
+				});
+			})
+			.then((actual) => {
+				assert.equal(actual, expected);
 			});
-		})
-		.then((actual) => {
-			assert.equal(actual, expected);
 		});
-	})
-)
-.then(() => {
-	console.log('passed: ReplaceStream');
-})
-.catch((error) => {
-	console.error(error);
-	process.exit(1);
+	}
 });

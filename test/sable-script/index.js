@@ -261,4 +261,10 @@ test('sable-script', (test) => {
 
 		}, {timeout: 60000});
 	});
+
+	test('stop bsLocal', () => {
+		return bsLocal && new Promise((resolve) => {
+			bsLocal.stop(resolve);
+		});
+	});
 });

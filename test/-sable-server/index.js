@@ -317,4 +317,4 @@ test('SableServer', (test) => {
 
 	});
 
-});
+}, {timeout: 10000});

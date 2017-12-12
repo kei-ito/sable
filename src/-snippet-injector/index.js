@@ -1,4 +1,4 @@
-const ReplaceStream = require('../-replace-stream');
+const {ReplaceStream} = require('@nlib/replace-stream');
 
 module.exports = class SnippetInjector extends ReplaceStream {
 

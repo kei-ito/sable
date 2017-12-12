@@ -1,5 +1,4 @@
 const assert = require('assert');
-const console = require('console');
 const test = require('@nlib/test');
 const {PassThrough} = require('stream');
 const SnippetInjector = require('../../src/-snippet-injector');

@@ -6,6 +6,7 @@ node_js:
 - '6'
 install:
 - npm install
+- npm install -g nyc eslint
 script:
 - npm run test_coverage
 - npm run lint

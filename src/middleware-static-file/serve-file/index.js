@@ -1,11 +1,9 @@
 const fs = require('fs');
 const url = require('url');
 const promisify = require('@nlib/promisify');
-const ContentType = require('@nlib/content-type');
 const SnippetInjector = require('../../-snippet-injector');
 
 const stat = promisify(fs.stat, fs);
-const contentType = new ContentType();
 
 module.exports = function serveFile(filePath, req, res, server) {
 	return stat(filePath)
@@ -20,7 +18,7 @@ module.exports = function serveFile(filePath, req, res, server) {
 			return undefined;
 		} else {
 			res.writeHead(200, {
-				'content-type': contentType.get(filePath),
+				'content-type': server.contentType.get(filePath),
 			});
 			return new Promise((resolve, reject) => {
 				fs.createReadStream(filePath)

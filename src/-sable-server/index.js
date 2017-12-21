@@ -4,6 +4,7 @@ const console = require('console');
 const chalk = require('chalk');
 const chokidar = require('chokidar');
 const {Server: WebSocketServer} = require('ws');
+const {ContentType} = require('@nlib/content-type');
 const getNextPort = require('../get-next-port');
 const getMsFromHrtime = require('../get-ms-from-hrtime');
 const staticFile = require('../middleware-static-file');
@@ -64,6 +65,7 @@ module.exports = class SableServer extends Server {
 		Object.assign(
 			super(),
 			{
+				contentType: new ContentType(config.contentType),
 				documentRoot: SableServer.filterDocumentRoot(config.documentRoot),
 				middlewares: SableServer.filterMiddlewares(config.middlewares),
 				config,

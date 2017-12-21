@@ -4,7 +4,6 @@ const {PassThrough} = require('stream');
 const promisify = require('@nlib/promisify');
 const humanReadable = require('@nlib/human-readable');
 const DateString = require('@nlib/date-string');
-const ContentType = require('@nlib/content-type');
 const {TemplateString} = require('@nlib/template-string');
 const SnippetInjector = require('../../-snippet-injector');
 const serveFile = require('../serve-file');
@@ -12,7 +11,6 @@ const serveFile = require('../serve-file');
 const stat = promisify(fs.stat, fs);
 const readdir = promisify(fs.readdir, fs);
 const readFile = promisify(fs.readFile, fs);
-const contentType = new ContentType();
 const date = new DateString('[YYYY]-[MM]-[DD] [hh]:[mm]:[ss]');
 
 module.exports = function indexPage(directoryPath, req, res, server) {
@@ -31,6 +29,7 @@ module.exports = function indexPage(directoryPath, req, res, server) {
 		);
 	})
 	.then((results) => {
+		const {contentType} = server;
 		const indexFile = results
 		.find(({filePath, stats}) => {
 			return stats.isFile() && contentType.get(filePath) === contentType.get('.html');

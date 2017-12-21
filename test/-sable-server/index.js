@@ -256,6 +256,54 @@ test('SableServer', (test) => {
 
 	});
 
+	test('contentTypes', (test) => {
+		const testDirectory = path.join(directories.temp, 'content-types');
+		const server = new SableServer({
+			documentRoot: testDirectory,
+			contentType: {
+				'text/plain': ['html'],
+			},
+		});
+
+		test('copy files', () => {
+			return cp(directories.src, testDirectory);
+		});
+
+		test('start', () => {
+			return server.start()
+			.then((resolved) => {
+				assert(server === resolved);
+			});
+		});
+
+		test('check state', () => {
+			assert(0 < server.address().port);
+		});
+
+		test('GET /index.html', (test) => {
+			let res;
+
+			test('request', () => {
+				return request(server, '/index.html')
+				.then((response) => {
+					res = response;
+				});
+			});
+
+			test('response status/headers', () => {
+				console.log(server.contentType);
+				assert.equal(res.statusCode, 200);
+				assert.equal(res.headers['content-type'], 'text/plain');
+			});
+
+		});
+
+		test('close', () => {
+			return server.close();
+		});
+
+	});
+
 	test('file-watcher', (test) => {
 
 		const testDirectory = path.join(directories.temp, 'file-watcher');

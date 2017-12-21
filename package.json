@@ -22,7 +22,7 @@
     "test_coverage": "nyc --reporter=lcov --reporter=text npm test"
   },
   "dependencies": {
-    "@nlib/content-type": "^1.1.0",
+    "@nlib/content-type": "^1.1.1",
     "@nlib/date-string": "^1.0.1",
     "@nlib/human-readable": "^1.0.1",
     "@nlib/promisify": "^1.0.1",

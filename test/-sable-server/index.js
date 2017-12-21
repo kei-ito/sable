@@ -291,7 +291,6 @@ test('SableServer', (test) => {
 			});
 
 			test('response status/headers', () => {
-				console.log(server.contentType);
 				assert.equal(res.statusCode, 200);
 				assert.equal(res.headers['content-type'], 'text/plain');
 			});

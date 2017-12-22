@@ -45,6 +45,12 @@ test('SableServer', (test) => {
 
 	test('documentRoot', (test) => {
 
+		test('use pwd', () => {
+			const server = new SableServer();
+			const expected = [process.cwd()];
+			assert.deepEqual(server.documentRoot, expected);
+		});
+
 		test('convert to an array', () => {
 			const testDirectory = path.join(directories.temp, 'documentRoot');
 			const server = new SableServer({
@@ -74,6 +80,11 @@ test('SableServer', (test) => {
 		});
 	});
 
+	test('wsPort', () => {
+		const server = new SableServer();
+		assert.equal(server.wsPort, null);
+	});
+
 	test('sendMessage', (test) => {
 		test('use available connections', () => {
 			assert.doesNotThrow(() => {
@@ -82,73 +93,116 @@ test('SableServer', (test) => {
 		});
 	});
 
-	test('listen/close', () => {
+	test('listen/close', (test) => {
 		const server = new SableServer();
-		return server.listen()
-		.then((resolved) => {
-			assert(server === resolved);
-			assert(0 < server.address().port);
+		test('listen', () => {
+			return server.listen()
+			.then((resolved) => {
+				assert(server === resolved);
+				assert(0 < server.address().port);
+			});
+		});
+		test('close', () => {
 			return server.close();
+		});
+	});
+
+	test('use an avaiable port', (test) => {
+		const server1 = new SableServer();
+		const server2 = new SableServer();
+		test('listen', () => {
+			return server1.listen()
+			.then((resolved) => {
+				assert(server1 === resolved);
+				assert(0 < server1.address().port);
+				return server2.listen();
+			})
+			.then((resolved) => {
+				assert(server2 === resolved);
+				assert(server1.address().port < server2.address().port);
+			});
+		});
+		test('close', () => {
+			return Promise.all([
+				server1.close(),
+				server2.close(),
+			]);
+		});
+	});
+
+	test('no avaiable ports', (test) => {
+		const server1 = new SableServer({listen: 65535});
+		const server2 = new SableServer({listen: 65535});
+		test('listen', () => {
+			return server1.listen()
+			.then((resolved) => {
+				assert(server1 === resolved);
+				assert(0 < server1.address().port);
+				return server2.listen();
+			})
+			.then(() => {
+				throw new Error('Resolved unexpectedly');
+			})
+			.catch((error) => {
+				assert.equal(error.code, 'ERR_SOCKET_BAD_PORT');
+			});
+		});
+		test('close', () => {
+			return Promise.all([
+				server1.close(),
+				server2.close(),
+			]);
 		});
 	});
 
 	test('start/close', (test) => {
 		const testDirectory = path.join(directories.temp, 'start-close');
-		const server = new SableServer({
-			documentRoot: testDirectory,
-		});
-
+		const server = new SableServer({documentRoot: testDirectory});
 		test('copy files', () => {
 			return cp(directories.src, testDirectory);
 		});
-
 		test('start', () => {
 			return server.start()
 			.then((resolved) => {
 				assert(server === resolved);
 			});
 		});
-
 		test('check state', () => {
 			assert(0 < server.address().port);
 		});
-
 		test('startWatcher returns current watcher', () => {
 			return server.startWatcher()
 			.then((watcher) => {
 				assert.equal(watcher, server.watcher);
 			});
 		});
-
 		test('startWebSocketServer returns current watcher', () => {
 			return server.startWebSocketServer()
 			.then((wss) => {
 				assert.equal(wss, server.wss);
 			});
 		});
-
+		test('wsPort', () => {
+			assert(0 < server.wsPort);
+		});
 		test('GET /', (test) => {
 			let res;
-
 			test('request', () => {
 				return request(server, '/')
 				.then((response) => {
 					res = response;
 				});
 			});
-
 			test('response status/headers', () => {
 				assert.equal(res.statusCode, 200);
 				assert(res.headers['content-type'].startsWith('text/html'));
 			});
-
 			test('read response body', () => {
 				return readStream(res)
 				.then((buffer) => {
 					res.body = buffer;
 				});
 			});
-
 			test('response body', (test) => {
 				test.lines(res.body, [
 					'<!doctype html>',
@@ -162,63 +216,49 @@ test('SableServer', (test) => {
 				]);
 			});
 		});
-
 		test('GET /directory', (test) => {
 			let res;
-
 			test('request', () => {
 				return request(server, '/directory')
 				.then((response) => {
 					res = response;
 				});
 			});
-
 			test('response status/headers', () => {
 				assert.equal(res.statusCode, 301);
 				assert(res.headers.location.endsWith('/directory/'));
 			});
-
 		});
-
 		test('GET /not-found', (test) => {
 			let res;
-
 			test('request', () => {
 				return request(server, '/not-found')
 				.then((response) => {
 					res = response;
 				});
 			});
-
 			test('response status/headers', () => {
 				assert.equal(res.statusCode, 404);
 			});
-
 		});
-
 		test('GET /directory/', (test) => {
-
 			let res;
-
 			test('request', () => {
 				return request(server, '/directory/')
 				.then((response) => {
 					res = response;
 				});
 			});
-
 			test('response status/headers', () => {
 				assert.equal(res.statusCode, 200);
 				assert(res.headers['content-type'].startsWith('text/html'));
 			});
-
 			test('read response body', () => {
 				return readStream(res)
 				.then((buffer) => {
 					res.body = buffer;
 				});
 			});
-
 			test('response body', () => {
 				const lines = res.body.toString().split(/\r\n|\r|\n/);
 				[
@@ -243,13 +283,143 @@ test('SableServer', (test) => {
 					}));
 				});
 			});
-
 		});
-
 		test('close', () => {
 			return server.close();
 		});
+	});
 
+	test('errors from middleware', (test) => {
+		test('no middlewares', () => {
+			const testDirectory = path.join(directories.temp, 'error-sync');
+			const server = new SableServer({
+				documentRoot: testDirectory,
+				middlewares: [
+					() => {
+						throw new Error('Expected');
+					},
+				],
+			});
+			server.middlewares.splice(0, server.middlewares.length);
+			test('start', () => server.start());
+			test('GET /', (test) => {
+				let res;
+				test('request', () => {
+					return request(server, '/')
+					.then((response) => {
+						res = response;
+					});
+				});
+				test('response status/headers', () => {
+					assert.equal(res.statusCode, 501);
+				});
+			});
+			test('close', () => {
+				return server.close();
+			});
+		});
+		test('sync', () => {
+			const testDirectory = path.join(directories.temp, 'error-sync');
+			const server = new SableServer({
+				documentRoot: testDirectory,
+				middlewares: [
+					() => {
+						throw new Error('Expected');
+					},
+				],
+			});
+			test('start', () => server.start());
+			test('GET /', (test) => {
+				let res;
+				test('request', () => {
+					return request(server, '/')
+					.then((response) => {
+						res = response;
+					});
+				});
+				test('response status/headers', () => {
+					assert.equal(res.statusCode, 500);
+				});
+				test('read response body', () => {
+					return readStream(res)
+					.then((buffer) => {
+						res.body = buffer;
+					});
+				});
+				test('response body', (test) => {
+					test.lines(res.body, 'Error: Expected');
+				});
+			});
+			test('close', () => {
+				return server.close();
+			});
+		});
+		test('async', () => {
+			const testDirectory = path.join(directories.temp, 'error-sync');
+			const server = new SableServer({
+				documentRoot: testDirectory,
+				middlewares: [
+					() => {
+						return Promise.reject(new Error('Expected'));
+					},
+				],
+			});
+			test('start', () => server.start());
+			test('GET /', (test) => {
+				let res;
+				test('request', () => {
+					return request(server, '/')
+					.then((response) => {
+						res = response;
+					});
+				});
+				test('response status/headers', () => {
+					assert.equal(res.statusCode, 500);
+				});
+				test('read response body', () => {
+					return readStream(res)
+					.then((buffer) => {
+						res.body = buffer;
+					});
+				});
+				test('response body', (test) => {
+					test.lines(res.body, 'Error: Expected');
+				});
+			});
+			test('close', () => {
+				return server.close();
+			});
+		});
+	});
+
+	test('invalid wss port', (test) => {
+		const testDirectory = path.join(directories.temp, 'invalid-wss-port');
+		const server1 = new SableServer({
+			documentRoot: testDirectory,
+			ws: {port: 65535},
+		});
+		const server2 = new SableServer({
+			documentRoot: testDirectory,
+			ws: {port: 65535},
+		});
+		test('start', () => {
+			return Promise.all([
+				server1.start(),
+				server2.start(),
+			])
+			.then(() => {
+				throw new Error('Resolved unexpectedly');
+			})
+			.catch((error) => {
+				assert.equal(error.code, 'ERR_SOCKET_BAD_PORT');
+			});
+		});
+		test('close', () => {
+			return Promise.all([
+				server1.close(),
+				server2.close(),
+			]);
+		});
 	});
 
 	test('contentTypes', (test) => {

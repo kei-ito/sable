@@ -43,19 +43,6 @@ module.exports = class SableServer extends Server {
 	}
 
 	/**
-	 * Filter config.middlewares.
-	 * @param  {*} input config.middlewares.
-	 * @return {Array.<Function>}       [descriptin]
-	 */
-	static filterMiddlewares(input) {
-		const middlewares = [sableScript, staticFile];
-		if (input) {
-			middlewares.splice(1, 0, ...input);
-		}
-		return middlewares;
-	}
-
-	/**
 	 * Create a server instance.
 	 * @param {Object} [config={}] - An object for configuration.
 	 * @param {String|Iterable.<String>} [config.documentRoot=[process.cwd()]] - An iterable object of file paths to root directories.
@@ -67,7 +54,7 @@ module.exports = class SableServer extends Server {
 			{
 				contentType: new ContentType(config.contentType),
 				documentRoot: SableServer.filterDocumentRoot(config.documentRoot),
-				middlewares: SableServer.filterMiddlewares(config.middlewares),
+				middlewares: [sableScript, ...(config.middlewares || []).map((x) => x), staticFile],
 				config,
 				count: 0,
 			}
@@ -84,29 +71,30 @@ module.exports = class SableServer extends Server {
 		const timer = setInterval(() => {
 			console.log(`pending (${getMsFromHrtime(req.startedAt)}ms): ${label}`);
 		}, 1000);
+		res
+		.once('finish', () => {
+			clearInterval(timer);
+			console.log(chalk.dim(`${label} → ${res.statusCode} (${getMsFromHrtime(req.startedAt)}ms)`));
+		});
 		const middlewares = this.middlewares.slice();
 		const next = () => {
 			const middleware = middlewares.shift();
 			if (middleware) {
-				return middleware(req, res, next, this);
-			} else {
+				Promise.resolve()
+				.then(() => {
+					return middleware(req, res, next, this);
+				})
+				.catch((error) => {
+					console.error(error);
+					res.statusCode = 500;
+					res.end(`${error}`);
+				});
+			} else if (!res.finished) {
 				res.statusCode = 501;
 				res.end('No middlewares matched');
-				return Promise.resolve();
 			}
 		};
-		next()
-		.catch((error) => {
-			console.error(error);
-			if (!res.finished) {
-				res.statusCode = 500;
-				res.end();
-			}
-		})
-		.then(() => {
-			clearInterval(timer);
-			console.log(chalk.dim(`${label} → ${res.statusCode} (${getMsFromHrtime(req.startedAt)}ms)`));
-		});
+		next();
 	}
 
 	close() {
@@ -183,7 +171,7 @@ module.exports = class SableServer extends Server {
 			return Promise.resolve(this.wss);
 		}
 		options = Object.assign(
-			{port: this.address().port},
+			{port: this.address().port + 1},
 			options || this.config.ws
 		);
 		return new Promise((resolve, reject) => {

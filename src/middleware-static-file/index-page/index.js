@@ -29,10 +29,12 @@ module.exports = function indexPage(directoryPath, req, res, server) {
 		);
 	})
 	.then((results) => {
-		const {contentType} = server;
+		const {contentType, indexFileName = 'index.html'} = server;
 		const indexFile = results
 		.find(({filePath, stats}) => {
-			return stats.isFile() && contentType.get(filePath) === contentType.get('.html');
+			return stats.isFile()
+			&& filePath.endsWith(indexFileName)
+			&& contentType.get(filePath) === contentType.get('.html');
 		});
 		if (indexFile) {
 			return serveFile(indexFile.filePath, req, res, server);

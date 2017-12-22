@@ -149,21 +149,17 @@ test('SableServer', (test) => {
 				});
 			});
 
-			test('response body', () => {
-				const lines = res.body.toString().split(/\r\n|\r|\n/);
-				[
+			test('response body', (test) => {
+				test.lines(res.body, [
 					'<!doctype html>',
 					`<script id="sable-wsport" type="text/plain">${server.wsPort}</script>`,
 					'<script src="/sable-script.js"></script>',
 					'<meta charset="utf-8">',
 					'<link rel="stylesheet" href="style.css">',
+					'<script>const messageElement = 0</script>',
 					'<h1>Title</h1>',
 					'<p>paragraph</p>',
-				]
-				.forEach((expected, index) => {
-					const actual = lines[index];
-					assert.equal(actual, expected);
-				});
+				]);
 			});
 		});
 

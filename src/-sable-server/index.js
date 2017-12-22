@@ -217,8 +217,8 @@ module.exports = class SableServer extends Server {
 				ignoreInitial: true,
 				awaitWriteFinish: {stabilityThreshold: 200},
 				ignored: [
-					/node_modules/,
-					/\.git/,
+					'**/node_modules/**/*',
+					'**/.git/**/*',
 				],
 			},
 			options || this.config.chokidar

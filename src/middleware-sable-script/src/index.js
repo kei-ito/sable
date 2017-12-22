@@ -15,10 +15,10 @@ messageElement.setAttribute('style', [
 ].join(';'));
 
 function showMessage(message) {
-	clearTimeout(messageElement.timer);
 	messageElement.textContent = message;
 	if (!messageElement.parentNode) {
 		document.body.appendChild(messageElement);
+		clearTimeout(messageElement.timer);
 		messageElement.timer = setTimeout(function () {
 			document.body.removeChild(messageElement);
 		}, 3000);

@@ -12,33 +12,25 @@ const sableScript = require('../middleware-sable-script');
 
 module.exports = class SableServer extends Server {
 
-	static filterDocumentRoot(input) {
-		const documentRoot = [];
-		switch (typeof input) {
+	constructor(config = {}) {
+		switch (typeof config.documentRoot) {
 		case 'string':
-			documentRoot.push(input);
+			config.documentRoot = [config.documentRoot];
 			break;
 		case 'object':
-			documentRoot.push(...input);
+			config.documentRoot = [...config.documentRoot];
 			break;
 		default:
+			config.documentRoot = [];
 		}
-		if (documentRoot.length === 0) {
-			documentRoot.push(process.cwd());
+		if (config.documentRoot.length === 0) {
+			config.documentRoot.push(process.cwd());
 		}
-		for (let i = 0; i < documentRoot.length; i++) {
-			const filePath = documentRoot[i];
-			documentRoot[i] = path.isAbsolute(filePath) ? filePath : path.join(process.cwd(), filePath);
-		}
-		return documentRoot;
-	}
-
-	constructor(config = {}) {
 		Object.assign(
 			super(),
 			{
 				contentType: new ContentType(config.contentType),
-				documentRoot: SableServer.filterDocumentRoot(config.documentRoot),
+				documentRoot: config.documentRoot,
 				middlewares: [sableScript, ...(config.middlewares || []).map((x) => x), staticFile],
 				timeout: Number(config.timeout || 10000),
 				config,

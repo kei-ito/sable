@@ -10,17 +10,8 @@ const getMsFromHrtime = require('../get-ms-from-hrtime');
 const staticFile = require('../middleware-static-file');
 const sableScript = require('../middleware-sable-script');
 
-/**
- * A HTTP Server for web development.
- */
 module.exports = class SableServer extends Server {
 
-	/**
-	 * Filter config.documentRoot.
-	 * @private
-	 * @param {*} input config.documentRoot.
-	 * @return {Array.<String>} An array of file paths to root directories.
-	 */
 	static filterDocumentRoot(input) {
 		const documentRoot = [];
 		switch (typeof input) {
@@ -42,12 +33,6 @@ module.exports = class SableServer extends Server {
 		return documentRoot;
 	}
 
-	/**
-	 * Create a server instance.
-	 * @param {Object} [config={}] - An object for configuration.
-	 * @param {String|Iterable.<String>} [config.documentRoot=[process.cwd()]] - An iterable object of file paths to root directories.
-	 * @return {undefined}
-	 */
 	constructor(config = {}) {
 		Object.assign(
 			super(),
@@ -55,6 +40,7 @@ module.exports = class SableServer extends Server {
 				contentType: new ContentType(config.contentType),
 				documentRoot: SableServer.filterDocumentRoot(config.documentRoot),
 				middlewares: [sableScript, ...(config.middlewares || []).map((x) => x), staticFile],
+				timeout: Number(config.timeout || 10000),
 				config,
 				count: 0,
 			}
@@ -69,9 +55,14 @@ module.exports = class SableServer extends Server {
 		const label = `#${this.count++} ${req.method} ${req.url}`;
 		req.startedAt = process.hrtime();
 		const timer = setInterval(() => {
-			console.log(`pending (${getMsFromHrtime(req.startedAt)}ms): ${label}`);
+			const elapsed = getMsFromHrtime(req.startedAt);
+			console.log(`pending (${elapsed}ms): ${label}`);
+			if (this.timeout < elapsed) {
+				onError(new Error(`Timeout of ${this.timeout}ms exceeded`));
+			}
 		}, 1000);
 		res
+		.once('error', onError)
 		.once('finish', () => {
 			clearInterval(timer);
 			console.log(chalk.dim(`${label} → ${res.statusCode} (${getMsFromHrtime(req.startedAt)}ms)`));
@@ -84,17 +75,20 @@ module.exports = class SableServer extends Server {
 				.then(() => {
 					return middleware(req, res, next, this);
 				})
-				.catch((error) => {
-					console.error(error);
-					res.statusCode = 500;
-					res.end(`${error}`);
-				});
-			} else if (!res.finished) {
-				res.statusCode = 501;
-				res.end('No middlewares matched');
+				.catch(onError);
+			} else {
+				onError(new Error('No middlewares matched'));
 			}
 		};
 		next();
+		function onError(error) {
+			clearInterval(timer);
+			console.error(error);
+			if (res.writable) {
+				res.statusCode = 500;
+				res.end(`${error}`);
+			}
+		}
 	}
 
 	close() {
@@ -227,8 +221,8 @@ module.exports = class SableServer extends Server {
 
 	onChange(filePath) {
 		const documentRoot = this.documentRoot
-		.find((dir) => {
-			return filePath.startsWith(dir);
+		.find((directory) => {
+			return filePath.startsWith(directory);
 		});
 		const pathname = `/${path.relative(documentRoot, filePath).split(path.sep).join('/')}`;
 		this.sendMessage(pathname);

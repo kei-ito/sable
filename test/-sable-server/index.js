@@ -309,7 +309,7 @@ test('SableServer', (test) => {
 					});
 				});
 				test('response status/headers', () => {
-					assert.equal(res.statusCode, 501);
+					assert.equal(res.statusCode, 500);
 				});
 			});
 			test('close', () => {

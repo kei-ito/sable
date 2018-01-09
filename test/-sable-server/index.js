@@ -214,6 +214,22 @@ test('SableServer', (test) => {
 				]);
 			});
 		});
+		test('GET /style.css', (test) => {
+			let res;
+			test('request', () => {
+				return request(server, '/style.css')
+				.then((response) => {
+					res = response;
+				});
+			});
+			test('response status/headers', (test) => {
+				assert.equal(res.statusCode, 200);
+				test.object(res.headers, {
+					'content-type': (value) => value.startsWith('text/css'),
+					'content-length': '18',
+				});
+			});
+		});
 		test('GET /directory', (test) => {
 			let res;
 			test('request', () => {

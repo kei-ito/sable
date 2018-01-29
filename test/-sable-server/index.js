@@ -177,7 +177,7 @@ test('SableServer', (test) => {
 				});
 			});
 			test('response body', (test) => {
-				test.lines(res.body, [
+				test.compare(`${res.body}`, [
 					'<!doctype html>',
 					`<script id="sable-wsport" type="text/plain">${server.wsPort}</script>`,
 					'<script src="/sable-script.js"></script>',
@@ -199,7 +199,7 @@ test('SableServer', (test) => {
 			});
 			test('response status/headers', (test) => {
 				assert.equal(res.statusCode, 200);
-				test.object(res.headers, {
+				test.compare(res.headers, {
 					'content-type': (value) => value.startsWith('text/css'),
 					'content-length': '18',
 				});
@@ -279,7 +279,7 @@ test('SableServer', (test) => {
 	});
 
 	test('errors from middleware', (test) => {
-		test('no middlewares', () => {
+		test('no middlewares', (test) => {
 			const testDirectory = path.join(directories.temp, 'error-sync');
 			const server = new SableServer({
 				documentRoot: testDirectory,
@@ -303,11 +303,9 @@ test('SableServer', (test) => {
 					assert.equal(res.statusCode, 500);
 				});
 			});
-			test('close', () => {
-				return server.close();
-			});
+			test('close', () => server.close());
 		});
-		test('sync', () => {
+		test('sync', (test) => {
 			const testDirectory = path.join(directories.temp, 'error-sync');
 			const server = new SableServer({
 				documentRoot: testDirectory,
@@ -336,21 +334,18 @@ test('SableServer', (test) => {
 					});
 				});
 				test('response body', (test) => {
-					test.lines(res.body, 'Error: Expected');
+					test.compare(`${res.body}`, 'Error: Expected');
 				});
 			});
-			test('close', () => {
-				return server.close();
-			});
+			test('close', () => server.close());
 		});
-		test('async', () => {
+
+		test('async', (test) => {
 			const testDirectory = path.join(directories.temp, 'error-sync');
 			const server = new SableServer({
 				documentRoot: testDirectory,
 				middlewares: [
-					() => {
-						return Promise.reject(new Error('Expected'));
-					},
+					() => Promise.reject(new Error('Expected')),
 				],
 			});
 			test('start', () => server.start());
@@ -372,12 +367,10 @@ test('SableServer', (test) => {
 					});
 				});
 				test('response body', (test) => {
-					test.lines(res.body, 'Error: Expected');
+					test.compare(`${res.body}`, 'Error: Expected');
 				});
 			});
-			test('close', () => {
-				return server.close();
-			});
+			test('close', () => server.close());
 		});
 	});
 
@@ -413,9 +406,7 @@ test('SableServer', (test) => {
 		const testDirectory = path.join(directories.temp, 'content-types');
 		const server = new SableServer({
 			documentRoot: testDirectory,
-			contentType: {
-				'text/plain': ['html'],
-			},
+			contentType: {'text/plain': ['html']},
 		});
 
 		test('copy files', () => {

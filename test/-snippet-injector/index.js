@@ -1,4 +1,3 @@
-const assert = require('assert');
 const test = require('@nlib/test');
 const {PassThrough} = require('stream');
 const SnippetInjector = require('../../src/-snippet-injector');
@@ -33,7 +32,7 @@ const tests = [
 
 test('SnippetInjector', (test) => {
 	for (const {server, source, expected} of tests) {
-		test(source, () => {
+		test(source, (test) => {
 			const replaceStream = new SnippetInjector(server);
 			return new Promise((resolve, reject) => {
 				const writer = new PassThrough();
@@ -64,7 +63,7 @@ test('SnippetInjector', (test) => {
 				});
 			})
 			.then((actual) => {
-				assert.equal(actual, expected);
+				test.compare(actual, expected);
 			});
 		});
 	}

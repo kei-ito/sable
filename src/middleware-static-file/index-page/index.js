@@ -16,22 +16,15 @@ const date = new DateString('[YYYY]-[MM]-[DD] [hh]:[mm]:[ss]');
 module.exports = function indexPage(directoryPath, req, res, server) {
 	const startedAt = Date.now();
 	return readdir(directoryPath)
-	.then((fileNames) => {
-		return Promise.all(
-			fileNames
-			.map((name) => {
-				const filePath = path.join(directoryPath, name);
-				return stat(filePath)
-				.then((stats) => {
-					return {name, filePath, stats};
-				});
-			})
-		);
-	})
+	.then((fileNames) => Promise.all(
+		fileNames.map((name) => {
+			const filePath = path.join(directoryPath, name);
+			return stat(filePath).then((stats) => ({name, filePath, stats}));
+		})
+	))
 	.then((results) => {
 		const {contentType, indexFileName = 'index.html'} = server;
-		const indexFile = results
-		.find(({filePath, stats}) => {
+		const indexFile = results.find(({filePath, stats}) => {
 			return stats.isFile()
 			&& filePath.endsWith(indexFileName)
 			&& contentType.get(filePath) === contentType.get('.html');
@@ -40,9 +33,7 @@ module.exports = function indexPage(directoryPath, req, res, server) {
 			return serveFile(indexFile.filePath, req, res, server);
 		}
 		const writer = new PassThrough();
-		res.writeHead(200, {
-			'content-type': contentType.get('.html'),
-		});
+		res.writeHead(200, {'content-type': contentType.get('.html')});
 		return Promise.all(
 			[
 				path.join(__dirname, 'template', 'index.html'),
@@ -51,16 +42,12 @@ module.exports = function indexPage(directoryPath, req, res, server) {
 			]
 			.map((templateFilePath) => {
 				return readFile(templateFilePath, 'utf8')
-				.then((template) => {
-					return new TemplateString(template);
-				});
+				.then((template) => new TemplateString(template));
 			})
 		)
 		.then(([indexHTML, breadcrumbHTML, fileHTML]) => {
 			return new Promise((resolve, reject) => {
-				res.writeHead(200, {
-					'content-type': 'text/html',
-				});
+				res.writeHead(200, {'content-type': 'text/html'});
 				writer
 				.pipe(new SnippetInjector(server))
 				.pipe(res)

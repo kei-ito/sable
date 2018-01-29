@@ -2,7 +2,6 @@ const fs = require('fs');
 const url = require('url');
 const promisify = require('@nlib/promisify');
 const SnippetInjector = require('../../-snippet-injector');
-
 const stat = promisify(fs.stat, fs);
 
 module.exports = function serveFile(filePath, req, res, server) {
@@ -11,9 +10,7 @@ module.exports = function serveFile(filePath, req, res, server) {
 		if (stats.isDirectory()) {
 			const newURL = Object.assign({}, req.parsedURL);
 			newURL.pathname += '/';
-			res.writeHead(301, {
-				'location': url.format(newURL),
-			});
+			res.writeHead(301, {'location': url.format(newURL)});
 			res.end();
 			return undefined;
 		} else {

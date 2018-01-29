@@ -12,9 +12,7 @@ const directories = require('../lib/directories');
 test('SableServer', (test) => {
 
 	test('constructor', () => {
-		assert.doesNotThrow(() => {
-			return new SableServer();
-		});
+		assert.doesNotThrow(() => new SableServer());
 	});
 
 	test('middlewares', (test) => {
@@ -24,22 +22,13 @@ test('SableServer', (test) => {
 		});
 
 		test('sandwich', () => {
-			const middleware1 = (req, res, next) => {
-				return next();
-			};
-			const middleware2 = (req, res, next) => {
-				return next();
-			};
-			const expected = [
-				middleware1,
-				middleware2,
-			];
-			assert.deepEqual(new SableServer({
-				middlewares: [
-					middleware1,
-					middleware2,
-				],
-			}).middlewares.slice(1, 3), expected);
+			const middleware1 = (req, res, next) => next();
+			const middleware2 = (req, res, next) => next();
+			const expected = [middleware1, middleware2];
+			assert.deepEqual(
+				new SableServer({middlewares: expected.slice()}).middlewares.slice(1, 3),
+				expected
+			);
 		});
 	});
 
@@ -53,18 +42,14 @@ test('SableServer', (test) => {
 
 		test('convert to an array', () => {
 			const testDirectory = path.join(directories.temp, 'documentRoot');
-			const server = new SableServer({
-				documentRoot: testDirectory,
-			});
+			const server = new SableServer({documentRoot: testDirectory});
 			const expected = [testDirectory];
 			assert.deepEqual(server.documentRoot, expected);
 		});
 
 		test('copy an array', () => {
 			const testDirectory = path.join(directories.temp, 'documentRoot');
-			const server = new SableServer({
-				documentRoot: [testDirectory],
-			});
+			const server = new SableServer({documentRoot: [testDirectory]});
 			const expected = [testDirectory];
 			assert.deepEqual(server.documentRoot, expected);
 		});
@@ -72,9 +57,7 @@ test('SableServer', (test) => {
 		test('relative paths', () => {
 			const testDirectory = path.join(directories.temp, 'documentRoot');
 			const relativePath = 'relative-path-directory';
-			const server = new SableServer({
-				documentRoot: [testDirectory, relativePath],
-			});
+			const server = new SableServer({documentRoot: [testDirectory, relativePath]});
 			const expected = [testDirectory, relativePath];
 			assert.deepEqual(server.documentRoot, expected);
 		});
@@ -102,9 +85,7 @@ test('SableServer', (test) => {
 				assert(0 < server.address().port);
 			});
 		});
-		test('close', () => {
-			return server.close();
-		});
+		test('close', () => server.close());
 	});
 
 	test('use an avaiable port', (test) => {
@@ -122,12 +103,10 @@ test('SableServer', (test) => {
 				assert(server1.address().port < server2.address().port);
 			});
 		});
-		test('close', () => {
-			return Promise.all([
-				server1.close(),
-				server2.close(),
-			]);
-		});
+		test('close', () => Promise.all([
+			server1.close(),
+			server2.close(),
+		]));
 	});
 
 	test('no avaiable ports', (test) => {
@@ -145,20 +124,16 @@ test('SableServer', (test) => {
 			})
 			.catch(() => {});
 		});
-		test('close', () => {
-			return Promise.all([
-				server1.close(),
-				server2.close(),
-			]);
-		});
+		test('close', () => Promise.all([
+			server1.close(),
+			server2.close(),
+		]));
 	});
 
 	test('start/close', (test) => {
 		const testDirectory = path.join(directories.temp, 'start-close');
 		const server = new SableServer({documentRoot: testDirectory});
-		test('copy files', () => {
-			return cp(directories.src, testDirectory);
-		});
+		test('copy files', () => cp(directories.src, testDirectory));
 		test('start', () => {
 			return server.start()
 			.then((resolved) => {
@@ -523,15 +498,10 @@ test('SableServer', (test) => {
 				ws
 				.once('error', reject)
 				.once('message', resolve);
-				fs.utimes(targetFile, new Date(), new Date(), (error) => {
-					if (error) {
-						reject(error);
-					}
-				});
+				fs.utimes(targetFile, new Date(), new Date(), (error) => error && reject(error));
 			})
 			.then((actual) => {
-				const expected = `/${path.relative(testDirectory, targetFile)}`;
-				assert.equal(actual, expected);
+				assert.equal(actual, `/${path.relative(testDirectory, targetFile)}`);
 			});
 		});
 

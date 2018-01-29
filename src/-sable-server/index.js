@@ -64,9 +64,7 @@ module.exports = class SableServer extends Server {
 			const middleware = middlewares.shift();
 			if (middleware) {
 				Promise.resolve()
-				.then(() => {
-					return middleware(req, res, next, this);
-				})
+				.then(() => middleware(req, res, next, this))
 				.catch(onError);
 			} else {
 				onError(new Error('No middlewares matched'));
@@ -101,16 +99,13 @@ module.exports = class SableServer extends Server {
 	start(...args) {
 		return this.listen(...args)
 		.then(() => {
-			this
-			.on('request', this.onRequest.bind(this));
+			this.on('request', this.onRequest.bind(this));
 			return Promise.all([
 				this.startWebSocketServer(),
 				this.startWatcher(),
 			]);
 		})
-		.then(() => {
-			return this;
-		});
+		.then(() => this);
 	}
 
 	listen(...args) {
@@ -212,10 +207,7 @@ module.exports = class SableServer extends Server {
 	}
 
 	onChange(filePath) {
-		const documentRoot = this.documentRoot
-		.find((directory) => {
-			return filePath.startsWith(directory);
-		});
+		const documentRoot = this.documentRoot.find((directory) => filePath.startsWith(directory));
 		const pathname = `/${path.relative(documentRoot, filePath).split(path.sep).join('/')}`;
 		this.sendMessage(pathname);
 	}
@@ -233,8 +225,7 @@ module.exports = class SableServer extends Server {
 
 	nextRequest(filter) {
 		return new Promise((resolve) => {
-			this
-			.once('request', (req, res) => {
+			this.once('request', (req, res) => {
 				if (!filter || filter({req, res})) {
 					resolve({req, res});
 				}
@@ -244,17 +235,15 @@ module.exports = class SableServer extends Server {
 
 	nextResponse(resFilter, reqFilter) {
 		return this.nextRequest(reqFilter)
-		.then(({req, res}) => {
-			return new Promise((resolve, reject) => {
-				res
-				.once('error', reject)
-				.once('finish', () => {
-					if (!resFilter || resFilter({req, res})) {
-						resolve({req, res});
-					}
-				});
+		.then(({req, res}) => new Promise((resolve, reject) => {
+			res
+			.once('error', reject)
+			.once('finish', () => {
+				if (!resFilter || resFilter({req, res})) {
+					resolve({req, res});
+				}
 			});
-		});
+		}));
 	}
 
 	nextWebSocketConnection(filter) {

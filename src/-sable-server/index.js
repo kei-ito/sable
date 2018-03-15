@@ -26,6 +26,8 @@ module.exports = class SableServer extends Server {
 		if (config.documentRoot.length === 0) {
 			config.documentRoot.push(process.cwd());
 		}
+		config.documentRoot = config.documentRoot
+		.map((directory) => path.isAbsolute(directory) ? directory : path.join(process.cwd(), directory));
 		Object.assign(
 			super(),
 			{
@@ -64,7 +66,9 @@ module.exports = class SableServer extends Server {
 			const middleware = middlewares.shift();
 			if (middleware) {
 				Promise.resolve()
-				.then(() => middleware(req, res, next, this))
+				.then(() => {
+					return middleware(req, res, next, this);
+				})
 				.catch(onError);
 			} else {
 				onError(new Error('No middlewares matched'));
@@ -99,13 +103,16 @@ module.exports = class SableServer extends Server {
 	start(...args) {
 		return this.listen(...args)
 		.then(() => {
-			this.on('request', this.onRequest.bind(this));
+			this
+			.on('request', this.onRequest.bind(this));
 			return Promise.all([
 				this.startWebSocketServer(),
 				this.startWatcher(),
 			]);
 		})
-		.then(() => this);
+		.then(() => {
+			return this;
+		});
 	}
 
 	listen(...args) {
@@ -207,7 +214,8 @@ module.exports = class SableServer extends Server {
 	}
 
 	onChange(filePath) {
-		const documentRoot = this.documentRoot.find((directory) => filePath.startsWith(directory));
+		const documentRoot = this.documentRoot
+		.find((directory) => filePath.startsWith(directory));
 		const pathname = `/${path.relative(documentRoot, filePath).split(path.sep).join('/')}`;
 		this.sendMessage(pathname);
 	}
@@ -225,7 +233,8 @@ module.exports = class SableServer extends Server {
 
 	nextRequest(filter) {
 		return new Promise((resolve) => {
-			this.once('request', (req, res) => {
+			this
+			.once('request', (req, res) => {
 				if (!filter || filter({req, res})) {
 					resolve({req, res});
 				}
@@ -235,15 +244,17 @@ module.exports = class SableServer extends Server {
 
 	nextResponse(resFilter, reqFilter) {
 		return this.nextRequest(reqFilter)
-		.then(({req, res}) => new Promise((resolve, reject) => {
-			res
-			.once('error', reject)
-			.once('finish', () => {
-				if (!resFilter || resFilter({req, res})) {
-					resolve({req, res});
-				}
+		.then(({req, res}) => {
+			return new Promise((resolve, reject) => {
+				res
+				.once('error', reject)
+				.once('finish', () => {
+					if (!resFilter || resFilter({req, res})) {
+						resolve({req, res});
+					}
+				});
 			});
-		}));
+		});
 	}
 
 	nextWebSocketConnection(filter) {

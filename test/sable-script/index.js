@@ -151,7 +151,7 @@ test('sable-script', (test) => {
 			});
 
 			test('put a value', () => {
-				return driver.executeScript(`window.${params.key} = '${params.key}';`);
+				return driver.executeScript(`return window.${params.key} = '${params.key}';`);
 			});
 
 			test('get a value', () => {

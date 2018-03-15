@@ -58,7 +58,7 @@ test('SableServer', (test) => {
 			const testDirectory = path.join(directories.temp, 'documentRoot');
 			const relativePath = 'relative-path-directory';
 			const server = new SableServer({documentRoot: [testDirectory, relativePath]});
-			const expected = [testDirectory, relativePath];
+			const expected = [testDirectory, path.join(process.cwd(), relativePath)];
 			assert.deepEqual(server.documentRoot, expected);
 		});
 	});

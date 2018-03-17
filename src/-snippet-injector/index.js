@@ -1,6 +1,6 @@
 const {ReplaceStream} = require('@nlib/replace-stream');
 
-module.exports = class SnippetInjector extends ReplaceStream {
+exports.SnippetInjector = class SnippetInjector extends ReplaceStream {
 
 	constructor(server) {
 		super([

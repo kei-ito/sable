@@ -5,15 +5,15 @@ const promisify = require('@nlib/promisify');
 const humanReadable = require('@nlib/human-readable');
 const DateString = require('@nlib/date-string');
 const {TemplateString} = require('@nlib/template-string');
-const SnippetInjector = require('../../-snippet-injector');
-const serveFile = require('../serve-file');
+const {SnippetInjector} = require('../../-snippet-injector');
+const {serveFile} = require('../serve-file');
 
 const stat = promisify(fs.stat, fs);
 const readdir = promisify(fs.readdir, fs);
 const readFile = promisify(fs.readFile, fs);
 const date = new DateString('[YYYY]-[MM]-[DD] [hh]:[mm]:[ss]');
 
-module.exports = function indexPage(directoryPath, req, res, server) {
+exports.indexPage = function indexPage(directoryPath, req, res, server) {
 	const startedAt = Date.now();
 	return readdir(directoryPath)
 	.then((fileNames) => Promise.all(

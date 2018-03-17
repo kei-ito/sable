@@ -5,12 +5,12 @@ const chalk = require('chalk');
 const chokidar = require('chokidar');
 const {Server: WebSocketServer} = require('ws');
 const {ContentType} = require('@nlib/content-type');
-const getNextPort = require('../get-next-port');
-const getMsFromHrtime = require('../get-ms-from-hrtime');
-const staticFile = require('../middleware-static-file');
-const sableScript = require('../middleware-sable-script');
+const {getNextPort} = require('../get-next-port');
+const {getMsFromHrTime} = require('../get-ms-from-hrtime');
+const {staticFile} = require('../middleware-static-file');
+const {sableScript} = require('../middleware-sable-script');
 
-module.exports = class SableServer extends Server {
+exports.SableServer = class SableServer extends Server {
 
 	constructor(config = {}) {
 		switch (typeof config.documentRoot) {
@@ -33,8 +33,8 @@ module.exports = class SableServer extends Server {
 			{
 				contentType: new ContentType(config.contentType),
 				documentRoot: config.documentRoot,
-				middlewares: [sableScript, ...(config.middlewares || []).map((x) => x), staticFile],
-				timeout: Number(config.timeout || 10000),
+				middlewares: [sableScript, ...(config.middlewares || []), staticFile],
+				timeout: config.timeout || 10000,
 				config,
 				count: 0,
 			}
@@ -42,47 +42,44 @@ module.exports = class SableServer extends Server {
 	}
 
 	get wsPort() {
-		return this.wss ? this.wss._server.address().port : null;
+		return this.wss ? this.wss.address().port : null;
 	}
 
 	onRequest(req, res) {
 		const label = `#${this.count++} ${req.method} ${req.url}`;
 		req.startedAt = process.hrtime();
 		const timer = setInterval(() => {
-			const elapsed = getMsFromHrtime(req.startedAt);
+			const elapsed = getMsFromHrTime(req.startedAt);
 			console.log(`pending (${elapsed}ms): ${label}`);
 			if (this.timeout < elapsed) {
-				onError(new Error(`Timeout of ${this.timeout}ms exceeded`));
+				res.emit('error', new Error(`Timeout of ${this.timeout}ms exceeded`));
 			}
 		}, 1000);
 		res
-		.once('error', onError)
-		.once('finish', () => {
-			clearInterval(timer);
-			console.log(chalk.dim(`${label} → ${res.statusCode} (${getMsFromHrtime(req.startedAt)}ms)`));
-		});
-		const middlewares = this.middlewares.slice();
-		const next = () => {
-			const middleware = middlewares.shift();
-			if (middleware) {
-				Promise.resolve()
-				.then(() => {
-					return middleware(req, res, next, this);
-				})
-				.catch(onError);
-			} else {
-				onError(new Error('No middlewares matched'));
-			}
-		};
-		next();
-		function onError(error) {
+		.once('error', (error) => {
 			clearInterval(timer);
 			console.error(error);
 			if (res.writable) {
 				res.statusCode = 500;
 				res.end(`${error}`);
 			}
-		}
+		})
+		.once('finish', () => {
+			clearInterval(timer);
+			console.log(chalk.dim(`${label} → ${res.statusCode} (${getMsFromHrTime(req.startedAt)}ms)`));
+		});
+		const middlewares = this.middlewares.slice();
+		const next = () => {
+			const middleware = middlewares.shift();
+			if (middleware) {
+				Promise.resolve()
+				.then(() => middleware(req, res, next, this))
+				.catch((error) => res.emit('error', error));
+			} else {
+				res.emit('error', new Error('No middleware matched'));
+			}
+		};
+		next();
 	}
 
 	close() {
@@ -92,27 +89,26 @@ module.exports = class SableServer extends Server {
 		if (this.wss) {
 			this.wss.close();
 		}
-		return this.listening && new Promise((resolve, reject) => {
+		return this.listening
+		? new Promise((resolve, reject) => {
 			this
 			.once('close', resolve)
 			.once('error', reject);
 			super.close();
-		});
+		})
+		: Promise.resolve();
 	}
 
 	start(...args) {
 		return this.listen(...args)
 		.then(() => {
-			this
-			.on('request', this.onRequest.bind(this));
+			this.on('request', this.onRequest.bind(this));
 			return Promise.all([
 				this.startWebSocketServer(),
 				this.startWatcher(),
 			]);
 		})
-		.then(() => {
-			return this;
-		});
+		.then(() => this);
 	}
 
 	listen(...args) {
@@ -214,8 +210,7 @@ module.exports = class SableServer extends Server {
 	}
 
 	onChange(filePath) {
-		const documentRoot = this.documentRoot
-		.find((directory) => filePath.startsWith(directory));
+		const documentRoot = this.documentRoot.find((directory) => filePath.startsWith(directory));
 		const pathname = `/${path.relative(documentRoot, filePath).split(path.sep).join('/')}`;
 		this.sendMessage(pathname);
 	}
@@ -233,8 +228,7 @@ module.exports = class SableServer extends Server {
 
 	nextRequest(filter) {
 		return new Promise((resolve) => {
-			this
-			.once('request', (req, res) => {
+			this.once('request', (req, res) => {
 				if (!filter || filter({req, res})) {
 					resolve({req, res});
 				}
@@ -243,8 +237,7 @@ module.exports = class SableServer extends Server {
 	}
 
 	nextResponse(resFilter, reqFilter) {
-		return this.nextRequest(reqFilter)
-		.then(({req, res}) => {
+		return this.nextRequest(reqFilter).then(({req, res}) => {
 			return new Promise((resolve, reject) => {
 				res
 				.once('error', reject)
@@ -259,8 +252,7 @@ module.exports = class SableServer extends Server {
 
 	nextWebSocketConnection(filter) {
 		return new Promise((resolve) => {
-			this.wss
-			.once('connection', (client, req) => {
+			this.wss.once('connection', (client, req) => {
 				if (!filter || filter({client, req})) {
 					resolve({client, req});
 				}

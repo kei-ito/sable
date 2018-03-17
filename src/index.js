@@ -1,1 +1,1 @@
-exports.SableServer = require('./-sable-server');
+Object.assign(exports, require('./-sable-server'));

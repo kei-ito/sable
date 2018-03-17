@@ -1,10 +1,10 @@
 const fs = require('fs');
 const url = require('url');
 const promisify = require('@nlib/promisify');
-const SnippetInjector = require('../../-snippet-injector');
+const {SnippetInjector} = require('../../-snippet-injector');
 const stat = promisify(fs.stat, fs);
 
-module.exports = function serveFile(filePath, req, res, server) {
+exports.serveFile = function serveFile(filePath, req, res, server) {
 	return stat(filePath)
 	.then((stats) => {
 		if (stats.isDirectory()) {

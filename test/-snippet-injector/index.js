@@ -1,6 +1,6 @@
 const test = require('@nlib/test');
 const {PassThrough} = require('stream');
-const SnippetInjector = require('../../src/-snippet-injector');
+const {SnippetInjector} = require('../../src/-snippet-injector');
 
 const tests = [
 	{

@@ -5,7 +5,8 @@ const chalk = require('chalk');
 const chokidar = require('chokidar');
 const {Server: WebSocketServer} = require('ws');
 const {ContentType} = require('@nlib/content-type');
-const {getNextPort} = require('../get-next-port');
+const {listen} = require('../listen');
+const {close} = require('../close');
 const {getMsFromHrTime} = require('../get-ms-from-hrtime');
 const {staticFile} = require('../middleware-static-file');
 const {sableScript} = require('../middleware-sable-script');
@@ -82,72 +83,34 @@ exports.SableServer = class SableServer extends Server {
 		next();
 	}
 
-	close() {
+	close(callback) {
 		if (this.watcher) {
 			this.watcher.close();
 		}
-		if (this.wss) {
-			this.wss.close();
-		}
-		return this.listening
-		? new Promise((resolve, reject) => {
-			this
-			.once('close', resolve)
-			.once('error', reject);
-			super.close();
-		})
-		: Promise.resolve();
+		Promise.all([
+			this.wss && close(this.wss),
+			new Promise((resolve, reject) => {
+				this.once('error', reject);
+				super.close((error) => {
+					this.removeListener('error', reject);
+					if (error) {
+						console.log('error@close', error);
+						reject(error);
+					} else {
+						resolve();
+					}
+				});
+			}),
+		]).then(() => callback(), callback);
 	}
 
 	start(...args) {
-		return this.listen(...args)
-		.then(() => {
-			this.on('request', this.onRequest.bind(this));
-			return Promise.all([
-				this.startWebSocketServer(),
-				this.startWatcher(),
-			]);
-		})
-		.then(() => this);
-	}
-
-	listen(...args) {
-		if (args.length === 0) {
-			args.push(...[].concat(this.config.listen || 4000));
-		}
-		const callback = args.pop();
-		if (typeof callback !== 'function') {
-			args.push(callback);
-		}
-		const options = {};
-		switch (typeof args[0]) {
-		case 'object':
-			Object.assign(options, args[0]);
-			break;
-		case 'number':
-			[options.port, options.host, options.backlog] = args;
-			break;
-		case 'string':
-			[options.path, options.backlog] = args;
-			break;
-		default:
-		}
-		return new Promise((resolve, reject) => {
-			const onError = (error) => {
-				const nextPort = getNextPort(error);
-				if (0 < nextPort) {
-					options.port = nextPort;
-					resolve(this.listen(options));
-				} else {
-					reject(error);
-				}
-			};
-			super.listen(...args, () => {
-				this.removeListener('error', onError);
-				resolve(this);
-			})
-			.once('error', onError);
-		});
+		return listen(this, ...args)
+		.then(() => Promise.all([
+			this.startWebSocketServer(),
+			this.startWatcher(),
+		]))
+		.then(() => this.on('request', this.onRequest.bind(this)));
 	}
 
 	startWebSocketServer(options) {
@@ -158,25 +121,22 @@ exports.SableServer = class SableServer extends Server {
 			{port: this.address().port + 1},
 			options || this.config.ws
 		);
-		return new Promise((resolve, reject) => {
-			const onError = (error) => {
-				const nextPort = getNextPort(error);
-				if (0 < nextPort) {
-					options.port = nextPort;
-					resolve(this.startWebSocketServer(options));
-				} else {
-					reject(error);
-				}
-			};
-			const wss = new WebSocketServer(options, () => {
-				wss.removeListener('error', onError);
-				this.wss = wss;
-				resolve(wss);
+		const server = options.server || new Server();
+		return (
+			options.server
+			? Promise.resolve(options)
+			: listen(new Server(), options)
+			.then((server) => {
+				options.port = server.address().port;
+				return close(server).then(() => options);
 			})
-			.on('connection', (client, req) => {
-				console.log(chalk.dim(`connection: ${req.headers['user-agent']}`));
-			})
-			.once('error', onError);
+		)
+		.then((options) => {
+			this.wss = new WebSocketServer(options);
+		})
+		.catch((error) => {
+			error.server = server;
+			throw error;
 		});
 	}
 

@@ -1,1 +1,6 @@
-Object.assign(exports, require('./-sable-server'));
+Object.assign(
+	exports,
+	require('./-sable-server'),
+	require('./listen'),
+	require('./close')
+);

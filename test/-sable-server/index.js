@@ -4,7 +4,7 @@ const fs = require('fs');
 const WebSocket = require('ws');
 const cp = require('@nlib/cp');
 const test = require('@nlib/test');
-const {SableServer} = require('../../src/-sable-server');
+const {SableServer, listen, close} = require('../..');
 const request = require('../lib/request');
 const readStream = require('../lib/read-stream');
 const directories = require('../lib/directories');
@@ -79,55 +79,51 @@ test('SableServer', (test) => {
 	test('listen/close', (test) => {
 		const server = new SableServer();
 		test('listen', () => {
-			return server.listen()
+			return listen(server)
 			.then((resolved) => {
 				assert(server === resolved);
 				assert(0 < server.address().port);
 			});
 		});
-		test('close', () => server.close());
+		test('close', () => close(server));
 	});
 
 	test('use an avaiable port', (test) => {
 		const server1 = new SableServer();
 		const server2 = new SableServer();
 		test('listen', () => {
-			return server1.listen()
+			return listen(server1)
 			.then((resolved) => {
 				assert(server1 === resolved);
 				assert(0 < server1.address().port);
-				return server2.listen();
+				return listen(server2);
 			})
 			.then((resolved) => {
 				assert(server2 === resolved);
 				assert(server1.address().port < server2.address().port);
 			});
 		});
-		test('close', () => Promise.all([
-			server1.close(),
-			server2.close(),
-		]));
+		test('close 1', () => close(server1));
+		test('close 2', () => close(server2));
 	});
 
 	test('no avaiable ports', (test) => {
 		const server1 = new SableServer({listen: 65535});
 		const server2 = new SableServer({listen: 65535});
 		test('listen', () => {
-			return server1.listen()
+			return listen(server1)
 			.then((resolved) => {
 				assert(server1 === resolved);
 				assert(0 < server1.address().port);
-				return server2.listen();
+				return listen(server2);
 			})
 			.then(() => {
 				throw new Error('Resolved unexpectedly');
 			})
 			.catch(() => {});
 		});
-		test('close', () => Promise.all([
-			server1.close(),
-			server2.close(),
-		]));
+		test('close 1', () => close(server1));
+		test('close 2', () => close(server2));
 	});
 
 	test('start/close', (test) => {
@@ -273,9 +269,7 @@ test('SableServer', (test) => {
 				});
 			});
 		});
-		test('close', () => {
-			return server.close();
-		});
+		test('close', () => close(server));
 	});
 
 	test('errors from middleware', (test) => {
@@ -303,7 +297,7 @@ test('SableServer', (test) => {
 					assert.equal(res.statusCode, 500);
 				});
 			});
-			test('close', () => server.close());
+			test('close', () => close(server));
 		});
 		test('sync', (test) => {
 			const testDirectory = path.join(directories.temp, 'error-sync');
@@ -337,7 +331,7 @@ test('SableServer', (test) => {
 					test.compare(`${res.body}`, 'Error: Expected');
 				});
 			});
-			test('close', () => server.close());
+			test('close', () => close(server));
 		});
 
 		test('async', (test) => {
@@ -370,7 +364,7 @@ test('SableServer', (test) => {
 					test.compare(`${res.body}`, 'Error: Expected');
 				});
 			});
-			test('close', () => server.close());
+			test('close', () => close(server));
 		});
 	});
 
@@ -384,22 +378,18 @@ test('SableServer', (test) => {
 			documentRoot: testDirectory,
 			ws: {port: 65535},
 		});
-		test('start', () => {
-			return Promise.all([
-				server1.start(),
-				server2.start(),
-			])
-			.then(() => {
-				throw new Error('Resolved unexpectedly');
-			})
-			.catch(() => {});
+		test('start 1', () => server1.start());
+		test('start 2', () => {
+			return server2.start()
+			.then(
+				() => {
+					throw new Error('Resolved unexpectedly');
+				},
+				() => {}
+			);
 		});
-		test('close', () => {
-			return Promise.all([
-				server1.close(),
-				server2.close(),
-			]);
-		});
+		test('close 1', () => close(server1));
+		test('close 2', () => close(server2));
 	});
 
 	test('contentTypes', (test) => {
@@ -441,9 +431,7 @@ test('SableServer', (test) => {
 
 		});
 
-		test('close', () => {
-			return server.close();
-		});
+		test('close', () => close(server));
 
 	});
 
@@ -496,10 +484,8 @@ test('SableServer', (test) => {
 			});
 		});
 
-		test('close', () => {
-			ws.close();
-			return server.close();
-		});
+		test('close ws', () => ws.close());
+		test('close', () => close(server));
 
 	});
 

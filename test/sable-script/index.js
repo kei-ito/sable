@@ -6,7 +6,7 @@ const test = require('@nlib/test');
 const {Builder, By} = require('selenium-webdriver');
 const {Local} = require('browserstack-local');
 const packageJSON = require('../../package.json');
-const {SableServer} = require('../../src/-sable-server');
+const {SableServer, close} = require('../..');
 const env = require('../lib/env');
 const dateString = require('../lib/date-string');
 const directories = require('../lib/directories');
@@ -256,9 +256,7 @@ test('sable-script', (test) => {
 				});
 			});
 
-			test('close', () => {
-				return server.close();
-			});
+			test('close', () => close(server));
 
 			test('wait a while', () => {
 				return driver.sleep(1000);

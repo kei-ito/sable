@@ -1,6 +1,6 @@
 const env = require('../env');
 module.exports = [];
-if (env.BROWSERSTACK && env.TRAVIS_NODE_VERSION === '9') {
+if (env.BROWSERSTACK && env.TRAVIS_NODE_VERSION === '10') {
 	module.exports.push(
 		{
 			os: 'OS X',

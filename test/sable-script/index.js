@@ -72,7 +72,7 @@ test('sable-script', (test) => {
 					test('wait for bsLocal.isRunning()', () => {
 						return new Promise((resolve, reject) => {
 							let count = 0;
-							function check() {
+							const check = function () {
 								if (bsLocal.isRunning()) {
 									resolve();
 								} else if (count++ < 30) {
@@ -80,7 +80,7 @@ test('sable-script', (test) => {
 								} else {
 									reject(new Error('Failed to start browserstack-local'));
 								}
-							}
+							};
 							check();
 						});
 					});

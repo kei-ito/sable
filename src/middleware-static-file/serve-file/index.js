@@ -1,8 +1,8 @@
 const fs = require('fs');
 const url = require('url');
-const promisify = require('@nlib/promisify');
+const {promisify} = require('@nlib/util');
 const {SnippetInjector} = require('../../-snippet-injector');
-const stat = promisify(fs.stat, fs);
+const stat = promisify(fs.stat);
 
 exports.serveFile = function serveFile(filePath, req, res, server) {
 	return stat(filePath)

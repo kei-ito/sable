@@ -1,16 +1,16 @@
 const path = require('path');
 const fs = require('fs');
 const {PassThrough} = require('stream');
-const promisify = require('@nlib/promisify');
+const {promisify} = require('@nlib/util');
 const humanReadable = require('@nlib/human-readable');
 const DateString = require('@nlib/date-string');
 const {TemplateString} = require('@nlib/template-string');
 const {SnippetInjector} = require('../../-snippet-injector');
 const {serveFile} = require('../serve-file');
 
-const stat = promisify(fs.stat, fs);
-const readdir = promisify(fs.readdir, fs);
-const readFile = promisify(fs.readFile, fs);
+const stat = promisify(fs.stat);
+const readdir = promisify(fs.readdir);
+const readFile = promisify(fs.readFile);
 const date = new DateString('[YYYY]-[MM]-[DD] [hh]:[mm]:[ss]');
 
 exports.indexPage = function indexPage(directoryPath, req, res, server) {

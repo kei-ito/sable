@@ -242,7 +242,7 @@ t.test('sable-script', (t) => {
 				t.test('mark the result', (t) => {
 					const failures = new Set();
 					for (const {results} of tests) {
-						if (results.failures) {
+						if (results && results.failures) {
 							for (const failure of results.failures) {
 								failures.add(failure);
 							}

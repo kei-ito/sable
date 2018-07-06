@@ -241,9 +241,11 @@ t.test('sable-script', (t) => {
 			if (env.BROWSERSTACK) {
 				t.test('mark the result', (t) => {
 					const failures = new Set();
-					for (const test of tests) {
-						for (const failure of test.results.failures) {
-							failures.add(failure);
+					for (const {results} of tests) {
+						if (results.failures) {
+							for (const failure of results.failures) {
+								failures.add(failure);
+							}
 						}
 					}
 					const status = failures.size === 0 ? 'passed' : 'failed';

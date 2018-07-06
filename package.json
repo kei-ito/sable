@@ -9,7 +9,7 @@
 	},
 	"license": "MIT",
 	"engines": {
-		"node": ">=6"
+		"node": ">=8"
 	},
 	"repository": "kei-ito/sable",
 	"main": "./src/index.js",

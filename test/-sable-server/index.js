@@ -193,7 +193,7 @@ t.test('SableServer', (t) => {
 						'<script>const messageElement = 0</script>',
 						'<h1>Title</h1>',
 						'<p>paragraph</p>',
-					],
+					]
 				);
 				t.end();
 			});

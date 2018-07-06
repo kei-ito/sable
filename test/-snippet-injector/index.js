@@ -1,4 +1,4 @@
-const test = require('@nlib/test');
+const t = require('tap');
 const {PassThrough} = require('stream');
 const {SnippetInjector} = require('../../src/-snippet-injector');
 
@@ -30,9 +30,9 @@ const tests = [
 	},
 ];
 
-test('SnippetInjector', (test) => {
+t.test('SnippetInjector', (t) => {
 	for (const {server, source, expected} of tests) {
-		test(source, (test) => {
+		t.test(source, (t) => {
 			const replaceStream = new SnippetInjector(server);
 			return new Promise((resolve, reject) => {
 				const writer = new PassThrough();
@@ -63,8 +63,9 @@ test('SnippetInjector', (test) => {
 				});
 			})
 			.then((actual) => {
-				test.compare(actual, expected);
+				t.match(actual, expected);
 			});
 		});
 	}
+	t.end();
 });

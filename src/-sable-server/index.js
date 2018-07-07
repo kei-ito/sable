@@ -103,69 +103,56 @@ exports.SableServer = class SableServer extends Server {
 		]).then(() => callback(), callback);
 	}
 
-	start(...args) {
-		return listen(this, ...args)
-		.then(() => Promise.all([
+	async start(...args) {
+		await listen(this, ...args);
+		await Promise.all([
 			this.startWebSocketServer(),
 			this.startWatcher(),
-		]))
-		.then(() => this.on('request', this.onRequest.bind(this)));
+		]);
+		this.on('request', this.onRequest.bind(this));
+		return this;
 	}
 
-	startWebSocketServer(options) {
-		if (this.wss) {
-			return Promise.resolve(this.wss);
-		}
-		options = Object.assign(
-			{port: this.address().port + 1},
-			options || this.config.ws
-		);
-		const server = options.server || new Server();
-		return (
-			options.server
-			? Promise.resolve(options)
-			: listen(new Server(), options)
-			.then((server) => {
+	async startWebSocketServer(options) {
+		if (!this.wss) {
+			options = Object.assign(
+				{port: this.address().port + 1},
+				options || this.config.ws
+			);
+			if (!options.server) {
+				const server = await listen(new Server(), options);
 				options.port = server.address().port;
-				return close(server).then(() => options);
-			})
-		)
-		.then((options) => {
+				await close(server);
+			}
 			this.wss = new WebSocketServer(options);
-		})
-		.catch((error) => {
-			error.server = server;
-			throw error;
-		});
+		}
+		return this.wss;
 	}
 
-	startWatcher(options) {
-		if (this.watcher) {
-			return Promise.resolve(this.watcher);
-		}
-		options = Object.assign(
-			{
-				ignoreInitial: true,
-				awaitWriteFinish: {stabilityThreshold: 200},
-				ignored: [
-					'**/node_modules/**/*',
-					'**/.git/**/*',
-				],
-			},
-			options || this.config.chokidar
-		);
-		return new Promise((resolve, reject) => {
-			const watcher = chokidar.watch(this.documentRoot, options)
-			.on('all', (event, filePath) => {
-				console.log(`${event} ${filePath}`);
-				this.onChange(filePath);
-			})
-			.once('error', reject)
-			.once('ready', () => {
-				this.watcher = watcher;
-				resolve(watcher);
+	async startWatcher(options) {
+		if (!this.watcher) {
+			options = Object.assign(
+				{
+					ignoreInitial: true,
+					awaitWriteFinish: {stabilityThreshold: 200},
+					ignored: ['**/node_modules/**/*', '**/.git/**/*'],
+				},
+				options || this.config.chokidar
+			);
+			await new Promise((resolve, reject) => {
+				const watcher = chokidar.watch(this.documentRoot, options)
+				.on('all', (event, filePath) => {
+					console.log(`${event} ${filePath}`);
+					this.onChange(filePath);
+				})
+				.once('error', reject)
+				.once('ready', () => {
+					this.watcher = watcher;
+					resolve(watcher);
+				});
 			});
-		});
+		}
+		return this.watcher;
 	}
 
 	onChange(filePath) {
@@ -175,45 +162,35 @@ exports.SableServer = class SableServer extends Server {
 	}
 
 	sendMessage(message) {
-		if (!this.wss) {
-			return;
-		}
-		for (const client of this.wss.clients) {
-			if (client.readyState === client.OPEN) {
-				client.send(message);
+		if (this.wss) {
+			for (const client of this.wss.clients) {
+				if (client.readyState === client.OPEN) {
+					client.send(message);
+				}
 			}
 		}
+		return this;
 	}
 
-	nextRequest(filter) {
-		return new Promise((resolve) => {
+	async nextRequest(filter) {
+		const nextRequest = await new Promise((resolve) => {
 			this.once('request', (req, res) => {
 				if (!filter || filter({req, res})) {
 					resolve({req, res});
 				}
 			});
 		});
+		return nextRequest;
 	}
 
-	nextResponse(resFilter, reqFilter) {
-		return this.nextRequest(reqFilter).then(({req, res}) => {
-			return new Promise((resolve, reject) => {
-				res
-				.once('error', reject)
-				.once('finish', () => {
-					if (!resFilter || resFilter({req, res})) {
-						resolve({req, res});
-					}
-				});
-			});
-		});
-	}
-
-	nextWebSocketConnection(filter) {
-		return new Promise((resolve) => {
-			this.wss.once('connection', (client, req) => {
-				if (!filter || filter({client, req})) {
-					resolve({client, req});
+	async nextResponse(resFilter, reqFilter) {
+		const {req, res} = await this.nextRequest(reqFilter);
+		return new Promise((resolve, reject) => {
+			res
+			.once('error', reject)
+			.once('finish', () => {
+				if (!resFilter || resFilter({req, res})) {
+					resolve({req, res});
 				}
 			});
 		});

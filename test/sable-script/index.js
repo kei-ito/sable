@@ -122,9 +122,11 @@ t.test('sable-script', (t) => {
 
 			t.test('GET /', () => {
 				return Promise.all([
-					server.nextWebSocketConnection(({req}) => {
-						params.ua0 = req.headers['user-agent'];
-						return true;
+					new Promise((resolve) => {
+						server.wss.once('connection', (client, req) => {
+							params.ua0 = req.headers['user-agent'];
+							resolve();
+						});
 					}),
 					driver.get(`http://127.0.0.1:${server.address().port}/`),
 				]);
@@ -133,9 +135,11 @@ t.test('sable-script', (t) => {
 			t.test('change index.html', () => {
 				const targetFile = path.join(server.documentRoot[0], 'index.html');
 				return Promise.all([
-					server.nextWebSocketConnection(({req}) => {
-						params.ua1 = req.headers['user-agent'];
-						return true;
+					new Promise((resolve) => {
+						server.wss.once('connection', (client, req) => {
+							params.ua1 = req.headers['user-agent'];
+							resolve();
+						});
 					}),
 					new Promise((resolve, reject) => {
 						fs.utimes(targetFile, new Date(), new Date(), (error) => {

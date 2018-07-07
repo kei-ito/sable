@@ -2,7 +2,6 @@ const path = require('path');
 const fs = require('fs');
 const {PassThrough} = require('stream');
 const {promisify} = require('util');
-const humanReadable = require('@nlib/human-readable');
 const DateString = require('@nlib/date-string');
 const {TemplateString} = require('@nlib/template-string');
 const {SnippetInjector} = require('../../-snippet-injector');
@@ -71,8 +70,6 @@ exports.indexPage = async (directoryPath, req, res, server) => {
 				if (isDirectory) {
 					name = `${name}/`;
 					size = '';
-				} else {
-					size = req.parsedURL.query.raw ? size : humanReadable(size);
 				}
 				atime = date(atime);
 				birthtime = date(birthtime);

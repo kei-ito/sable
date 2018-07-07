@@ -22,7 +22,6 @@
 	},
 	"dependencies": {
 		"@nlib/content-type": "^1.1.1",
-		"@nlib/date-string": "^1.0.1",
 		"@nlib/template-string": "^1.3.0",
 		"@nlib/util": "^0.1.2",
 		"chalk": "^2.4.1",

@@ -6,7 +6,6 @@ const {Local} = require('browserstack-local');
 const packageJSON = require('../../package.json');
 const {SableServer, close} = require('../..');
 const env = require('../lib/env');
-const dateString = require('../lib/date-string');
 const directories = require('../lib/directories');
 const capabilities = require('../lib/capabilities');
 const markResult = require('../lib/mark-result');
@@ -42,8 +41,8 @@ t.test('sable-script', (t) => {
 			if (env.BROWSERSTACK) {
 				t.test('setup BrowserStack', (t) => {
 					const project = packageJSON.name;
-					const build = `${project}#${env.TRAVIS_BUILD_NUMBER || dateString()}`;
-					const localIdentifier = (`${build}${dateString}`).replace(/[^\w-]/g, '');
+					const build = `${project}#${env.TRAVIS_BUILD_NUMBER || new Date().toISOString()}`;
+					const localIdentifier = (`${build}${new Date().toISOString()}`).replace(/[^\w-]/g, '');
 
 					t.test('setup bsLocal', () => {
 						// https://github.com/browserstack/browserstack-local-nodejs/blob/master/lib/Local.js

@@ -2,7 +2,6 @@ const path = require('path');
 const fs = require('fs');
 const {PassThrough} = require('stream');
 const {promisify} = require('util');
-const DateString = require('@nlib/date-string');
 const {TemplateString} = require('@nlib/template-string');
 const {SnippetInjector} = require('../../-snippet-injector');
 const {serveFile} = require('../serve-file');
@@ -10,7 +9,6 @@ const {serveFile} = require('../serve-file');
 const stat = promisify(fs.stat);
 const readdir = promisify(fs.readdir);
 const readFile = promisify(fs.readFile);
-const date = new DateString('[YYYY]-[MM]-[DD] [hh]:[mm]:[ss]');
 const templates = Promise.all(
 	['index.html', 'breadcrumb.html', 'file.html']
 	.map(async (templateFileName) => new TemplateString(await readFile(path.join(__dirname, 'template', templateFileName), 'utf8')))
@@ -44,7 +42,7 @@ exports.indexPage = async (directoryPath, req, res, server) => {
 	.pipe(res);
 	writer.end(indexHTML({
 		title: req.parsedURL.pathname,
-		createdAt: date(startedAt),
+		createdAt: `${new Date(startedAt).toISOString()}`,
 		duration: Date.now() - startedAt,
 		breadcrumbs: `home${req.parsedURL.pathname}`.split('/')
 		.reverse()
@@ -65,19 +63,16 @@ exports.indexPage = async (directoryPath, req, res, server) => {
 			}),
 			...results
 			.map(({name, stats}) => {
-				let {size, atime, birthtime} = stats;
-				const isDirectory = stats.isDirectory();
-				if (isDirectory) {
+				let {size} = stats;
+				if (stats.isDirectory()) {
 					name = `${name}/`;
 					size = '';
 				}
-				atime = date(atime);
-				birthtime = date(birthtime);
 				return fileHTML({
 					name,
 					size,
-					modifiedAt: atime,
-					createdAt: birthtime,
+					modifiedAt: new Date(stats.atime).toISOString(),
+					createdAt: new Date(stats.birthtime).toISOString(),
 				});
 			}),
 		]

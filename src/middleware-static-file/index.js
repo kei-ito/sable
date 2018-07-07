@@ -8,15 +8,15 @@ exports.staticFile = async function staticFile(req, res, next, server) {
 		const filePath = path.join(directory, ...pathname.split('/'));
 		try {
 			await (pathname.endsWith('/') ? indexPage : serveFile)(filePath, req, res, server);
-			break;
+			return;
 		} catch (error) {
 			if (!(error && error.code === 'ENOENT')) {
-				throw error;
+				res.statusCode = 500;
+				res.end();
+				return;
 			}
 		}
 	}
-	if (!res.finished) {
-		res.statusCode = 404;
-		res.end();
-	}
+	res.statusCode = 404;
+	res.end();
 };

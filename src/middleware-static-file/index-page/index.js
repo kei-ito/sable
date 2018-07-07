@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const {PassThrough} = require('stream');
-const {promisify} = require('@nlib/util');
+const {promisify} = require('util');
 const humanReadable = require('@nlib/human-readable');
 const DateString = require('@nlib/date-string');
 const {TemplateString} = require('@nlib/template-string');
@@ -12,91 +12,78 @@ const stat = promisify(fs.stat);
 const readdir = promisify(fs.readdir);
 const readFile = promisify(fs.readFile);
 const date = new DateString('[YYYY]-[MM]-[DD] [hh]:[mm]:[ss]');
+const templates = Promise.all(
+	['index.html', 'breadcrumb.html', 'file.html']
+	.map(async (templateFileName) => new TemplateString(await readFile(path.join(__dirname, 'template', templateFileName), 'utf8')))
+);
 
-exports.indexPage = function indexPage(directoryPath, req, res, server) {
+exports.indexPage = async (directoryPath, req, res, server) => {
 	const startedAt = Date.now();
-	return readdir(directoryPath)
-	.then((fileNames) => Promise.all(
-		fileNames.map((name) => {
+	const results = await Promise.all(
+		(await readdir(directoryPath))
+		.map((name) => {
 			const filePath = path.join(directoryPath, name);
 			return stat(filePath).then((stats) => ({name, filePath, stats}));
 		})
-	))
-	.then((results) => {
-		const {contentType, indexFileName = 'index.html'} = server;
-		const indexFile = results.find(({filePath, stats}) => {
-			return stats.isFile()
-			&& filePath.endsWith(indexFileName)
-			&& contentType.get(filePath) === contentType.get('.html');
-		});
-		if (indexFile) {
-			return serveFile(indexFile.filePath, req, res, server);
-		}
-		const writer = new PassThrough();
-		res.writeHead(200, {'content-type': contentType.get('.html')});
-		return Promise.all(
-			[
-				path.join(__dirname, 'template', 'index.html'),
-				path.join(__dirname, 'template', 'breadcrumb.html'),
-				path.join(__dirname, 'template', 'file.html'),
-			]
-			.map((templateFilePath) => {
-				return readFile(templateFilePath, 'utf8')
-				.then((template) => new TemplateString(template));
-			})
+	);
+	const {contentType, indexFileName = 'index.html'} = server;
+	const htmlContentType = contentType.get('index.html');
+	const indexFile = results.find(
+		({filePath, stats}) => stats.isFile()
+		&& filePath.endsWith(indexFileName)
+		&& contentType.get(filePath) === htmlContentType
+	);
+	if (indexFile) {
+		serveFile(indexFile.filePath, req, res, server);
+		return;
+	}
+	res.writeHead(200, {'content-type': htmlContentType});
+	const [indexHTML, breadcrumbHTML, fileHTML] = await templates;
+	const writer = new PassThrough();
+	writer
+	.pipe(new SnippetInjector(server))
+	.pipe(res);
+	writer.end(indexHTML({
+		title: req.parsedURL.pathname,
+		createdAt: date(startedAt),
+		duration: Date.now() - startedAt,
+		breadcrumbs: `home${req.parsedURL.pathname}`.split('/')
+		.reverse()
+		.map(
+			(name, index) => (0 < index ? breadcrumbHTML({
+				pathname: '../'.repeat(index - 1),
+				name,
+			}) : name).trim()
 		)
-		.then(([indexHTML, breadcrumbHTML, fileHTML]) => {
-			return new Promise((resolve, reject) => {
-				res.writeHead(200, {'content-type': 'text/html'});
-				writer
-				.pipe(new SnippetInjector(server))
-				.pipe(res)
-				.once('error', reject)
-				.once('finish', resolve);
-				writer.end(indexHTML({
-					title: req.parsedURL.pathname,
-					createdAt: date(startedAt),
-					duration: Date.now() - startedAt,
-					breadcrumbs: `home${req.parsedURL.pathname}`.split('/')
-					.reverse()
-					.map((name, index) => {
-						return (0 < index ? breadcrumbHTML({
-							pathname: '../'.repeat(index - 1),
-							name,
-						}) : name).trim();
-					})
-					.reverse()
-					.join(''),
-					files: [
-						fileHTML({
-							name: '..',
-							size: '',
-							modifiedAt: '',
-							createdAt: '',
-						}),
-						...results
-						.map(({name, stats}) => {
-							let {size, atime, birthtime} = stats;
-							const isDirectory = stats.isDirectory();
-							if (isDirectory) {
-								name = `${name}/`;
-								size = '';
-							} else {
-								size = req.parsedURL.query.raw ? size : humanReadable(size);
-							}
-							atime = date(atime);
-							birthtime = date(birthtime);
-							return fileHTML({
-								name,
-								size,
-								modifiedAt: atime,
-								createdAt: birthtime,
-							});
-						}),
-					]
-					.join('\n'),
-				}));
-			});
-		});
-	});
+		.reverse()
+		.join(''),
+		files: [
+			fileHTML({
+				name: '..',
+				size: '',
+				modifiedAt: '',
+				createdAt: '',
+			}),
+			...results
+			.map(({name, stats}) => {
+				let {size, atime, birthtime} = stats;
+				const isDirectory = stats.isDirectory();
+				if (isDirectory) {
+					name = `${name}/`;
+					size = '';
+				} else {
+					size = req.parsedURL.query.raw ? size : humanReadable(size);
+				}
+				atime = date(atime);
+				birthtime = date(birthtime);
+				return fileHTML({
+					name,
+					size,
+					modifiedAt: atime,
+					createdAt: birthtime,
+				});
+			}),
+		]
+		.join('\n'),
+	}));
 };

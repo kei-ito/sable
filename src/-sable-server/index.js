@@ -10,6 +10,7 @@ const {listen} = require('../listen');
 const {close} = require('../close');
 const {staticFile} = require('../middleware-static-file');
 const {sableScript} = require('../middleware-sable-script');
+const {absolutify} = require('@nlib/util');
 
 exports.SableServer = class SableServer extends Server {
 
@@ -27,8 +28,7 @@ exports.SableServer = class SableServer extends Server {
 		if (config.documentRoot.length === 0) {
 			config.documentRoot.push(process.cwd());
 		}
-		config.documentRoot = config.documentRoot
-		.map((directory) => path.isAbsolute(directory) ? directory : path.join(process.cwd(), directory));
+		config.documentRoot = config.documentRoot.map((directory) => absolutify(directory));
 		Object.assign(
 			super(),
 			{
@@ -46,13 +46,22 @@ exports.SableServer = class SableServer extends Server {
 		return this.wss ? this.wss.address().port : null;
 	}
 
-	onRequest(req, res) {
-		const label = `#${this.count++} ${req.method} ${req.url}`;
+	getLabel(req) {
+		return `#${this.count++} ${req.method} ${req.url}`;
+	}
+
+	filterRequest(req) {
 		req.parsedURL = url.parse(req.url, true);
 		req.startedAt = new Date();
+		req.label = this.getLabel(req);
+		return req;
+	}
+
+	onRequest(req, res) {
+		this.filterRequest(req);
 		const timer = setInterval(() => {
 			const elapsed = new Date() - req.startedAt;
-			console.log(`pending (${elapsed}ms): ${label}`);
+			console.log(`pending (${elapsed}ms): ${req.label}`);
 			if (this.timeout < elapsed) {
 				res.emit('error', new Error(`Timeout of ${this.timeout}ms exceeded`));
 			}
@@ -68,7 +77,7 @@ exports.SableServer = class SableServer extends Server {
 		})
 		.once('finish', () => {
 			clearInterval(timer);
-			console.log(chalk.dim(`${label} → ${res.statusCode} (${new Date() - req.startedAt}ms)`));
+			console.log(chalk.dim(`${req.label} → ${res.statusCode} (${new Date() - req.startedAt}ms)`));
 		});
 		const middlewares = this.middlewares.slice();
 		const next = () => {

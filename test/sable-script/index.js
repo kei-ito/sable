@@ -1,8 +1,6 @@
-const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
 const cp = require('@nlib/cp');
-const test = require('@nlib/test');
 const {Builder, By} = require('selenium-webdriver');
 const {Local} = require('browserstack-local');
 const packageJSON = require('../../package.json');
@@ -12,12 +10,13 @@ const dateString = require('../lib/date-string');
 const directories = require('../lib/directories');
 const capabilities = require('../lib/capabilities');
 const markResult = require('../lib/mark-result');
+const t = require('tap');
 
-test('sable-script', (test) => {
+t.test('sable-script', (t) => {
 
 	capabilities
 	.forEach((capability) => {
-		test(JSON.stringify(capability), (test) => {
+		t.test(JSON.stringify(capability), (t) => {
 			const index = capabilities.indexOf(capability);
 			const testDirectory = path.join(directories.temp, `sable-script-${index}`);
 			const params = {
@@ -31,21 +30,22 @@ test('sable-script', (test) => {
 				documentRoot: testDirectory,
 			});
 
-			test(`copy ${directories.src} to ${testDirectory}`, () => {
-				return cp(directories.src, testDirectory);
+			const tests = [];
+			t.afterEach((done) => {
+				tests.push(...t.subtests);
+				done();
 			});
 
-			test('start a server', () => {
-				return server.start();
-			});
+			t.test(`copy ${directories.src} to ${testDirectory}`, () => cp(directories.src, testDirectory));
+			t.test('start a server', () => server.start());
 
 			if (env.BROWSERSTACK) {
-				test('setup BrowserStack', (test) => {
+				t.test('setup BrowserStack', (t) => {
 					const project = packageJSON.name;
 					const build = `${project}#${env.TRAVIS_BUILD_NUMBER || dateString()}`;
 					const localIdentifier = (`${build}${dateString}`).replace(/[^\w-]/g, '');
 
-					test('setup bsLocal', () => {
+					t.test('setup bsLocal', () => {
 						// https://github.com/browserstack/browserstack-local-nodejs/blob/master/lib/Local.js
 						return new Promise((resolve, reject) => {
 							bsLocal = new Local();
@@ -69,7 +69,7 @@ test('sable-script', (test) => {
 						});
 					});
 
-					test('wait for bsLocal.isRunning()', () => {
+					t.test('wait for bsLocal.isRunning()', () => {
 						return new Promise((resolve, reject) => {
 							let count = 0;
 							const check = function () {
@@ -85,7 +85,7 @@ test('sable-script', (test) => {
 						});
 					});
 
-					test('add some properties', () => {
+					t.test('add some properties', (t) => {
 						Object.assign(
 							capability,
 							{
@@ -97,27 +97,30 @@ test('sable-script', (test) => {
 								'browserstack.key': env.BROWSERSTACK_ACCESS_KEY,
 							}
 						);
+						t.end();
 					});
 
+					t.end();
 				});
 			}
 
-			test('create a builder', () => {
+			t.test('create a builder', (t) => {
 				builder = new Builder().withCapabilities(capability);
 				if (env.BROWSERSTACK) {
 					builder.usingServer('http://hub-cloud.browserstack.com/wd/hub');
 				}
 				driver = builder.build();
+				t.end();
 			});
 
-			test('get session', () => {
+			t.test('get session', () => {
 				return driver.getSession()
 				.then((session) => {
 					params.session = session;
 				});
 			});
 
-			test('GET /', () => {
+			t.test('GET /', () => {
 				return Promise.all([
 					server.nextWebSocketConnection(({req}) => {
 						params.ua0 = req.headers['user-agent'];
@@ -127,7 +130,7 @@ test('sable-script', (test) => {
 				]);
 			});
 
-			test('change index.html', () => {
+			t.test('change index.html', () => {
 				const targetFile = path.join(server.documentRoot[0], 'index.html');
 				return Promise.all([
 					server.nextWebSocketConnection(({req}) => {
@@ -146,36 +149,37 @@ test('sable-script', (test) => {
 				]);
 			});
 
-			test('compare requesters', () => {
-				assert.equal(params.ua0, params.ua1);
+			t.test('compare requesters', (t) => {
+				t.equal(params.ua0, params.ua1);
+				t.end();
 			});
 
-			test('put a value', () => {
+			t.test('put a value', () => {
 				return driver.executeScript(`return window.${params.key} = '${params.key}';`);
 			});
 
-			test('get a value', () => {
+			t.test('get a value', (t) => {
 				return driver.executeScript(`return window.${params.key};`)
 				.then((returned) => {
-					assert.equal(returned, params.key);
+					t.equal(returned, params.key);
 				});
 			});
 
-			test('get the first h1', () => {
+			t.test('get the first h1', () => {
 				return driver.findElement(By.tagName('h1'))
 				.then((webElement) => {
 					params.beforeh1 = webElement;
 				});
 			});
 
-			test('get the size of the first h1', () => {
-				return params.beforeh1.getSize()
+			t.test('get the size of the first h1', () => {
+				return params.beforeh1.getRect()
 				.then((size) => {
 					params.beforeSize = size;
 				});
 			});
 
-			test('change style.css', () => {
+			t.test('change style.css', () => {
 				const targetFile = path.join(server.documentRoot[0], 'style.css');
 				return Promise.all([
 					server.nextResponse(({req}) => {
@@ -193,76 +197,94 @@ test('sable-script', (test) => {
 				]);
 			});
 
-			test('confirm no reload was occurred', () => {
+			t.test('confirm no reload was occurred', (t) => {
 				return driver.executeScript(`return window.${params.key};`)
 				.then((returned) => {
-					assert.equal(returned, params.key);
+					t.equal(returned, params.key);
 				});
 			});
 
-			test('wait a while', () => {
+			t.test('wait a while', () => {
 				return driver.sleep(500);
 			});
 
-			test('get the first h1 again', () => {
+			t.test('get the first h1 again', () => {
 				return driver.findElement(By.tagName('h1'))
 				.then((webElement) => {
 					params.afterh1 = webElement;
 				});
 			});
 
-			test('get the size of the first h1 again', () => {
-				return params.afterh1.getSize()
+			t.test('get the size of the first h1 again', () => {
+				return params.afterh1.getRect()
 				.then((size) => {
 					params.afterSize = size;
 				});
 			});
 
-			test('compare sizes', (test) => {
-				test(`beforeSize: ${params.beforeSize.height}`, () => {
-					assert(0 < params.beforeSize.height);
+			t.test('compare sizes', (t) => {
+				t.test(`beforeSize: ${params.beforeSize.height}`, (t) => {
+					t.ok(0 < params.beforeSize.height);
+					t.end();
 				});
-				test(`afterSize: ${params.afterSize.height}`, () => {
-					assert(0 < params.afterSize.height);
+				t.test(`afterSize: ${params.afterSize.height}`, (t) => {
+					t.ok(0 < params.afterSize.height);
+					t.end();
 				});
-				test('compare', () => {
-					assert(params.beforeSize.height < params.afterSize.height);
+				t.test('compare', (t) => {
+					t.ok(params.beforeSize.height < params.afterSize.height);
+					t.end();
 				});
+				t.end();
 			});
 
 			if (env.BROWSERSTACK) {
-				test('mark the result', (test) => {
-					const errors = test.children.filter(({failed}) => {
-						return failed;
-					});
-					const status = errors.length === 0 ? 'passed' : 'failed';
-					test(`mark "${status}"`, () => {
+				t.test('mark the result', (t) => {
+					const failures = new Set();
+					for (const {results} of tests) {
+						if (results && results.failures) {
+							for (const failure of results.failures) {
+								failures.add(failure);
+							}
+						}
+					}
+					const status = failures.size === 0 ? 'passed' : 'failed';
+					t.test(`mark "${status}"`, () => {
 						return markResult({
 							session: params.session,
 							driver,
 							status,
 						});
 					});
+					t.end();
 				});
 			}
 
-			test('quit driver', () => {
+			t.test('quit driver', () => {
 				return driver.quit();
 			});
 
-			test('stop bsLocal', () => {
-				return bsLocal && new Promise((resolve) => {
-					bsLocal.stop(resolve);
-				});
+			t.test('stop bsLocal', () => {
+				if (bsLocal) {
+					return new Promise((resolve) => {
+						bsLocal.stop(resolve);
+					});
+				} else {
+					return Promise.resolve();
+				}
 			});
 
-			test('close', () => close(server));
+			t.test('close', () => close(server));
 
-			test('wait a while', () => {
+			t.test('wait a while', () => {
 				return driver.sleep(1000);
 			});
 
-		}, {timeout: 60000});
+			t.end();
+
+		});
 	});
+
+	t.end();
 
 });

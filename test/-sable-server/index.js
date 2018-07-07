@@ -1,120 +1,125 @@
-const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
 const WebSocket = require('ws');
 const cp = require('@nlib/cp');
-const test = require('@nlib/test');
+const t = require('tap');
+const {lineSplitter} = require('@nlib/util');
 const {SableServer, listen, close} = require('../..');
 const request = require('../lib/request');
 const readStream = require('../lib/read-stream');
 const directories = require('../lib/directories');
 
-test('SableServer', (test) => {
+t.test('SableServer', (t) => {
 
-	test('constructor', () => {
-		assert.doesNotThrow(() => new SableServer());
+	t.test('constructor', (t) => {
+		t.doesNotThrow(() => new SableServer());
+		t.end();
 	});
 
-	test('middlewares', (test) => {
-
-		test('is an array', () => {
-			assert(Array.isArray(new SableServer().middlewares));
-		});
-
-		test('sandwich', () => {
+	t.test('middlewares', (t) => {
+		t.ok(Array.isArray(new SableServer().middlewares));
+		t.test('sandwich', (t) => {
 			const middleware1 = (req, res, next) => next();
 			const middleware2 = (req, res, next) => next();
 			const expected = [middleware1, middleware2];
-			assert.deepEqual(
+			t.match(
 				new SableServer({middlewares: expected.slice()}).middlewares.slice(1, 3),
 				expected
 			);
+			t.end();
 		});
+		t.end();
 	});
 
-	test('documentRoot', (test) => {
-
-		test('use pwd', () => {
+	t.test('documentRoot', (t) => {
+		t.test('use pwd', (t) => {
 			const server = new SableServer();
 			const expected = [process.cwd()];
-			assert.deepEqual(server.documentRoot, expected);
+			t.match(server.documentRoot, expected);
+			t.end();
 		});
-
-		test('convert to an array', () => {
+		t.test('convert to an array', (t) => {
 			const testDirectory = path.join(directories.temp, 'documentRoot');
 			const server = new SableServer({documentRoot: testDirectory});
 			const expected = [testDirectory];
-			assert.deepEqual(server.documentRoot, expected);
+			t.match(server.documentRoot, expected);
+			t.end();
 		});
-
-		test('copy an array', () => {
+		t.test('copy an array', (t) => {
 			const testDirectory = path.join(directories.temp, 'documentRoot');
 			const server = new SableServer({documentRoot: [testDirectory]});
 			const expected = [testDirectory];
-			assert.deepEqual(server.documentRoot, expected);
+			t.match(server.documentRoot, expected);
+			t.end();
 		});
-
-		test('relative paths', () => {
+		t.test('relative paths', (t) => {
 			const testDirectory = path.join(directories.temp, 'documentRoot');
 			const relativePath = 'relative-path-directory';
 			const server = new SableServer({documentRoot: [testDirectory, relativePath]});
 			const expected = [testDirectory, path.join(process.cwd(), relativePath)];
-			assert.deepEqual(server.documentRoot, expected);
+			t.match(server.documentRoot, expected);
+			t.end();
 		});
+		t.end();
 	});
 
-	test('wsPort', () => {
+	t.test('wsPort', (t) => {
 		const server = new SableServer();
-		assert.equal(server.wsPort, null);
+		t.equal(server.wsPort, null);
+		t.end();
 	});
 
-	test('sendMessage', (test) => {
-		test('use available connections', () => {
-			assert.doesNotThrow(() => {
+	t.test('sendMessage', (t) => {
+		t.test('use available connections', (t) => {
+			t.doesNotThrow(() => {
 				new SableServer().sendMessage('message');
 			});
+			t.end();
 		});
+		t.end();
 	});
 
-	test('listen/close', (test) => {
+	t.test('listen/close', (t) => {
 		const server = new SableServer();
-		test('listen', () => {
+		t.test('listen', (t) => {
 			return listen(server)
 			.then((resolved) => {
-				assert(server === resolved);
-				assert(0 < server.address().port);
+				t.ok(server === resolved);
+				t.ok(0 < server.address().port);
 			});
 		});
-		test('close', () => close(server));
+		t.test('close', () => close(server));
+		t.end();
 	});
 
-	test('use an avaiable port', (test) => {
+	t.test('use an avaiable port', (t) => {
 		const server1 = new SableServer();
 		const server2 = new SableServer();
-		test('listen', () => {
+		t.test('listen', (t) => {
 			return listen(server1)
 			.then((resolved) => {
-				assert(server1 === resolved);
-				assert(0 < server1.address().port);
+				t.ok(server1 === resolved);
+				t.ok(0 < server1.address().port);
 				return listen(server2);
 			})
 			.then((resolved) => {
-				assert(server2 === resolved);
-				assert(server1.address().port < server2.address().port);
+				t.ok(server2 === resolved);
+				t.ok(server1.address().port < server2.address().port);
 			});
 		});
-		test('close 1', () => close(server1));
-		test('close 2', () => close(server2));
+		t.test('close 1', () => close(server1));
+		t.test('close 2', () => close(server2));
+		t.end();
 	});
 
-	test('no avaiable ports', (test) => {
+	t.test('no avaiable ports', (t) => {
 		const server1 = new SableServer({listen: 65535});
 		const server2 = new SableServer({listen: 65535});
-		test('listen', () => {
+		t.test('listen', (t) => {
 			return listen(server1)
 			.then((resolved) => {
-				assert(server1 === resolved);
-				assert(0 < server1.address().port);
+				t.ok(server1 === resolved);
+				t.ok(0 < server1.address().port);
 				return listen(server2);
 			})
 			.then(() => {
@@ -122,129 +127,143 @@ test('SableServer', (test) => {
 			})
 			.catch(() => {});
 		});
-		test('close 1', () => close(server1));
-		test('close 2', () => close(server2));
+		t.test('close 1', () => close(server1));
+		t.test('close 2', () => close(server2));
+		t.end();
 	});
 
-	test('start/close', (test) => {
+	t.test('start/close', (t) => {
 		const testDirectory = path.join(directories.temp, 'start-close');
 		const server = new SableServer({documentRoot: testDirectory});
-		test('copy files', () => cp(directories.src, testDirectory));
-		test('start', () => {
+		t.test('copy files', () => cp(directories.src, testDirectory));
+		t.test('start', (t) => {
 			return server.start()
 			.then((resolved) => {
-				assert(server === resolved);
+				t.ok(server === resolved);
 			});
 		});
-		test('check state', () => {
-			assert(0 < server.address().port);
+		t.test('check state', (t) => {
+			t.ok(0 < server.address().port);
+			t.end();
 		});
-		test('startWatcher returns current watcher', () => {
+		t.test('startWatcher returns current watcher', (t) => {
 			return server.startWatcher()
 			.then((watcher) => {
-				assert.equal(watcher, server.watcher);
+				t.equal(watcher, server.watcher);
 			});
 		});
-		test('startWebSocketServer returns current watcher', () => {
+		t.test('startWebSocketServer returns current watcher', (t) => {
 			return server.startWebSocketServer()
 			.then((wss) => {
-				assert.equal(wss, server.wss);
+				t.equal(wss, server.wss);
 			});
 		});
-		test('wsPort', () => {
-			assert(0 < server.wsPort);
+		t.test('wsPort', (t) => {
+			t.ok(0 < server.wsPort);
+			t.end();
 		});
-		test('GET /', (test) => {
+		t.test('GET /', (t) => {
 			let res;
-			test('request', () => {
+			t.test('request', () => {
 				return request(server, '/')
 				.then((response) => {
 					res = response;
 				});
 			});
-			test('response status/headers', () => {
-				assert.equal(res.statusCode, 200);
-				assert(res.headers['content-type'].startsWith('text/html'));
+			t.test('response status/headers', (t) => {
+				t.equal(res.statusCode, 200);
+				t.ok(res.headers['content-type'].startsWith('text/html'));
+				t.end();
 			});
-			test('read response body', () => {
+			t.test('read response body', () => {
 				return readStream(res)
 				.then((buffer) => {
 					res.body = buffer;
 				});
 			});
-			test('response body', (test) => {
-				test.compare(`${res.body}`, [
-					'<!doctype html>',
-					`<script id="sable-wsport" type="text/plain">${server.wsPort}</script>`,
-					'<script src="/sable-script.js"></script>',
-					'<meta charset="utf-8">',
-					'<link rel="stylesheet" href="style.css">',
-					'<script>const messageElement = 0</script>',
-					'<h1>Title</h1>',
-					'<p>paragraph</p>',
-				]);
+			t.test('response body', (t) => {
+				t.match(
+					[...lineSplitter(`${res.body}`)],
+					[
+						'<!doctype html>',
+						`<script id="sable-wsport" type="text/plain">${server.wsPort}</script>`,
+						'<script src="/sable-script.js"></script>',
+						'<meta charset="utf-8">',
+						'<link rel="stylesheet" href="style.css">',
+						'<script>const messageElement = 0</script>',
+						'<h1>Title</h1>',
+						'<p>paragraph</p>',
+					]
+				);
+				t.end();
 			});
+			t.end();
 		});
-		test('GET /style.css', (test) => {
+		t.test('GET /style.css', (t) => {
 			let res;
-			test('request', () => {
+			t.test('request', () => {
 				return request(server, '/style.css')
 				.then((response) => {
 					res = response;
 				});
 			});
-			test('response status/headers', (test) => {
-				assert.equal(res.statusCode, 200);
-				test.compare(res.headers, {
-					'content-type': (value) => value.startsWith('text/css'),
-					'content-length': '18',
-				});
+			t.test('response status/headers', (t) => {
+				t.equal(res.statusCode, 200);
+				t.ok(res.headers['content-type'].startsWith('text/css'));
+				t.equal(res.headers['content-length'], '18');
+				t.end();
 			});
+			t.end();
 		});
-		test('GET /directory', (test) => {
+		t.test('GET /directory', (t) => {
 			let res;
-			test('request', () => {
+			t.test('request', () => {
 				return request(server, '/directory')
 				.then((response) => {
 					res = response;
 				});
 			});
-			test('response status/headers', () => {
-				assert.equal(res.statusCode, 301);
-				assert(res.headers.location.endsWith('/directory/'));
+			t.test('response status/headers', (t) => {
+				t.equal(res.statusCode, 301);
+				t.ok(res.headers.location.endsWith('/directory/'));
+				t.end();
 			});
+			t.end();
 		});
-		test('GET /not-found', (test) => {
+		t.test('GET /not-found', (t) => {
 			let res;
-			test('request', () => {
+			t.test('request', () => {
 				return request(server, '/not-found')
 				.then((response) => {
 					res = response;
 				});
 			});
-			test('response status/headers', () => {
-				assert.equal(res.statusCode, 404);
+			t.test('response status/headers', (t) => {
+				t.equal(res.statusCode, 404);
+				t.end();
 			});
+			t.end();
 		});
-		test('GET /directory/', (test) => {
+		t.test('GET /directory/', (t) => {
 			let res;
-			test('request', () => {
+			t.test('request', () => {
 				return request(server, '/directory/')
 				.then((response) => {
 					res = response;
 				});
 			});
-			test('response status/headers', () => {
-				assert.equal(res.statusCode, 200);
-				assert(res.headers['content-type'].startsWith('text/html'));
+			t.test('response status/headers', (t) => {
+				t.equal(res.statusCode, 200);
+				t.ok(res.headers['content-type'].startsWith('text/html'));
+				t.end();
 			});
-			test('read response body', () => {
+			t.test('read response body', () => {
 				return readStream(res)
 				.then((buffer) => {
 					res.body = buffer;
 				});
 			});
-			test('response body', () => {
+			t.test('response body', (t) => {
 				const lines = res.body.toString().split(/\r\n|\r|\n/);
 				[
 					'<!doctype html>',
@@ -253,7 +272,7 @@ test('SableServer', (test) => {
 				]
 				.forEach((expected, index) => {
 					const actual = lines[index];
-					assert.equal(actual, expected);
+					t.equal(actual, expected);
 				});
 				[
 					'..',
@@ -263,17 +282,18 @@ test('SableServer', (test) => {
 					'no-extension',
 				]
 				.forEach((fileName) => {
-					assert(lines.find((line) => {
-						return line.includes(`<a href="${fileName}"`);
-					}));
+					t.ok(lines.find((line) => line.includes(`<a href="${fileName}"`)));
 				});
+				t.end();
 			});
+			t.end();
 		});
-		test('close', () => close(server));
+		t.test('close', () => close(server));
+		t.end();
 	});
 
-	test('errors from middleware', (test) => {
-		test('no middlewares', (test) => {
+	t.test('errors from middleware', (t) => {
+		t.test('no middlewares', (t) => {
 			const testDirectory = path.join(directories.temp, 'error-sync');
 			const server = new SableServer({
 				documentRoot: testDirectory,
@@ -284,22 +304,25 @@ test('SableServer', (test) => {
 				],
 			});
 			server.middlewares.splice(0, server.middlewares.length);
-			test('start', () => server.start());
-			test('GET /', (test) => {
+			t.test('start', () => server.start());
+			t.test('GET /', (t) => {
 				let res;
-				test('request', () => {
+				t.test('request', () => {
 					return request(server, '/')
 					.then((response) => {
 						res = response;
 					});
 				});
-				test('response status/headers', () => {
-					assert.equal(res.statusCode, 500);
+				t.test('response status/headers', (t) => {
+					t.equal(res.statusCode, 500);
+					t.end();
 				});
+				t.end();
 			});
-			test('close', () => close(server));
+			t.test('close', () => close(server));
+			t.end();
 		});
-		test('sync', (test) => {
+		t.test('sync', (t) => {
 			const testDirectory = path.join(directories.temp, 'error-sync');
 			const server = new SableServer({
 				documentRoot: testDirectory,
@@ -309,32 +332,36 @@ test('SableServer', (test) => {
 					},
 				],
 			});
-			test('start', () => server.start());
-			test('GET /', (test) => {
+			t.test('start', () => server.start());
+			t.test('GET /', (t) => {
 				let res;
-				test('request', () => {
+				t.test('request', () => {
 					return request(server, '/')
 					.then((response) => {
 						res = response;
 					});
 				});
-				test('response status/headers', () => {
-					assert.equal(res.statusCode, 500);
+				t.test('response status/headers', (t) => {
+					t.equal(res.statusCode, 500);
+					t.end();
 				});
-				test('read response body', () => {
+				t.test('read response body', () => {
 					return readStream(res)
 					.then((buffer) => {
 						res.body = buffer;
 					});
 				});
-				test('response body', (test) => {
-					test.compare(`${res.body}`, 'Error: Expected');
+				t.test('response body', (t) => {
+					t.equal(`${res.body}`, 'Error: Expected');
+					t.end();
 				});
+				t.end();
 			});
-			test('close', () => close(server));
+			t.test('close', () => close(server));
+			t.end();
 		});
 
-		test('async', (test) => {
+		t.test('async', (t) => {
 			const testDirectory = path.join(directories.temp, 'error-sync');
 			const server = new SableServer({
 				documentRoot: testDirectory,
@@ -342,124 +369,119 @@ test('SableServer', (test) => {
 					() => Promise.reject(new Error('Expected')),
 				],
 			});
-			test('start', () => server.start());
-			test('GET /', (test) => {
+			t.test('start', () => server.start());
+			t.test('GET /', (t) => {
 				let res;
-				test('request', () => {
+				t.test('request', () => {
 					return request(server, '/')
 					.then((response) => {
 						res = response;
 					});
 				});
-				test('response status/headers', () => {
-					assert.equal(res.statusCode, 500);
+				t.test('response status/headers', (t) => {
+					t.equal(res.statusCode, 500);
+					t.end();
 				});
-				test('read response body', () => {
+				t.test('read response body', () => {
 					return readStream(res)
 					.then((buffer) => {
 						res.body = buffer;
 					});
 				});
-				test('response body', (test) => {
-					test.compare(`${res.body}`, 'Error: Expected');
+				t.test('response body', (t) => {
+					t.equal(`${res.body}`, 'Error: Expected');
+					t.end();
 				});
+				t.end();
 			});
-			test('close', () => close(server));
+			t.test('close', () => close(server));
+			t.end();
 		});
+		t.end();
 	});
 
-	test('invalid wss port', (test) => {
-		const testDirectory = path.join(directories.temp, 'invalid-wss-port');
-		const server1 = new SableServer({
-			documentRoot: testDirectory,
-			ws: {port: 65535},
-		});
-		const server2 = new SableServer({
-			documentRoot: testDirectory,
-			ws: {port: 65535},
-		});
-		test('start 1', () => server1.start());
-		test('start 2', () => {
-			return server2.start()
-			.then(
-				() => {
-					throw new Error('Resolved unexpectedly');
-				},
-				() => {}
-			);
-		});
-		test('close 1', () => close(server1));
-		test('close 2', () => close(server2));
-	});
+	// t.test('invalid wss port', (t) => {
+	// 	const testDirectory = path.join(directories.temp, 'invalid-wss-port');
+	// 	const server1 = new SableServer({
+	// 		documentRoot: testDirectory,
+	// 		ws: {port: 65535},
+	// 	});
+	// 	const server2 = new SableServer({
+	// 		documentRoot: testDirectory,
+	// 		ws: {port: 65535},
+	// 	});
+	// 	t.test('start 1', () => server1.start());
+	// 	t.test('start 2', () => {
+	// 		return server2.start()
+	// 		.then(
+	// 			() => {
+	// 				throw new Error('Resolved unexpectedly');
+	// 			},
+	// 			() => {}
+	// 		);
+	// 	});
+	// 	t.test('close 1', () => close(server1));
+	// 	t.test('close 2', () => close(server2));
+	// 	t.end();
+	// });
 
-	test('contentTypes', (test) => {
+	t.test('contentTypes', (t) => {
 		const testDirectory = path.join(directories.temp, 'content-types');
 		const server = new SableServer({
 			documentRoot: testDirectory,
 			contentType: {'text/plain': ['html']},
 		});
-
-		test('copy files', () => {
-			return cp(directories.src, testDirectory);
-		});
-
-		test('start', () => {
+		t.test('copy files', () => cp(directories.src, testDirectory));
+		t.test('start', (t) => {
 			return server.start()
 			.then((resolved) => {
-				assert(server === resolved);
+				t.ok(server === resolved);
 			});
 		});
-
-		test('check state', () => {
-			assert(0 < server.address().port);
+		t.test('check state', (t) => {
+			t.ok(0 < server.address().port);
+			t.end();
 		});
-
-		test('GET /index.html', (test) => {
+		t.test('GET /index.html', (t) => {
 			let res;
-
-			test('request', () => {
+			t.test('request', () => {
 				return request(server, '/index.html')
 				.then((response) => {
 					res = response;
 				});
 			});
-
-			test('response status/headers', () => {
-				assert.equal(res.statusCode, 200);
-				assert.equal(res.headers['content-type'], 'text/plain');
+			t.test('response status/headers', (t) => {
+				t.equal(res.statusCode, 200);
+				t.equal(res.headers['content-type'], 'text/plain');
+				t.end();
 			});
-
+			t.end();
 		});
-
-		test('close', () => close(server));
-
+		t.test('close', () => close(server));
+		t.end();
 	});
 
-	test('file-watcher', (test) => {
-
+	t.test('file-watcher', (t) => {
 		const testDirectory = path.join(directories.temp, 'file-watcher');
 		const targetFile = path.join(testDirectory, 'index.html');
 		let ws;
 		const server = new SableServer({
 			documentRoot: testDirectory,
 		});
-
-		test('copy files', () => {
+		t.test('copy files', () => {
 			return cp(directories.src, testDirectory);
 		});
-
-		test('start a server', () => {
+		t.test('start a server', (t) => {
 			return server.start()
 			.then((resolved) => {
-				assert(server === resolved);
+				t.ok(server === resolved);
 			});
 		});
-
-		test('state', () => {
-			assert(0 < server.address().port);
+		t.test('state', (t) => {
+			t.ok(0 < server.address().port);
+			t.end();
 		});
-
-		test('start a websocket server', () => {
+		t.test('start a websocket server', () => {
 			return new Promise((resolve, reject) => {
 				ws = new WebSocket(`ws://127.0.0.1:${server.wsPort}`, {
 					headers: {'user-agent': 'sable-test'},
@@ -471,8 +493,7 @@ test('SableServer', (test) => {
 				});
 			});
 		});
-
-		test('message', () => {
+		t.test('message', (t) => {
 			return new Promise((resolve, reject) => {
 				ws
 				.once('error', reject)
@@ -480,13 +501,15 @@ test('SableServer', (test) => {
 				fs.utimes(targetFile, new Date(), new Date(), (error) => error && reject(error));
 			})
 			.then((actual) => {
-				assert.equal(actual, `/${path.relative(testDirectory, targetFile)}`);
+				t.equal(actual, `/${path.relative(testDirectory, targetFile)}`);
 			});
 		});
-
-		test('close ws', () => ws.close());
-		test('close', () => close(server));
-
+		t.test('close ws', (t) => {
+			ws.close();
+			t.end();
+		});
+		t.test('close', () => close(server));
+		t.end();
 	});
-
-}, {timeout: 10000});
+	t.end();
+});

@@ -1,4 +1,5 @@
 const path = require('path');
+const url = require('url');
 const {Server} = require('http');
 const console = require('console');
 const chalk = require('chalk');
@@ -47,6 +48,7 @@ exports.SableServer = class SableServer extends Server {
 
 	onRequest(req, res) {
 		const label = `#${this.count++} ${req.method} ${req.url}`;
+		req.parsedURL = url.parse(req.url, true);
 		req.startedAt = new Date();
 		const timer = setInterval(() => {
 			const elapsed = new Date() - req.startedAt;
@@ -170,30 +172,6 @@ exports.SableServer = class SableServer extends Server {
 			}
 		}
 		return this;
-	}
-
-	async nextRequest(filter) {
-		const nextRequest = await new Promise((resolve) => {
-			this.once('request', (req, res) => {
-				if (!filter || filter({req, res})) {
-					resolve({req, res});
-				}
-			});
-		});
-		return nextRequest;
-	}
-
-	async nextResponse(resFilter, reqFilter) {
-		const {req, res} = await this.nextRequest(reqFilter);
-		return new Promise((resolve, reject) => {
-			res
-			.once('error', reject)
-			.once('finish', () => {
-				if (!resFilter || resFilter({req, res})) {
-					resolve({req, res});
-				}
-			});
-		});
 	}
 
 };

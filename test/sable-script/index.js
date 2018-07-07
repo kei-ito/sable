@@ -186,8 +186,16 @@ t.test('sable-script', (t) => {
 			t.test('change style.css', () => {
 				const targetFile = path.join(server.documentRoot[0], 'style.css');
 				return Promise.all([
-					server.nextResponse(({req}) => {
-						return req.parsedURL.pathname.endsWith('style.css');
+					new Promise((resolve) => {
+						const onRequest = (req, res) => {
+							res.once('finish', () => {
+								if (req.parsedURL.pathname.endsWith('style.css')) {
+									server.removeListener('request', onRequest);
+									resolve();
+								}
+							});
+						};
+						server.on('request', onRequest);
 					}),
 					new Promise((resolve, reject) => {
 						fs.writeFile(targetFile, 'h1 {height: 100px}', (error) => {

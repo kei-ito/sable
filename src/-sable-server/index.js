@@ -7,7 +7,6 @@ const {Server: WebSocketServer} = require('ws');
 const {ContentType} = require('@nlib/content-type');
 const {listen} = require('../listen');
 const {close} = require('../close');
-const {getMsFromHrTime} = require('../get-ms-from-hrtime');
 const {staticFile} = require('../middleware-static-file');
 const {sableScript} = require('../middleware-sable-script');
 
@@ -48,9 +47,9 @@ exports.SableServer = class SableServer extends Server {
 
 	onRequest(req, res) {
 		const label = `#${this.count++} ${req.method} ${req.url}`;
-		req.startedAt = process.hrtime();
+		req.startedAt = new Date();
 		const timer = setInterval(() => {
-			const elapsed = getMsFromHrTime(req.startedAt);
+			const elapsed = new Date() - req.startedAt;
 			console.log(`pending (${elapsed}ms): ${label}`);
 			if (this.timeout < elapsed) {
 				res.emit('error', new Error(`Timeout of ${this.timeout}ms exceeded`));
@@ -67,7 +66,7 @@ exports.SableServer = class SableServer extends Server {
 		})
 		.once('finish', () => {
 			clearInterval(timer);
-			console.log(chalk.dim(`${label} → ${res.statusCode} (${getMsFromHrTime(req.startedAt)}ms)`));
+			console.log(chalk.dim(`${label} → ${res.statusCode} (${new Date() - req.startedAt}ms)`));
 		});
 		const middlewares = this.middlewares.slice();
 		const next = () => {

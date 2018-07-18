@@ -10,7 +10,7 @@ const directories = require('../lib/directories');
 const capabilities = require('../lib/capabilities');
 const markResult = require('../lib/mark-result');
 const t = require('tap');
-const timeout = 120000;
+const timeout = 60000;
 
 t.test('sable-script', {timeout: timeout * capabilities.length}, (t) => {
 

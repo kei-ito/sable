@@ -3,35 +3,30 @@ node_js:
 - '10'
 - '8'
 before_install:
-- 'export GREENKEEPER=$([[ $(node -v) == v10.* ]]; echo $?)'
-- if [[ ${GREENKEEPER} -eq 0 ]]; then
-  npm install -g greenkeeper-lockfile;
-  fi
+- export GREENKEEPER=$([[ $(node -v) == v10.* ]]; echo $?)
+- if [[ ${GREENKEEPER} -eq 0 ]]; then npm install -g greenkeeper-lockfile; fi
 install:
 - npm install
 before_script:
-- if [[ ${GREENKEEPER} -eq 0 ]]; then
-  greenkeeper-lockfile-update;
-  fi
+- if [[ ${GREENKEEPER} -eq 0 ]]; then greenkeeper-lockfile-update; fi
 script:
 - npm test
 - npm run lint
 after_success:
-- if [[ ${GREENKEEPER} -eq 0 ]]; then
-  greenkeeper-lockfile-upload;
-  fi
+- if [[ ${GREENKEEPER} -eq 0 ]]; then greenkeeper-lockfile-upload; fi
 - npm install -g codecov
 - codecov
-deploy:
-  provider: npm
-  email: kei.itof@gmail.com
-  api_key:
-    secure: eGBVKgHgj+w3C1UQLZN+l1Iqf2qp+LDdLyEeWcum0OFdVkS5bDL7iLhnhs74U/iEoF353ITPspA6FSmbN8VyurkNo5arMwvIsJIc+YzujMUj+TL4WUFpNXHmRtGHJFR7vVaiTeoL13cIiDKfEH5fTnRC6vCV3lqA/2YAQMktsTCET+3tv7HEGzimKN9/NaxaM1/yT/fF5ZBirUgCX20jVVv+CBsTcF/ekJE4fKPxvq07qRYG4V/6xCIbQD2GLKOf/Yv3Udra54iKKVQLTjeLTQSS8ShAkE0QZ01kp9CP4p7ysAIHSoyx5csyLISgvv6BGqY0IkpEeTUpjMtwmQBsJ97ZLpyirnevisSIwIpTxtufHeM1Sng6J2lSvXvjvM18ZlfgOzYuVXlf8y2ovyJip+Tv16B4LvAxZKHS7SQM4AZ+BoUqWrKo0x59yLgN0fwwsj/G96sXiqjIswOxvZ8GUmBsv/D6g6wqSqFBaRR83x4gN3uWEYRS1wi1kbaruv4RH64pToXUlDXoOCY0wMqgroT9/V+9ZqOfI7FJI34DhJQR7/P1nWKuJNNRxs9hZcaTEJiNRzxrdVMxsAus3h9YArThl00z+QgWtIRT57d7xHiNokBnI7MdvLRHZhxgvNc0icNoQ3/I9Z2kmABqBceISKVXnj8JQTeYG0oai4HOO28=
-  on:
-    tags: true
-    repo: kei-ito/sable
 env:
   global:
   - secure: HhZPVIxp6QJ/djXL+VBUVdGbPg0bjydthHcJ3Qd1vX8m8PuzDQfl/Fuo/yqvyDpN7PDu0JndNdb0bbOGxyPP/nqeajGAnNnTsMI0g0+5u50LTAJSpYaVPZ0H2y9YHDmZdk8fYA31RSzTTqPYRZj5ONVQNs9yQVCY1AsXUB/SLeQt12VFASeWiWyOa7d0LeWF/KEjOIioNOZgl2BdBLGVgf8lu84HvTChXfOQX3nsEPQaSBdnwmOHCIr5bCq2gAd7mH9bUvHlFDxCoS6SDvDYRdw4AuwmhXOtl2/8c1B/fpu0xwtw6kvcxRZuj24RXkUEASXdE8qR2+j7hTprbZ+RLPcOTwMwylXP7KfPIR3sAYdMxJOKhW67/XtMJLWbaHN3c9+YM2jW8dckFeBde2qKRkALJOQwf41BFM0sj/UUXHLYYBmqhjLt4RJ2DlD6YAAS0CsSjhx8ixjuwMTlmtxZue0bPUnZ8QdDBXf3L/v+dUxSLWidrz9lFbbZWJDCcLXl/r02tMgisPz/NGg6CjW81hJcxh7Ozq9wrLZR7J+tyMp7WGU4XaEnPvd4i+yeo8h3Vt7qJixxxo5CvS9kFEiJPwZLfOZEN4rWjb9p9JBLswW0koDQ/zKGtlS7J0ZBdXcGFFMTnCJykK00LOLUFd2/uv0HsaSSYRGDPEMD5oEdVbw=
   - secure: Q2wIP+DmTbb/Gb4j9qV2tiiRrosFo/0K6G4HibEhrCN2FT5PngvmqIQZGXrofujUHUHSxDEICQlQ/27etvrtEi837a/10v+KAkEAclW3lUnNuk9HZ+NxHNYSJXC5xg1BuglS5oz0qMcSB7Z5j0pMEv0RsyGjE+m18mIqOSfFDo4gDpaZpbX8uztaS1WJK6L0cfuoP2U/wfUV9tSI8bQ7kRj7HGEPjICX5jUUnZ+pDdTKNKHp5LB+BVfE+szVBdA0ypQ73zAbS1AwPweWburjOoK3kp2d58XexDrR+JPkoP/JrUZgxI4USrNm9Zp8HWnm1NH3vLUYN0fC+E8XPuJ2L44yFvIksxZ3pXLMsQWeNoqKeC5+7/omVOHsYraq7qxXnG8W3pdPSYtqLcyR7ebAYeSB196w13rPJ1DS4JlMatoll6CnZG6EPFjNWLvWZ47ykVj6KSYYtJMJmpNnamY7vnTFXCESTKE4TEz5pWKYbQ7wBCMgpoCcqYxGvp6DIH7DweaDT2ze1emZiXaJadJkhTl+n1tz3J9IAIXjcDqG45dgngW6HWM9J3cst40VTYzyCS2jJ/l2rPwjacOjCjUw/Uy433yFsoFGNmILZJZy53BMOC7VirXqeFomp8sg5gvZHW4tv/tnVyusIW4TfLgap4CRjQ9PeoYEKmJKLC5nC0U=
   - secure: GvUH/66NjV76KbiMiAFqpj87HRO2OIkKN9Um464c4gsBr14btd5PhEd+ggrltK2YBQ9uQFqQftcnnzrYGfzYcYjf3kku4/XeJIaK/sdMLTqlL82+Uo9yagfO3lg3w4IVv77hosZwWurrc/+NRlB1x2HvuS/48Ck1A4hrKT00AQFBAOwtlvKfA5y3cDwonOm1LmwnMNaQgjqbsS7BOtIy8tB900nfyPCCKDljzT5MX0qwbO7ac7KrUG5n2wNdXTwdF84IUnzsCYctGi0LKE93iNZVW4OS4sJ3r2gF6LA70wDrfU/1BMpRnC3aM1yQNTjVRIPHfxX7e5gZc+z0AiOQfZyWvO4BQFUW26Li/2Qrn/iCLEripWIPHwxpmMbuyZRFkKg66ZjmHmUv4qeP0Ck2gCACItS2Gt99f/fiA7BRk5pNBBPtk8GVQsX1UIxBfRwWTeC5A92FUyGe0TsQXIYpTPa5PTFuvhetpfD8zMoo9XjCsz/4bzznpvFxcSY1H9lLno97yG3vl9i/LfQ9tcmsqeGCQNmgDTmo6IlwUDATBvOh5kMKaBRmh61ewjsQJ6uGJimmMNcLiS93T5bXewUND1aFK3HhEewJZPpL4+J9g3DRiWUKdbCpleuV5fck4thUrYh3eWIcCsnb1mJ2DPtcAGog+x0O8JdXPlZVnvh77gc=
+deploy:
+  provider: npm
+  email: kei.itof@gmail.com
+  api_key:
+    secure: XRIrHKj1/6PtI5YQA21HewcbDQfdVSBFEP2A08SD28pQB73/EvNrg266B1627Mvl44TXPLujFVZTY3yl8P2IvlNuImBMdk1k3Sj0s7OgIgYw2cS+hjtJAqwKGUo/ef+PfQDyNCdcRDCoxQRiVImvF/36Sotn2rd/Tn1RYBac04EZX3/WUbn3P+M7DT7D9683tPv03h6mjpHw01QCCeWCDbCTRS3LEVyheNkrFNVPvCERa7Fl5wZmeF8r42usQrHmrgzJwyTGeUmX5Pjejr6AwLCROf0umrXE2Z+v+84frVynY8gC+Itgm0kjM/x9tkf5ZLEUB8v5VgqrC/qgkvKTTQaCxXJqHbXxPkAPh0xoaEXaeNdfqftt9q1EocqTX6EQtt0fhHsHP86I3ZLC+I31w4+E7RlITyhw9IYKr0amtwEQLwA2mL99wpdvRYSUjzL+GxckaXnxFLla8RcG5CoXFrbPpSZtY42pxwLktyv2vIbuYVBRpKx2HHsaePZh0IzYq1weNP2XgywzJh/3XZyWP3E1JZBHw4JbFOxux4rxayAOmFcfBBdQGbLT9/eRJgU3w005OtwYZ3DWY6Oh9b/uSTBHQUE0UWCHQ1k/EkDC6ZLocdpxcyvUkGRb+14/+FDXSDh8lz6NjwBk+0ozqodGvKMfEgXbgcWTdJ/ZpZWQemU=
+  on:
+    tags: true
+    repo: kei-ito/sable
+    branch: master

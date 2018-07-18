@@ -10,12 +10,13 @@ const directories = require('../lib/directories');
 const capabilities = require('../lib/capabilities');
 const markResult = require('../lib/mark-result');
 const t = require('tap');
+const timeout = 60000;
 
-t.test('sable-script', (t) => {
+t.test('sable-script', {timeout: timeout * capabilities.length}, (t) => {
 
 	capabilities
 	.forEach((capability) => {
-		t.test(JSON.stringify(capability), (t) => {
+		t.test(JSON.stringify(capability), {timeout}, (t) => {
 			const index = capabilities.indexOf(capability);
 			const testDirectory = path.join(directories.temp, `sable-script-${index}`);
 			const params = {

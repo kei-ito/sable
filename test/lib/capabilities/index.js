@@ -12,11 +12,11 @@ if (env.BROWSERSTACK && env.TRAVIS_NODE_VERSION === '10') {
 			os_version: 'High Sierra',
 			browserName: 'Firefox',
 		},
-		{
-			os: 'OS X',
-			os_version: 'High Sierra',
-			browserName: 'Safari',
-		},
+		// {
+		// 	os: 'OS X',
+		// 	os_version: 'High Sierra',
+		// 	browserName: 'Safari',
+		// },
 		{
 			os: 'Windows',
 			os_version: '10',

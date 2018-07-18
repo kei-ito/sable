@@ -85,7 +85,7 @@ t.test('SableServer', (t) => {
 			return listen(server)
 			.then((resolved) => {
 				t.ok(server === resolved);
-				t.ok(0 < server.address().port);
+				t.ok(0 < server.server.address().port);
 			});
 		});
 		t.test('close', () => close(server));
@@ -104,7 +104,14 @@ t.test('SableServer', (t) => {
 			})
 			.then((resolved) => {
 				t.ok(server2 === resolved);
-				t.ok(server1.address().port < server2.address().port);
+				t.test(`server1.port: ${server1.address().port}`, (t) => {
+					t.ok(0 < server1.address().port);
+					t.end();
+				});
+				t.test(`server2.port: ${server2.address().port}`, (t) => {
+					t.ok(0 < server2.address().port);
+					t.end();
+				});
 			});
 		});
 		t.test('close 1', () => close(server1));

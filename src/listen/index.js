@@ -1,8 +1,6 @@
 const listen = exports.listen = async (server, ...args) => {
+	const httpServer = server.server || server;
 	const options = {};
-	if (args.length === 0) {
-		args.push(...[].concat(server.config.listen || 4000));
-	}
 	const callback = args.pop();
 	if (typeof callback !== 'function') {
 		args.push(callback);
@@ -21,10 +19,10 @@ const listen = exports.listen = async (server, ...args) => {
 	}
 	try {
 		await new Promise((resolve, reject) => {
-			server
+			httpServer
 			.once('error', reject)
 			.listen(...args, () => {
-				server.removeListener('error', reject);
+				httpServer.removeListener('error', reject);
 				resolve();
 			});
 		});

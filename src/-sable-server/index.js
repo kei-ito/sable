@@ -12,7 +12,7 @@ const {staticFile} = require('../middleware-static-file');
 const {sableScript} = require('../middleware-sable-script');
 const {absolutify} = require('@nlib/util');
 
-exports.SableServer = class SableServer extends Server {
+class SableServer {
 
 	constructor(config = {}) {
 		switch (typeof config.documentRoot) {
@@ -30,16 +30,40 @@ exports.SableServer = class SableServer extends Server {
 		}
 		config.documentRoot = config.documentRoot.map((directory) => absolutify(directory));
 		Object.assign(
-			super(),
+			this,
 			{
+				server: config.server || new Server(),
 				contentType: new ContentType(config.contentType),
 				documentRoot: config.documentRoot,
 				middlewares: [sableScript, ...(config.middlewares || []), staticFile],
-				timeout: config.timeout || 10000,
 				config,
 				count: 0,
 			}
 		);
+	}
+
+	address() {
+		return this.server.address();
+	}
+
+	once(...args) {
+		this.server.once(...args);
+		return this;
+	}
+
+	on(...args) {
+		this.server.on(...args);
+		return this;
+	}
+
+	removeListener(...args) {
+		this.server.removeListener(...args);
+		return this;
+	}
+
+	removeAllListeners(...args) {
+		this.server.removeAllListeners(...args);
+		return this;
 	}
 
 	get wsPort() {
@@ -60,10 +84,11 @@ exports.SableServer = class SableServer extends Server {
 	onRequest(req, res) {
 		this.filterRequest(req);
 		const timer = setInterval(() => {
+			const {config: {timeout = 10000}} = this;
 			const elapsed = new Date() - req.startedAt;
 			console.log(`pending (${elapsed}ms): ${req.label}`);
-			if (this.timeout < elapsed) {
-				res.emit('error', new Error(`Timeout of ${this.timeout}ms exceeded`));
+			if (timeout < elapsed) {
+				res.emit('error', new Error(`Timeout of ${timeout}ms exceeded`));
 			}
 		}, 1000);
 		res
@@ -99,28 +124,18 @@ exports.SableServer = class SableServer extends Server {
 		}
 		Promise.all([
 			this.wss && close(this.wss),
-			new Promise((resolve, reject) => {
-				this.once('error', reject);
-				super.close((error) => {
-					this.removeListener('error', reject);
-					if (error) {
-						console.log('error@close', error);
-						reject(error);
-					} else {
-						resolve();
-					}
-				});
-			}),
-		]).then(() => callback(), callback);
+			close(this.server),
+		])
+		.then(() => callback(), callback);
 	}
 
 	async start(...args) {
-		await listen(this, ...args);
+		await listen(this.server, ...(args || [].concat(this.config.listen || 4000)));
 		await Promise.all([
 			this.startWebSocketServer(),
 			this.startWatcher(),
 		]);
-		this.on('request', this.onRequest.bind(this));
+		this.server.on('request', this.onRequest.bind(this));
 		return this;
 	}
 
@@ -183,4 +198,6 @@ exports.SableServer = class SableServer extends Server {
 		return this;
 	}
 
-};
+}
+
+exports.SableServer = SableServer;

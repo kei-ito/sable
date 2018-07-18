@@ -104,6 +104,14 @@ t.test('SableServer', (t) => {
 			})
 			.then((resolved) => {
 				t.ok(server2 === resolved);
+				t.test(`server1.port: ${server1.address().port}`, (t) => {
+					t.ok(0 < server1.address().port);
+					t.end();
+				});
+				t.test(`server2.port: ${server2.address().port}`, (t) => {
+					t.ok(0 < server2.address().port);
+					t.end();
+				});
 				t.ok(server1.address().port < server2.address().port);
 			});
 		});

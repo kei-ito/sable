@@ -15,7 +15,7 @@ t.test('sable-script', (t) => {
 
 	capabilities
 	.forEach((capability) => {
-		t.test(JSON.stringify(capability), (t) => {
+		t.test(JSON.stringify(capability), {timeout: 120000}, (t) => {
 			const index = capabilities.indexOf(capability);
 			const testDirectory = path.join(directories.temp, `sable-script-${index}`);
 			const params = {

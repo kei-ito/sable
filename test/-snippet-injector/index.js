@@ -63,7 +63,7 @@ t.test('SnippetInjector', (t) => {
 				});
 			})
 			.then((actual) => {
-				t.match(actual, expected);
+				t.equal(actual, expected);
 			});
 		});
 	}

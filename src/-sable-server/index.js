@@ -1,4 +1,5 @@
 const path = require('path');
+const url = require('url');
 const {Server} = require('http');
 const console = require('console');
 const chalk = require('chalk');
@@ -7,9 +8,9 @@ const {Server: WebSocketServer} = require('ws');
 const {ContentType} = require('@nlib/content-type');
 const {listen} = require('../listen');
 const {close} = require('../close');
-const {getMsFromHrTime} = require('../get-ms-from-hrtime');
 const {staticFile} = require('../middleware-static-file');
 const {sableScript} = require('../middleware-sable-script');
+const {absolutify} = require('@nlib/util');
 
 exports.SableServer = class SableServer extends Server {
 
@@ -27,8 +28,7 @@ exports.SableServer = class SableServer extends Server {
 		if (config.documentRoot.length === 0) {
 			config.documentRoot.push(process.cwd());
 		}
-		config.documentRoot = config.documentRoot
-		.map((directory) => path.isAbsolute(directory) ? directory : path.join(process.cwd(), directory));
+		config.documentRoot = config.documentRoot.map((directory) => absolutify(directory));
 		Object.assign(
 			super(),
 			{
@@ -46,12 +46,22 @@ exports.SableServer = class SableServer extends Server {
 		return this.wss ? this.wss.address().port : null;
 	}
 
+	getLabel(req) {
+		return `#${this.count++} ${req.method} ${req.url}`;
+	}
+
+	filterRequest(req) {
+		req.parsedURL = url.parse(req.url, true);
+		req.startedAt = new Date();
+		req.label = this.getLabel(req);
+		return req;
+	}
+
 	onRequest(req, res) {
-		const label = `#${this.count++} ${req.method} ${req.url}`;
-		req.startedAt = process.hrtime();
+		this.filterRequest(req);
 		const timer = setInterval(() => {
-			const elapsed = getMsFromHrTime(req.startedAt);
-			console.log(`pending (${elapsed}ms): ${label}`);
+			const elapsed = new Date() - req.startedAt;
+			console.log(`pending (${elapsed}ms): ${req.label}`);
 			if (this.timeout < elapsed) {
 				res.emit('error', new Error(`Timeout of ${this.timeout}ms exceeded`));
 			}
@@ -67,7 +77,7 @@ exports.SableServer = class SableServer extends Server {
 		})
 		.once('finish', () => {
 			clearInterval(timer);
-			console.log(chalk.dim(`${label} → ${res.statusCode} (${getMsFromHrTime(req.startedAt)}ms)`));
+			console.log(chalk.dim(`${req.label} → ${res.statusCode} (${new Date() - req.startedAt}ms)`));
 		});
 		const middlewares = this.middlewares.slice();
 		const next = () => {
@@ -104,69 +114,56 @@ exports.SableServer = class SableServer extends Server {
 		]).then(() => callback(), callback);
 	}
 
-	start(...args) {
-		return listen(this, ...args)
-		.then(() => Promise.all([
+	async start(...args) {
+		await listen(this, ...args);
+		await Promise.all([
 			this.startWebSocketServer(),
 			this.startWatcher(),
-		]))
-		.then(() => this.on('request', this.onRequest.bind(this)));
+		]);
+		this.on('request', this.onRequest.bind(this));
+		return this;
 	}
 
-	startWebSocketServer(options) {
-		if (this.wss) {
-			return Promise.resolve(this.wss);
-		}
-		options = Object.assign(
-			{port: this.address().port + 1},
-			options || this.config.ws
-		);
-		const server = options.server || new Server();
-		return (
-			options.server
-			? Promise.resolve(options)
-			: listen(new Server(), options)
-			.then((server) => {
+	async startWebSocketServer(options) {
+		if (!this.wss) {
+			options = Object.assign(
+				{port: this.address().port + 1},
+				options || this.config.ws
+			);
+			if (!options.server) {
+				const server = await listen(new Server(), options);
 				options.port = server.address().port;
-				return close(server).then(() => options);
-			})
-		)
-		.then((options) => {
+				await close(server);
+			}
 			this.wss = new WebSocketServer(options);
-		})
-		.catch((error) => {
-			error.server = server;
-			throw error;
-		});
+		}
+		return this.wss;
 	}
 
-	startWatcher(options) {
-		if (this.watcher) {
-			return Promise.resolve(this.watcher);
-		}
-		options = Object.assign(
-			{
-				ignoreInitial: true,
-				awaitWriteFinish: {stabilityThreshold: 200},
-				ignored: [
-					'**/node_modules/**/*',
-					'**/.git/**/*',
-				],
-			},
-			options || this.config.chokidar
-		);
-		return new Promise((resolve, reject) => {
-			const watcher = chokidar.watch(this.documentRoot, options)
-			.on('all', (event, filePath) => {
-				console.log(`${event} ${filePath}`);
-				this.onChange(filePath);
-			})
-			.once('error', reject)
-			.once('ready', () => {
-				this.watcher = watcher;
-				resolve(watcher);
+	async startWatcher(options) {
+		if (!this.watcher) {
+			options = Object.assign(
+				{
+					ignoreInitial: true,
+					awaitWriteFinish: {stabilityThreshold: 200},
+					ignored: ['**/node_modules/**/*', '**/.git/**/*'],
+				},
+				options || this.config.chokidar
+			);
+			await new Promise((resolve, reject) => {
+				const watcher = chokidar.watch(this.documentRoot, options)
+				.on('all', (event, filePath) => {
+					console.log(`${event} ${filePath}`);
+					this.onChange(filePath);
+				})
+				.once('error', reject)
+				.once('ready', () => {
+					this.watcher = watcher;
+					resolve(watcher);
+				});
 			});
-		});
+		}
+		return this.watcher;
 	}
 
 	onChange(filePath) {
@@ -176,48 +173,14 @@ exports.SableServer = class SableServer extends Server {
 	}
 
 	sendMessage(message) {
-		if (!this.wss) {
-			return;
-		}
-		for (const client of this.wss.clients) {
-			if (client.readyState === client.OPEN) {
-				client.send(message);
+		if (this.wss) {
+			for (const client of this.wss.clients) {
+				if (client.readyState === client.OPEN) {
+					client.send(message);
+				}
 			}
 		}
-	}
-
-	nextRequest(filter) {
-		return new Promise((resolve) => {
-			this.once('request', (req, res) => {
-				if (!filter || filter({req, res})) {
-					resolve({req, res});
-				}
-			});
-		});
-	}
-
-	nextResponse(resFilter, reqFilter) {
-		return this.nextRequest(reqFilter).then(({req, res}) => {
-			return new Promise((resolve, reject) => {
-				res
-				.once('error', reject)
-				.once('finish', () => {
-					if (!resFilter || resFilter({req, res})) {
-						resolve({req, res});
-					}
-				});
-			});
-		});
-	}
-
-	nextWebSocketConnection(filter) {
-		return new Promise((resolve) => {
-			this.wss.once('connection', (client, req) => {
-				if (!filter || filter({client, req})) {
-					resolve({client, req});
-				}
-			});
-		});
+		return this;
 	}
 
 };

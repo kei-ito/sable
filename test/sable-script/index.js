@@ -6,7 +6,6 @@ const {Local} = require('browserstack-local');
 const packageJSON = require('../../package.json');
 const {SableServer, close} = require('../..');
 const env = require('../lib/env');
-const dateString = require('../lib/date-string');
 const directories = require('../lib/directories');
 const capabilities = require('../lib/capabilities');
 const markResult = require('../lib/mark-result');
@@ -42,8 +41,8 @@ t.test('sable-script', (t) => {
 			if (env.BROWSERSTACK) {
 				t.test('setup BrowserStack', (t) => {
 					const project = packageJSON.name;
-					const build = `${project}#${env.TRAVIS_BUILD_NUMBER || dateString()}`;
-					const localIdentifier = (`${build}${dateString}`).replace(/[^\w-]/g, '');
+					const build = `${project}#${env.TRAVIS_BUILD_NUMBER || new Date().toISOString()}`;
+					const localIdentifier = (`${build}${new Date().toISOString()}`).replace(/[^\w-]/g, '');
 
 					t.test('setup bsLocal', () => {
 						// https://github.com/browserstack/browserstack-local-nodejs/blob/master/lib/Local.js
@@ -122,9 +121,11 @@ t.test('sable-script', (t) => {
 
 			t.test('GET /', () => {
 				return Promise.all([
-					server.nextWebSocketConnection(({req}) => {
-						params.ua0 = req.headers['user-agent'];
-						return true;
+					new Promise((resolve) => {
+						server.wss.once('connection', (client, req) => {
+							params.ua0 = req.headers['user-agent'];
+							resolve();
+						});
 					}),
 					driver.get(`http://127.0.0.1:${server.address().port}/`),
 				]);
@@ -133,9 +134,11 @@ t.test('sable-script', (t) => {
 			t.test('change index.html', () => {
 				const targetFile = path.join(server.documentRoot[0], 'index.html');
 				return Promise.all([
-					server.nextWebSocketConnection(({req}) => {
-						params.ua1 = req.headers['user-agent'];
-						return true;
+					new Promise((resolve) => {
+						server.wss.once('connection', (client, req) => {
+							params.ua1 = req.headers['user-agent'];
+							resolve();
+						});
 					}),
 					new Promise((resolve, reject) => {
 						fs.utimes(targetFile, new Date(), new Date(), (error) => {
@@ -182,8 +185,16 @@ t.test('sable-script', (t) => {
 			t.test('change style.css', () => {
 				const targetFile = path.join(server.documentRoot[0], 'style.css');
 				return Promise.all([
-					server.nextResponse(({req}) => {
-						return req.parsedURL.pathname.endsWith('style.css');
+					new Promise((resolve) => {
+						const onRequest = (req, res) => {
+							res.once('finish', () => {
+								if (req.parsedURL.pathname.endsWith('style.css')) {
+									server.removeListener('request', onRequest);
+									resolve();
+								}
+							});
+						};
+						server.on('request', onRequest);
 					}),
 					new Promise((resolve, reject) => {
 						fs.writeFile(targetFile, 'h1 {height: 100px}', (error) => {

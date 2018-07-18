@@ -112,7 +112,6 @@ t.test('SableServer', (t) => {
 					t.ok(0 < server2.address().port);
 					t.end();
 				});
-				t.ok(server1.address().port < server2.address().port);
 			});
 		});
 		t.test('close 1', () => close(server1));

@@ -13,7 +13,7 @@
 	getBody(function () {
 
 		const port = document.getElementById('sable-wsport').textContent;
-		const endpoint = ['ws://', location.hostname, ':', port].join('');
+		const endpoint = [(location.protocol === 'https' ? 'wss' : 'ws'), '://', location.hostname, ':', port].join('');
 		const messageElement = document.createElement('div');
 
 		const showMessage = function (message) {

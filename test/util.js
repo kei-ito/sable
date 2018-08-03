@@ -1,9 +1,12 @@
+const net = require('net');
 const t = require('tap');
 const {
 	toString,
 	getType,
 	ContentTypeRegistry,
 	contentTypes,
+	listen,
+	close,
 } = require('../lib/util.js');
 
 t.test('toString', (t) => {
@@ -46,7 +49,15 @@ t.test('ContentTypeRegistry', (t) => {
 
 t.test('contentTypes', (t) => {
 	t.equal(contentTypes.get('style.css'), 'text/css');
-	t.equal(contentTypes.get('script.js'), 'application/json');
+	t.equal(contentTypes.get('script.js'), 'application/javascript');
 	t.equal(contentTypes.get('font.ttf'), 'application/x-font-ttf');
 	t.end();
+});
+
+t.test('listen/close', async (t) => {
+	const port = 12345;
+	const server = net.createServer();
+	await listen(server, port);
+	t.equal(server.address().port, port);
+	await close(server);
 });

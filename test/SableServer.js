@@ -81,3 +81,9 @@ t.test('middlewares', (t) => {
 	t.end();
 
 });
+
+t.test('close', async () => {
+	const server = http.createServer();
+	const sableServer = SableServer.create({server});
+	await sableServer.close();
+});

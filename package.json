@@ -17,7 +17,7 @@
 		"sable": "./bin/sable"
 	},
 	"scripts": {
-		"lint": "eslint bin/sable src test",
+		"lint": "eslint bin/sable src lib test",
 		"test": "tap --coverage test/*.js"
 	},
 	"dependencies": {

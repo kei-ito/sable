@@ -13,14 +13,21 @@ const {staticFile} = require('../lib/middlewares/staticFile.js');
 
 t.test('staticFile', async (t) => {
 	const documentRoot = await mkdtemp(path.join(os.tmpdir(), 'staticFile'));
+	const autoReloadScriptURL = '/foobar.js';
 	const port = 12345;
 	t.beforeEach(async () => {
 		const server = http.createServer();
+		const wsServer = http.createServer();
 		await listen(server, port);
 		sableServer = SableServer.create({
 			server,
 			middlewares: [
-				staticFile({documentRoot}),
+				staticFile({
+					documentRoot,
+					wss: {server: wsServer},
+					chokidar: [documentRoot],
+					autoReloadScriptURL,
+				}),
 			],
 		});
 	});
@@ -31,6 +38,13 @@ t.test('staticFile', async (t) => {
 	await mkdir(path.join(documentRoot, 'foo'));
 	await writeFile(path.join(documentRoot, 'foo/index.html'), '<!doctype html>foo');
 	await writeFile(path.join(documentRoot, 'foo/bar.txt'), 'foobar');
+	t.test(autoReloadScriptURL, async (t) => {
+		const res = await waitResponse(http.get(`http://localhost:${port}${autoReloadScriptURL}`));
+		t.equal(res.statusCode, 200);
+		t.match(res.headers, {'content-type': 'application/javascript'});
+		const body = await res.pipe(new Logger()).promise();
+		t.ok(`${body}`.startsWith('self.wsAddress'));
+	});
 	t.test('index', async (t) => {
 		const res = await waitResponse(http.get(`http://localhost:${port}/`));
 		t.equal(res.statusCode, 200);

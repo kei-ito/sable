@@ -1,7 +1,7 @@
 const http = require('http');
 const t = require('tap');
 const {Logger} = require('../lib/util.js');
-const {SableServer} = require('../lib/SableServer.js');
+const {SableServer} = require('..');
 
 t.test('constructor', (t) => {
 	t.throws(() => SableServer.create());

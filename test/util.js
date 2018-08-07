@@ -7,7 +7,7 @@ const {
 	contentTypes,
 	listen,
 	close,
-} = require('../lib/util.js');
+} = require('..');
 
 t.test('toString', (t) => {
 	t.equal(toString(), '[object Undefined]');

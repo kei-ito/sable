@@ -8,8 +8,10 @@ const mkdir = promisify(fs.mkdir);
 const writeFile = promisify(fs.writeFile);
 const t = require('tap');
 const {Logger, listen, waitResponse} = require('../lib/util.js');
-const {SableServer} = require('../lib/SableServer.js');
-const {staticFile} = require('../lib/middlewares/staticFile.js');
+const {
+	SableServer,
+	middlewares: {staticFile},
+} = require('..');
 
 t.test('staticFile', async (t) => {
 	const documentRoot = await mkdtemp(path.join(os.tmpdir(), 'staticFile'));

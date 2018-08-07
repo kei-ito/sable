@@ -12,12 +12,12 @@
 		"node": ">=8"
 	},
 	"repository": "kei-ito/sable",
-	"main": "./src/index.js",
+	"main": "./lib/index.js",
 	"bin": {
 		"sable": "./bin/sable"
 	},
 	"scripts": {
-		"lint": "eslint bin/sable src lib test",
+		"lint": "eslint bin/sable lib test",
 		"test": "tap --coverage test/*.js"
 	},
 	"dependencies": {

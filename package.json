@@ -25,6 +25,7 @@
 		"@nlib/util": "^0.1.4",
 		"chalk": "^2.4.1",
 		"chokidar": "^2.0.4",
+		"commander": "^2.17.0",
 		"ws": "^6.0.0"
 	},
 	"devDependencies": {

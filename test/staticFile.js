@@ -10,7 +10,7 @@ const writeFile = promisify(fs.writeFile);
 const t = require('tap');
 const {Logger, listen, waitResponse, close} = require('../lib/util.js');
 const {
-	SableServer,
+	startServer,
 	middlewares: {staticFile},
 } = require('..');
 
@@ -30,7 +30,7 @@ t.test('staticFile', (t) => {
 			listen(server, port),
 			listen(wsServer, port + 1),
 		]);
-		sableServer = SableServer.create({
+		sableServer = await startServer({
 			server,
 			middlewares: [
 				staticFile({

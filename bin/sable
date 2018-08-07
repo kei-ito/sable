@@ -1,72 +1,22 @@
 #!/usr/bin/env node
-
 const console = require('console');
-const {runInNewContext} = require('vm');
-const {SableServer} = require('..');
+const program = require('commander');
+const {startServer} = require('..');
 const packageJSON = require('../package.json');
 
-const args = process.argv.slice(2);
+program
+.version(packageJSON.version)
+.description('Starts a HTTP server for development')
+.usage('[options] <documentRoot>')
+.option('-p, --port <n>', 'A port number for HTTP, HTTPS (4000)', parseInt)
+.option('-w, --wsport <n>', 'A port number for WS, WSS (port + 1)', parseInt)
+.option('-b, --base <s>', 'An URL used as the 2nd argument of the URL constructor (http://localhost)')
+.option('-i, --index <s>', 'A filename of index (index.html)')
+.option('-a, --reloadscript <s>', 'An URL for autoreload script (autoreload.js)')
+.parse(process.argv);
 
-const help = args.find((arg) => {
-	return (/^-*h(?:elp)?$/i).test(arg);
-}) && `
-Usage: sable [options] [documentRoot1, documentRoot2, ...]
-
-+ Command-1 -------------------------------+
-| sable \\                                  |
-|  --listen={host:localhost, port:5000} \\  |
-|  --ws={port:20000} \\                     |
-|  /document/root1 \\                       |
-|  /document/root2                         |
-+------------------------------------------+
-
-The Command-1 above runs the Script-1 below.
-
-+ Script-1 --------------------------------+
-| new SableServer({                        |
-|   listen: {                              |
-|     host: 'localhost',                   |
-|     port: 5000,                          |
-|   },                                     |
-|   ws: {port: 20000},                     |
-|   documentRoot: [                        |
-|     '/document/root1',                   |
-|     '/document/root2',                   |
-|   ],                                     |
-| }).start()                               |
-| .catch((error) => {                      |
-|   console.error(error);                  |
-|   process.exit(1);                       |
-| });                                      |
-+------------------------------------------+
-`;
-
-const version = args.find((arg) => {
-	return (/^-*v(?:ersion)?$/i).test(arg);
-}) && packageJSON.version;
-
-if (help) {
-	console.log(help);
-} else if (version) {
-	console.log(version);
-} else {
-	const config = {};
-	if (args.length === 0) {
-		args.push(process.cwd());
-	}
-	while (args[0].startsWith('--')) {
-		const arg = args.shift().replace(/^-+/, '');
-		const [key, ...value] = arg.split('=');
-		runInNewContext(`config[${JSON.stringify(key)}] = ${value.join('=')};`, {config});
-	}
-	console.log(config);
-	config.documentRoot = args;
-	new SableServer(config).start()
-	.then((server) => {
-		console.log(`listening ${server.address().port}`);
-	})
-	.catch((error) => {
-		console.error(error);
-		process.exit(1);
-	});
-}
+startServer(program)
+.catch((error) => {
+	console.error(error);
+	process.exit(1);
+});

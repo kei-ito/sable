@@ -3,24 +3,33 @@ const http = require('http');
 const os = require('os');
 const fs = require('fs');
 const {promisify} = require('util');
+const WebSocket = require('ws');
 const mkdtemp = promisify(fs.mkdtemp);
 const mkdir = promisify(fs.mkdir);
 const writeFile = promisify(fs.writeFile);
 const t = require('tap');
-const {Logger, listen, waitResponse} = require('../lib/util.js');
+const {Logger, listen, waitResponse, close} = require('../lib/util.js');
 const {
 	SableServer,
 	middlewares: {staticFile},
 } = require('..');
 
-t.test('staticFile', async (t) => {
-	const documentRoot = await mkdtemp(path.join(os.tmpdir(), 'staticFile'));
+t.test('staticFile', (t) => {
+	let sableServer;
+	let documentRoot;
 	const autoReloadScriptURL = '/foobar.js';
 	const port = 12345;
 	t.beforeEach(async () => {
+		documentRoot = await mkdtemp(path.join(os.tmpdir(), 'staticFile'));
+		await mkdir(path.join(documentRoot, 'foo'));
+		await writeFile(path.join(documentRoot, 'foo/index.html'), '<!doctype html>foo');
+		await writeFile(path.join(documentRoot, 'foo/bar.txt'), 'foobar');
 		const server = http.createServer();
 		const wsServer = http.createServer();
-		await listen(server, port);
+		await Promise.all([
+			listen(server, port),
+			listen(wsServer, port + 1),
+		]);
 		sableServer = SableServer.create({
 			server,
 			middlewares: [
@@ -32,14 +41,12 @@ t.test('staticFile', async (t) => {
 				}),
 			],
 		});
+		sableServer.wsServer = wsServer;
 	});
 	t.afterEach(async () => {
 		await sableServer.close();
+		await close(sableServer.wsServer);
 	});
-	let sableServer;
-	await mkdir(path.join(documentRoot, 'foo'));
-	await writeFile(path.join(documentRoot, 'foo/index.html'), '<!doctype html>foo');
-	await writeFile(path.join(documentRoot, 'foo/bar.txt'), 'foobar');
 	t.test(autoReloadScriptURL, async (t) => {
 		const res = await waitResponse(http.get(`http://localhost:${port}${autoReloadScriptURL}`));
 		t.equal(res.statusCode, 200);
@@ -79,4 +86,23 @@ t.test('staticFile', async (t) => {
 		const res = await waitResponse(http.get(`http://localhost:${port}/foo/baz.txt`));
 		t.equal(res.statusCode, 404);
 	});
+	t.test('WebSocket', async (t) => {
+		let ws;
+		await new Promise((resolve, reject) => {
+			ws = new WebSocket(`ws://localhost:${sableServer.wsServer.address().port}`)
+			.once('error', reject)
+			.once('open', resolve);
+		});
+		const dest = path.join(documentRoot, 'ws.txt');
+		const [message] = await Promise.all([
+			new Promise((resolve) => {
+				ws.once('message', resolve);
+			}),
+			writeFile(dest, 'WS'),
+		]);
+		const {event, file} = JSON.parse(message);
+		t.equal(event, 'change');
+		t.equal(file, dest);
+	});
+	t.end();
 }, {timeout: 3000});

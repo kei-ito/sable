@@ -14,7 +14,7 @@ const {
 	middlewares: {staticFile},
 } = require('..');
 
-t.test('staticFile', (t) => {
+t.test('staticFile', {timeout: 3000}, (t) => {
 	let sableServer;
 	let documentRoot;
 	const autoReloadScriptURL = '/foobar.js';
@@ -105,4 +105,4 @@ t.test('staticFile', (t) => {
 		t.equal(file, dest);
 	});
 	t.end();
-}, {timeout: 3000});
+});

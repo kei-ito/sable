@@ -13,7 +13,6 @@ const {
 	startServer,
 	middlewares: {staticFile},
 } = require('..');
-const wait = (duration) => new Promise((resolve) => setTimeout(resolve, duration));
 
 t.test('staticFile', {timeout: 3000}, (t) => {
 	let sableServer;

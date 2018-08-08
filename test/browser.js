@@ -74,7 +74,7 @@ t.test('Sync', {timeout: timeout * capabilities.length}, (t) => {
 			t.ok(1, 'Get the driver');
 			session = await driver.getSession();
 			t.ok(1, 'Get the session');
-			await driver.get(`http://localhost:${sableServer.server.address().port}/`);
+			await driver.get(`http://127.0.0.1:${sableServer.server.address().port}/`);
 			const indexPageURL = await driver.getCurrentUrl();
 			t.ok(indexPageURL, `URL: ${indexPageURL}`);
 			t.match(

@@ -6,6 +6,9 @@ before_install:
 - export GREENKEEPER=$([[ $(node -v) == v10.* ]]; echo $?)
 - if [[ ${GREENKEEPER} -eq 0 ]]; then npm install -g greenkeeper-lockfile; fi
 install:
+- BASE_URL=http://chromedriver.storage.googleapis.com
+- wget ${BASE_URL}/$(curl ${BASE_URL}/LATEST_RELEASE)/chromedriver_linux64.zip
+- unzip chromedriver_linux64.zip
 - npm install
 before_script:
 - if [[ ${GREENKEEPER} -eq 0 ]]; then greenkeeper-lockfile-update; fi

@@ -51,7 +51,7 @@ t.test('Sync', {timeout: timeout * capabilities.length}, (t) => {
 	});
 
 	capabilities.forEach((capability) => {
-		t.test(JSON.stringify(capability), {timeout}, async (t) => {
+		t.test(JSON.stringify(capability), {timeout, bail: true}, async (t) => {
 			const builder = new Builder().withCapabilities(capability);
 			t.ok(1, 'Create a builder');
 			if (env.BROWSERSTACK) {
@@ -59,7 +59,6 @@ t.test('Sync', {timeout: timeout * capabilities.length}, (t) => {
 				const project = packageJSON.name;
 				const build = `${project}#${env.TRAVIS_BUILD_NUMBER || new Date().toISOString()}`;
 				const localIdentifier = (`${build}${new Date().toISOString()}`).replace(/[^\w-]/g, '');
-				// https://github.com/browserstack/browserstack-local-nodejs/blob/master/lib/Local.js
 				bsLocal = new Local();
 				t.ok(1, 'Setup bsLocal');
 				await promisify(bsLocal.start).call(bsLocal, {

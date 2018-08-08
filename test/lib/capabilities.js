@@ -15,6 +15,7 @@ exports.capabilities = env.BROWSERSTACK
 		chromeOptions: {
 			args: [
 				'--headless',
+				'--no-sandbox',
 				'--disable-dev-shm-usage',
 			],
 		},

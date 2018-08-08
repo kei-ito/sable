@@ -60,7 +60,7 @@ t.test('Sync', {timeout: timeout * capabilities.length}, (t) => {
 				const build = `${project}#${env.TRAVIS_BUILD_NUMBER || new Date().toISOString()}`;
 				const localIdentifier = (`${build}${new Date().toISOString()}`).replace(/[^\w-]/g, '');
 				bsLocal = new Local();
-				t.ok(1, 'Setup bsLocal');
+				t.ok(1, 'Create bsLocal');
 				await new Promise((resolve, reject) => {
 					bsLocal.start({
 						key: env.BROWSERSTACK_ACCESS_KEY,
@@ -77,6 +77,21 @@ t.test('Sync', {timeout: timeout * capabilities.length}, (t) => {
 						}
 					});
 				});
+				t.ok(1, 'Setup bsLocal');
+				await new Promise((resolve, reject) => {
+					let count = 0;
+					const check = function () {
+						if (bsLocal.isRunning()) {
+							resolve();
+						} else if (count++ < 30) {
+							setTimeout(check, 1000);
+						} else {
+							reject(new Error('Failed to start browserstack-local'));
+						}
+					};
+					check();
+				});
+				t.ok(1, 'Connect to BrowserStack');
 			}
 			driver = builder.build();
 			t.ok(1, 'Get the driver');

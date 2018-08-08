@@ -1,5 +1,5 @@
 const env = require('./env.js');
-exports.capabilities = env.BROWSERSTACK && env.TRAVIS_NODE_VERSION === '10'
+exports.capabilities = env.BROWSERSTACK
 ? [
 	{os: 'OS X', os_version: 'High Sierra', browserName: 'Chrome'},
 	{os: 'OS X', os_version: 'High Sierra', browserName: 'Firefox'},

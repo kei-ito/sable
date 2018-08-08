@@ -13,6 +13,7 @@ const {
 	startServer,
 	middlewares: {staticFile},
 } = require('..');
+const wait = (duration) => new Promise((resolve) => setTimeout(resolve, duration));
 
 t.test('staticFile', {timeout: 3000}, (t) => {
 	let sableServer;
@@ -88,6 +89,7 @@ t.test('staticFile', {timeout: 3000}, (t) => {
 	});
 	t.test('WebSocket', async (t) => {
 		let ws;
+		await wait(400);
 		await new Promise((resolve, reject) => {
 			ws = new WebSocket(`ws://localhost:${sableServer.wsServer.address().port}`)
 			.once('error', reject)

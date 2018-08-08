@@ -53,6 +53,7 @@ t.test('Sync', {timeout: timeout * capabilities.length}, (t) => {
 	capabilities.forEach((capability) => {
 		t.test(JSON.stringify(capability), {timeout}, async (t) => {
 			const builder = new Builder().withCapabilities(capability);
+			t.ok(1, 'Create a builder');
 			if (env.BROWSERSTACK) {
 				builder.usingServer('http://hub-cloud.browserstack.com/wd/hub');
 				const project = packageJSON.name;
@@ -60,6 +61,7 @@ t.test('Sync', {timeout: timeout * capabilities.length}, (t) => {
 				const localIdentifier = (`${build}${new Date().toISOString()}`).replace(/[^\w-]/g, '');
 				// https://github.com/browserstack/browserstack-local-nodejs/blob/master/lib/Local.js
 				bsLocal = new Local();
+				t.ok(1, 'Setup bsLocal');
 				await promisify(bsLocal.start).call(bsLocal, {
 					key: env.BROWSERSTACK_ACCESS_KEY,
 					verbose: true,
@@ -70,10 +72,12 @@ t.test('Sync', {timeout: timeout * capabilities.length}, (t) => {
 				});
 			}
 			driver = builder.build();
+			t.ok(1, 'Get the driver');
 			session = await driver.getSession();
+			t.ok(1, 'Get the session');
 			await driver.get(`http://localhost:${sableServer.server.address().port}/`);
 			const indexPageURL = await driver.getCurrentUrl();
-			t.ok(indexPageURL, indexPageURL);
+			t.ok(indexPageURL, `URL: ${indexPageURL}`);
 			t.match(
 				await catchError(driver.findElement(By.css('a[href="foo.txt"]'))),
 				{name: 'NoSuchElementError'}

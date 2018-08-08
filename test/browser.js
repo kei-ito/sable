@@ -61,13 +61,21 @@ t.test('Sync', {timeout: timeout * capabilities.length}, (t) => {
 				const localIdentifier = (`${build}${new Date().toISOString()}`).replace(/[^\w-]/g, '');
 				bsLocal = new Local();
 				t.ok(1, 'Setup bsLocal');
-				await promisify(bsLocal.start).call(bsLocal, {
-					key: env.BROWSERSTACK_ACCESS_KEY,
-					verbose: true,
-					forceLocal: true,
-					onlyAutomate: true,
-					only: `localhost,${sableServer.server.address().port},0`,
-					localIdentifier,
+				await new Promise((resolve, reject) => {
+					bsLocal.start({
+						key: env.BROWSERSTACK_ACCESS_KEY,
+						verbose: true,
+						forceLocal: true,
+						onlyAutomate: true,
+						only: `localhost,${sableServer.server.address().port},0`,
+						localIdentifier,
+					}, (error) => {
+						if (error) {
+							reject(error);
+						} else {
+							resolve();
+						}
+					});
 				});
 			}
 			driver = builder.build();

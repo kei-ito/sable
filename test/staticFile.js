@@ -89,22 +89,30 @@ t.test('staticFile', {timeout: 3000}, (t) => {
 	});
 	t.test('WebSocket', async (t) => {
 		let ws;
-		await wait(400);
 		await new Promise((resolve, reject) => {
 			ws = new WebSocket(`ws://localhost:${sableServer.wsServer.address().port}`)
 			.once('error', reject)
 			.once('open', resolve);
 		});
 		const dest = path.join(documentRoot, 'ws.txt');
-		const [message] = await Promise.all([
+		const [messages] = await Promise.all([
 			new Promise((resolve) => {
-				ws.once('message', resolve);
+				const messages = [];
+				let timer;
+				const resetTimer = () => {
+					clearTimeout(timer);
+					timer = setTimeout(() => resolve(messages), 400);
+				};
+				ws.on('message', (message) => {
+					messages.push(JSON.parse(message));
+					resetTimer();
+				});
+				resetTimer();
 			}),
 			writeFile(dest, 'WS'),
 		]);
-		const {event, file} = JSON.parse(message);
-		t.equal(event, 'change');
-		t.equal(file, dest);
+		const message = messages.find(({file}) => file === dest);
+		t.ok(message, 'found expected message');
 	});
 	t.end();
 });

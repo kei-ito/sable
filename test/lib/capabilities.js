@@ -10,5 +10,13 @@ exports.capabilities = env.BROWSERSTACK
 	{os: 'Windows', os_version: '10', browserName: 'Firefox'},
 ]
 : [
-	{browserName: 'chrome', chromeOptions: {args: ['--headless']}},
+	{
+		browserName: 'chrome',
+		chromeOptions: {
+			args: [
+				'--headless',
+				'--disable-dev-shm-usage',
+			],
+		},
+	},
 ];

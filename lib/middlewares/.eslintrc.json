@@ -1,0 +1,16 @@
+{
+	"overrides": [
+		{
+			"files": ["*.script.js"],
+			"globals": {
+				"self": true
+			},
+			"rules": {
+				"prefer-arrow-callback": "off",
+				"prefer-destructuring": "off",
+				"prefer-rest-params": "off",
+				"prefer-template": "off"
+			}
+		}
+	]
+}

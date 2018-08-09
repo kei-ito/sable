@@ -1,7 +1,6 @@
 const https = require('https');
-const env = require('../env');
-
-module.exports = function markResult({session, status, reason = ''}) {
+const env = require('./env');
+exports.markResult = ({session, status}) => {
 	const sessionId = session.getId();
 	return new Promise((resolve, reject) => {
 		https.request({
@@ -13,9 +12,6 @@ module.exports = function markResult({session, status, reason = ''}) {
 		})
 		.once('error', reject)
 		.once('response', resolve)
-		.end(JSON.stringify({
-			status,
-			reason,
-		}));
+		.end(JSON.stringify({status}));
 	});
 };

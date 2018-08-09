@@ -33,7 +33,7 @@ t.test('Sync', {timeout: timeout * capabilities.length}, (t) => {
 		status = 'failed';
 		documentRoot = await mkdtemp(path.join(os.tmpdir(), 'Sync'));
 		sableServer = await startServer({
-			port: 23456,
+			port: 8080,
 			documentRoot,
 		});
 	});

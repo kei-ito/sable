@@ -50,15 +50,25 @@ t.test('Sync', {timeout: timeout * capabilities.length}, (t) => {
 		}
 	});
 
-	capabilities.forEach((capability) => {
-		t.test(JSON.stringify(capability), {timeout, bail: true}, async (t) => {
+	capabilities.forEach((capability, index) => {
+		t.test(`Capability#${index}`, {timeout, bail: true}, async (t) => {
+			for (const key of Object.keys(capability)) {
+				t.ok(1, `${key}: ${capability[key]}`);
+			}
+			const project = packageJSON.name;
+			const build = `${project}#${env.TRAVIS_BUILD_NUMBER || new Date().toISOString()}`;
+			const localIdentifier = (`${build}${new Date().toISOString()}`).replace(/[^\w-]/g, '');
+			if (env.BROWSERSTACK) {
+				t.ok(1, 'Create a builder');
+				capability['browserstack.local'] = true;
+				capability['browserstack.localIdentifier'] = localIdentifier;
+				capability['browserstack.user'] = env.BROWSERSTACK_USERNAME;
+				capability['browserstack.key'] = env.BROWSERSTACK_ACCESS_KEY;
+			}
 			const builder = new Builder().withCapabilities(capability);
 			t.ok(1, 'Create a builder');
 			if (env.BROWSERSTACK) {
 				builder.usingServer('http://hub-cloud.browserstack.com/wd/hub');
-				const project = packageJSON.name;
-				const build = `${project}#${env.TRAVIS_BUILD_NUMBER || new Date().toISOString()}`;
-				const localIdentifier = (`${build}${new Date().toISOString()}`).replace(/[^\w-]/g, '');
 				bsLocal = new Local();
 				t.ok(1, 'Create bsLocal');
 				await new Promise((resolve, reject) => {

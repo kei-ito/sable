@@ -56,7 +56,7 @@ t.test('Sync', {timeout: timeout * capabilities.length}, (t) => {
 			t.ok(1, `port: ${sableServer.server.address().port}`);
 			t.ok(1, `wsport: ${sableServer.wss.address().port}`);
 			for (const key of Object.keys(capability)) {
-				t.ok(1, `${key}: ${capability[key]}`);
+				t.ok(1, `${key}: ${JSON.stringify(capability[key])}`);
 			}
 			capability.project = packageJSON.name;
 			capability.build = `${capability.project}#${env.TRAVIS_BUILD_NUMBER || new Date().toISOString()}`;

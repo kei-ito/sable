@@ -3,7 +3,6 @@ const http = require('http');
 const os = require('os');
 const fs = require('fs');
 const {promisify} = require('util');
-const WebSocket = require('ws');
 const mkdtemp = promisify(fs.mkdtemp);
 const mkdir = promisify(fs.mkdir);
 const writeFile = promisify(fs.writeFile);
@@ -85,35 +84,6 @@ t.test('staticFile', {timeout: 3000}, (t) => {
 	t.test('404', async (t) => {
 		const res = await waitResponse(http.get(`http://127.0.0.1:${port}/foo/baz.txt`));
 		t.equal(res.statusCode, 404);
-	});
-	t.test('WebSocket', async (t) => {
-		let ws;
-		await new Promise((resolve, reject) => {
-			ws = new WebSocket(`ws://127.0.0.1:${sableServer.wsServer.address().port}`)
-			.once('error', reject)
-			.once('open', resolve);
-		});
-		t.ok(1, 'ws connected');
-		const dest = path.join(documentRoot, 'ws.txt');
-		const [messages] = await Promise.all([
-			new Promise((resolve) => {
-				const messages = [];
-				let timer;
-				const resetTimer = () => {
-					clearTimeout(timer);
-					timer = setTimeout(() => resolve(messages), 2000);
-				};
-				ws.on('message', (message) => {
-					t.ok(1, `message: ${message}`);
-					messages.push(JSON.parse(message));
-					resetTimer();
-				});
-				resetTimer();
-			}),
-			writeFile(dest, 'WS'),
-		]);
-		const message = messages.find(({file}) => file === dest);
-		t.ok(message, 'found expected message');
 	});
 	t.end();
 });

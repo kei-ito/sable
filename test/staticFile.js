@@ -48,14 +48,14 @@ t.test('staticFile', {timeout: 3000}, (t) => {
 		await close(sableServer.wsServer);
 	});
 	t.test(autoReloadScriptURL, async (t) => {
-		const res = await waitResponse(http.get(`http://localhost:${port}${autoReloadScriptURL}`));
+		const res = await waitResponse(http.get(`http://127.0.0.1:${port}${autoReloadScriptURL}`));
 		t.equal(res.statusCode, 200);
 		t.match(res.headers, {'content-type': 'application/javascript'});
 		const body = await res.pipe(new Logger()).promise();
 		t.ok(`${body}`.startsWith('self.wsAddress'));
 	});
 	t.test('index', async (t) => {
-		const res = await waitResponse(http.get(`http://localhost:${port}/`));
+		const res = await waitResponse(http.get(`http://127.0.0.1:${port}/`));
 		t.equal(res.statusCode, 200);
 		t.equal(res.headers['content-type'], 'text/html');
 		const body = `${await res.pipe(new Logger()).promise()}`;
@@ -63,12 +63,12 @@ t.test('staticFile', {timeout: 3000}, (t) => {
 		t.ok(body.includes('a href="foo"'));
 	});
 	t.test('redirect', async (t) => {
-		const res = await waitResponse(http.get(`http://localhost:${port}/foo`));
+		const res = await waitResponse(http.get(`http://127.0.0.1:${port}/foo`));
 		t.equal(res.statusCode, 301);
 		t.equal(res.headers.location, '/foo/');
 	});
 	t.test('foo/index.html', async (t) => {
-		const res = await waitResponse(http.get(`http://localhost:${port}/foo/`));
+		const res = await waitResponse(http.get(`http://127.0.0.1:${port}/foo/`));
 		t.equal(res.statusCode, 200);
 		t.equal(res.headers['content-type'], 'text/html');
 		const body = `${await res.pipe(new Logger()).promise()}`;
@@ -76,23 +76,24 @@ t.test('staticFile', {timeout: 3000}, (t) => {
 		t.ok(body.endsWith('foo'));
 	});
 	t.test('foo/bar.txt', async (t) => {
-		const res = await waitResponse(http.get(`http://localhost:${port}/foo/bar.txt`));
+		const res = await waitResponse(http.get(`http://127.0.0.1:${port}/foo/bar.txt`));
 		t.equal(res.statusCode, 200);
 		t.equal(res.headers['content-type'], 'text/plain');
 		const body = `${await res.pipe(new Logger()).promise()}`;
 		t.equal(body, 'foobar');
 	});
 	t.test('404', async (t) => {
-		const res = await waitResponse(http.get(`http://localhost:${port}/foo/baz.txt`));
+		const res = await waitResponse(http.get(`http://127.0.0.1:${port}/foo/baz.txt`));
 		t.equal(res.statusCode, 404);
 	});
 	t.test('WebSocket', async (t) => {
 		let ws;
 		await new Promise((resolve, reject) => {
-			ws = new WebSocket(`ws://localhost:${sableServer.wsServer.address().port}`)
+			ws = new WebSocket(`ws://127.0.0.1:${sableServer.wsServer.address().port}`)
 			.once('error', reject)
 			.once('open', resolve);
 		});
+		t.ok(1, 'ws connected');
 		const dest = path.join(documentRoot, 'ws.txt');
 		const [messages] = await Promise.all([
 			new Promise((resolve) => {

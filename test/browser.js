@@ -33,6 +33,17 @@ t.test('Sync', {timeout: timeout * capabilities.length}, (t) => {
 		status = 'failed';
 		documentRoot = await mkdtemp(path.join(os.tmpdir(), 'Sync'));
 		sableServer = await startServer({
+			// https://www.browserstack.com/question/664
+			// # What ports can I use to test development environments or private
+			//   servers using BrowserStack?
+			// 22
+			// 80
+			// ...
+			// 8080
+			// 8081
+			// 8082
+			// 8083
+			// ...
 			port: 8080,
 			documentRoot,
 		});

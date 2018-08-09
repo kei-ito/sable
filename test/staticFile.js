@@ -18,7 +18,7 @@ t.test('staticFile', {timeout: 3000}, (t) => {
 	let sableServer;
 	let documentRoot;
 	const autoReloadScriptURL = '/foobar.js';
-	const port = 12345;
+	const port = 8080;
 	t.beforeEach(async () => {
 		documentRoot = await mkdtemp(path.join(os.tmpdir(), 'staticFile'));
 		await mkdir(path.join(documentRoot, 'foo'));

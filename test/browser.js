@@ -13,7 +13,6 @@ const {markResult} = require('./lib/markResult.js');
 const timeout = 60000;
 const mkdtemp = promisify(fs.mkdtemp);
 const packageJSON = require('../package.json');
-const wait = (duration) => new Promise((resolve) => setTimeout(resolve, duration));
 const catchError = (promise) => promise
 .then((x) => {
 	throw new Error(`Unexpected resolution: ${x}`);

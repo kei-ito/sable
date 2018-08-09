@@ -55,9 +55,9 @@ t.test('Sync', {timeout: timeout * capabilities.length}, (t) => {
 			for (const key of Object.keys(capability)) {
 				t.ok(1, `${key}: ${capability[key]}`);
 			}
-			const project = packageJSON.name;
-			const build = `${project}#${env.TRAVIS_BUILD_NUMBER || new Date().toISOString()}`;
-			const localIdentifier = (`${build}${new Date().toISOString()}`).replace(/[^\w-]/g, '');
+			capability.project = packageJSON.name;
+			capability.build = `${capability.project}#${env.TRAVIS_BUILD_NUMBER || new Date().toISOString()}`;
+			const localIdentifier = (`${capability.build}${new Date().toISOString()}`).replace(/[^\w-]/g, '');
 			if (env.BROWSERSTACK) {
 				t.ok(1, 'Create a builder');
 				capability['browserstack.local'] = true;
@@ -107,7 +107,20 @@ t.test('Sync', {timeout: timeout * capabilities.length}, (t) => {
 			t.ok(1, 'Get the driver');
 			session = await driver.getSession();
 			t.ok(1, 'Get the session');
-			await driver.get(`http://127.0.0.1:${sableServer.server.address().port}/`);
+			await Promise.all([
+				new Promise((resolve, reject) => {
+					let timer = setTimeout(() => reject(new Error('WebSocket connection timeout')), 5000);
+					const userAgents = [];
+					sableServer.wss.once('connection', (client, req) => {
+						clearTimeout(timer);
+						const userAgent = req.headers['user-agent'];
+						t.ok(1, `Connected: ${userAgent}`);
+						userAgents.push(userAgent);
+						timer = setTimeout(() => resolve(userAgents), 1000);
+					});
+				}),
+				driver.get(`http://127.0.0.1:${sableServer.server.address().port}/`),
+			]);
 			const indexPageURL = await driver.getCurrentUrl();
 			t.ok(indexPageURL, `URL: ${indexPageURL}`);
 			t.match(

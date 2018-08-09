@@ -20,6 +20,17 @@ const catchError = (promise) => promise
 })
 .catch((x) => x);
 const writeFile = promisify(fs.writeFile);
+const waitWebSocketConnections = (wss) => new Promise((resolve, reject) => {
+	let timer = setTimeout(() => reject(new Error('WebSocket connection timeout')), 5000);
+	const userAgents = [];
+	wss.once('connection', (client, req) => {
+		clearTimeout(timer);
+		const userAgent = req.headers['user-agent'];
+		t.ok(1, `Connected: ${userAgent}`);
+		userAgents.push(userAgent);
+		timer = setTimeout(() => resolve(userAgents), 1000);
+	});
+});
 
 t.test('Sync', {timeout: timeout * capabilities.length}, (t) => {
 
@@ -122,17 +133,7 @@ t.test('Sync', {timeout: timeout * capabilities.length}, (t) => {
 			session = await driver.getSession();
 			t.ok(1, 'Get the session');
 			await Promise.all([
-				new Promise((resolve, reject) => {
-					let timer = setTimeout(() => reject(new Error('WebSocket connection timeout')), 5000);
-					const userAgents = [];
-					sableServer.wss.once('connection', (client, req) => {
-						clearTimeout(timer);
-						const userAgent = req.headers['user-agent'];
-						t.ok(1, `Connected: ${userAgent}`);
-						userAgents.push(userAgent);
-						timer = setTimeout(() => resolve(userAgents), 1000);
-					});
-				}),
+				waitWebSocketConnections(sableServer.wss),
 				driver.get(`http://127.0.0.1:${sableServer.server.address().port}/`),
 			]);
 			const indexPageURL = await driver.getCurrentUrl();
@@ -141,8 +142,10 @@ t.test('Sync', {timeout: timeout * capabilities.length}, (t) => {
 				await catchError(driver.findElement(By.css('a[href="foo.txt"]'))),
 				{name: 'NoSuchElementError'}
 			);
-			await writeFile(path.join(documentRoot, 'foo.txt'), 'foobar');
-			await wait(200);
+			await Promise.all([
+				waitWebSocketConnections(sableServer.wss),
+				writeFile(path.join(documentRoot, 'foo.txt'), 'foobar'),
+			]);
 			t.ok(await driver.findElement(By.css('a[href="foo.txt"]')), 'a[href="foo.txt"]');
 			status = 'passed';
 		});

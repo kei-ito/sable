@@ -100,7 +100,7 @@ t.test('staticFile', {timeout: 3000}, (t) => {
 				let timer;
 				const resetTimer = () => {
 					clearTimeout(timer);
-					timer = setTimeout(() => resolve(messages), 500);
+					timer = setTimeout(() => resolve(messages), 2000);
 				};
 				ws.on('message', (message) => {
 					t.ok(1, `message: ${message}`);

@@ -9,7 +9,7 @@
 				"prefer-arrow-callback": "off",
 				"prefer-destructuring": "off",
 				"prefer-rest-params": "off",
-				"prefer-template": ["never", "error"]
+				"prefer-template": "off"
 			}
 		}
 	]

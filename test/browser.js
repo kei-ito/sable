@@ -52,6 +52,7 @@ t.test('Sync', {timeout: timeout * capabilities.length}, (t) => {
 
 	capabilities.forEach((capability, index) => {
 		t.test(`Capability#${index}`, {timeout, bail: true}, async (t) => {
+			t.ok(1, `documentRoot: ${documentRoot}`);
 			t.ok(1, `port: ${sableServer.server.address().port}`);
 			t.ok(1, `wsport: ${sableServer.wss.address().port}`);
 			for (const key of Object.keys(capability)) {

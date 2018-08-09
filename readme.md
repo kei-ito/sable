@@ -17,54 +17,26 @@ npm install sable --save-dev
 ## CLI
 
 ```
-Usage: sable [options] [documentRoot1, documentRoot2, ...]
+$ sable -h
 
-+ Command-1 -------------------------------+
-| sable \                                  |
-|  --listen={host:localhost, port:5000} \  |
-|  --ws={port:20000} \                     |
-|  /document/root1 \                       |
-|  /document/root2                         |
-+------------------------------------------+
+  Usage: sable [options] <documentRoot>
 
-The Command-1 above runs the Script-1 below.
+  Starts a HTTP server for development
 
-+ Script-1 --------------------------------+
-| new SableServer({                        |
-|   listen: {                              |
-|     host: 'localhost',                   |
-|     port: 5000,                          |
-|   },                                     |
-|   ws: {port: 20000},                     |
-|   documentRoot: [                        |
-|     '/document/root1',                   |
-|     '/document/root2',                   |
-|   ],                                     |
-| }).start()                               |
-| .catch((error) => {                      |
-|   console.error(error);                  |
-|   process.exit(1);                       |
-| });                                      |
-+------------------------------------------+
+  Options:
+
+    -V, --version           output the version number
+    -p, --port <n>          A port number for HTTP, HTTPS (4000)
+    -w, --wsport <n>        A port number for WS, WSS (port + 1)
+    -b, --base <s>          An URL used as the 2nd argument of the URL constructor (http://localhost)
+    -i, --index <s>         A filename of index (index.html)
+    -a, --reloadscript <s>  An URL for autoreload script (autoreload.js)
+    -h, --help              output usage information
 ```
 
 ## Javascript API
 
 WIP
-
-### middleware
-
-A middleware is a function which gets 3 arguments `(req, res, next)`.
-
-- `req`: [http.ClientRequest](https://nodejs.org/api/http.html#http_class_http_clientrequest)
-- `res`: [http.ServerResponse](https://nodejs.org/api/http.html#http_class_http_serverresponse)
-- `next`: A function to escalate the incoming request.
-
-The `middlewares` configuration is sandwiched between
-[`watcher`](https://github.com/kei-ito/sable/blob/master/middleware/watcher/index.js)
-and
-[`staticFile`](https://github.com/kei-ito/sable/blob/master/middleware/staticFile/index.js)
-middlewares. i.e. `[a, b, c]` works as `[watcher, a, b, c, staticFile]`.
 
 ## License
 

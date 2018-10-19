@@ -1,0 +1,21 @@
+extends:
+  - './node_modules/@nlib/lint/.eslintrc.json'
+env:
+  node: true
+  es6: true
+overrides:
+  -
+    files:
+      - '*.script.js'
+    globals:
+      self: true
+    rules:
+      prefer-arrow-callback: 'off'
+      prefer-destructuring: 'off'
+      prefer-rest-params: 'off'
+      prefer-template: 'off'
+  -
+    files:
+      - 'capabilities.js'
+    rules:
+      camelcase: 'off'

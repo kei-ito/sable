@@ -3,7 +3,7 @@
 [![Greenkeeper badge](https://badges.greenkeeper.io/kei-ito/sable.svg)](https://greenkeeper.io/)
 [![Build Status](https://travis-ci.org/kei-ito/sable.svg?branch=master)](https://travis-ci.org/kei-ito/sable)
 [![Build status](https://ci.appveyor.com/api/projects/status/github/kei-ito/sable?branch=master&svg=true)](https://ci.appveyor.com/project/kei-ito/sable/branch/master)
-[![BrowserStack Status](https://www.browserstack.com/automate/badge.svg?badge_key=clRVWTBmQVdFcHNGaDFvMDlxanRoZllsMGN1RU9JNW1CRUtEVjkxQ2NMZz0tLUVMdFpUZnJKajltN0FSTWlJeXBCbVE9PQ==--046a5961a5e492a5b38e13d34a12a6ca2a8c1139)](https://www.browserstack.com/automate/public-build/clRVWTBmQVdFcHNGaDFvMDlxanRoZllsMGN1RU9JNW1CRUtEVjkxQ2NMZz0tLUVMdFpUZnJKajltN0FSTWlJeXBCbVE9PQ==--046a5961a5e492a5b38e13d34a12a6ca2a8c1139)
+[![BrowserStack Status](https://www.browserstack.com/automate/badge.svg?badge_key=TUd4dDNqUlljR2EvZkkyZkRvU2U5YzRQR01Rc3EvM2JKdmRrelZnMi9IUT0tLVc1K3ViMjVMUHJJUm1hOTM5STdGVGc9PQ==--24bb94d7fbf503d93397fc9d8610dce7b616b47f)](https://www.browserstack.com/automate/public-build/TUd4dDNqUlljR2EvZkkyZkRvU2U5YzRQR01Rc3EvM2JKdmRrelZnMi9IUT0tLVc1K3ViMjVMUHJJUm1hOTM5STdGVGc9PQ==--24bb94d7fbf503d93397fc9d8610dce7b616b47f)
 [![codecov](https://codecov.io/gh/kei-ito/sable/branch/master/graph/badge.svg)](https://codecov.io/gh/kei-ito/sable)
 
 Creates a server for development.

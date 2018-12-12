@@ -59,7 +59,7 @@ t.test('Sync', {timeout: timeout * capabilities.length}, (t) => {
     capabilities.forEach((capability, index) => {
         t.test(`Capability#${index}`, {timeout}, async (t) => {
             documentRoot = await mkdtemp(path.join(os.tmpdir(), 'Sync'));
-            t.ok(documentRoot, documentRoot);
+            t.ok('Configuration', {documentRoot, ...capability});
             sableServer = await startServer({
                 // https://www.browserstack.com/question/664
                 // # What ports can I use to test development environments or private

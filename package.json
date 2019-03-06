@@ -24,7 +24,7 @@
 		"chalk": "^2.4.1",
 		"chokidar": "^2.0.4",
 		"commander": "^2.19.0",
-		"ws": "^6.1.2"
+		"ws": "^6.2.0"
 	},
 	"devDependencies": {
 		"@nlib/lint": "^3.0.7",

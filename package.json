@@ -22,7 +22,7 @@
 	},
 	"dependencies": {
 		"chalk": "^2.4.1",
-		"chokidar": "^2.0.4",
+		"chokidar": "^3.0.0",
 		"commander": "^2.19.0",
 		"ws": "^6.2.0"
 	},

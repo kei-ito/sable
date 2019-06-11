@@ -109,7 +109,7 @@ test.afterEach(async (t) => {
 let port = 9200;
 
 test('GET /src', async (t) => {
-    const localURL = await t.context.start(t, `sable --port ${port++}`, __dirname);
+    const localURL = await t.context.start(t, `sable --port ${port++} --host localhost`, __dirname);
     const indexResponse = await get(new URL('/src', localURL));
     t.is(indexResponse.statusCode, 200);
     t.is(indexResponse.headers['content-type'], 'text/html');
@@ -118,14 +118,18 @@ test('GET /src', async (t) => {
 });
 
 test('GET /', async (t) => {
-    const localURL = await t.context.start(t, `sable --port ${port++}`, __dirname);
+    const localURL = await t.context.start(t, `sable --port ${port++} --host localhost`, __dirname);
     const indexResponse = await get(new URL('/', localURL));
     t.is(indexResponse.statusCode, 200);
 });
 
 test('GET /index.ts', async (t) => {
     const portNumber = port++;
-    t.context.server = await startServer({port: portNumber, documentRoot: __dirname});
+    t.context.server = await startServer({
+        host: 'localhost',
+        port: portNumber,
+        documentRoot: __dirname,
+    });
     const indexResponse = await get(new URL(`http://localhost:${portNumber}/index.ts`));
     t.is(indexResponse.statusCode, 200);
 });

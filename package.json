@@ -19,7 +19,7 @@
     "scripts": {
         "lint": "eslint --ext .ts src",
         "build": "tsc",
-        "test": "ava",
+        "test": "ava -v test/index.ts",
         "version:changelog": "conventional-changelog --preset angular --infile CHANGELOG.md --same-file --release-count 0",
         "version:add": "git add .",
         "version": "run-s version:changelog version:add"
@@ -64,9 +64,6 @@
         ],
         "require": [
             "ts-node/register"
-        ],
-        "files": [
-            "lib/**/*.test.js"
         ]
     },
     "commitlint": {

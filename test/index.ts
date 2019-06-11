@@ -1,4 +1,4 @@
-import anyTest, {TestInterface} from 'ava';
+import anyTest, {TestInterface, ExecutionContext} from 'ava';
 import {URL} from 'url';
 import * as http from 'http';
 import * as stream from 'stream';
@@ -7,6 +7,7 @@ import * as childProcess from 'child_process';
 interface ITextContext {
     process?: childProcess.ChildProcess,
     start(
+        t: ExecutionContext<ITextContext>,
         command: string,
         cwd: string,
     ): Promise<URL>,
@@ -35,7 +36,7 @@ const readStream = (readable: stream.Readable): Promise<Buffer> => new Promise((
     .once('error', reject);
 });
 
-test.before(async (t) => {
+test.before(async () => {
     await new Promise((resolve, reject) => {
         childProcess.spawn('npm install', {
             cwd: __dirname,
@@ -44,7 +45,10 @@ test.before(async (t) => {
         .once('error', reject)
         .once('exit', resolve);
     });
-    t.context.start = async (command, cwd) => {
+});
+
+test.beforeEach((t) => {
+    t.context.start = async (t, command, cwd) => {
         const process = t.context.process = childProcess.spawn(
             `npx ${command}`,
             {cwd, shell: true},
@@ -56,7 +60,6 @@ test.before(async (t) => {
                 chunks.push(chunk);
                 totalLength += chunk.length;
                 const concatenated = Buffer.concat(chunks, totalLength);
-                t.log([`${concatenated}`]);
                 const matched = `${concatenated}`.match(/http:\/\/\S+/);
                 if (matched) {
                     resolve(new URL(matched[0]));
@@ -68,7 +71,7 @@ test.before(async (t) => {
                     callback();
                 },
                 final(callback) {
-                    reject(new Error('Failed to get a local URL'));
+                    reject(new Error(`Failed to get a local URL: ${Buffer.concat(chunks, totalLength)}`));
                     callback();
                 },
             }));
@@ -90,10 +93,16 @@ test.afterEach((t) => {
 });
 
 test.serial('GET /src', async (t) => {
-    const localURL = await t.context.start('sable', __dirname);
+    const localURL = await t.context.start(t, 'sable', __dirname);
     const indexResponse = await get(new URL('/src', localURL));
     t.is(indexResponse.statusCode, 200);
     t.is(indexResponse.headers['content-type'], 'text/html');
     const html = `${await readStream(indexResponse)}`;
     t.true(html.includes('<script'));
+});
+
+test.serial('GET /', async (t) => {
+    const localURL = await t.context.start(t, 'sable', __dirname);
+    const indexResponse = await get(new URL('/', localURL));
+    t.is(indexResponse.statusCode, 200);
 });

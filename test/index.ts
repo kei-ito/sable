@@ -3,9 +3,11 @@ import {URL} from 'url';
 import * as http from 'http';
 import * as stream from 'stream';
 import * as childProcess from 'child_process';
+import {startServer} from '..';
 
 interface ITextContext {
     process?: childProcess.ChildProcess,
+    server?: http.Server,
     start(
         t: ExecutionContext<ITextContext>,
         command: string,
@@ -86,9 +88,21 @@ test.beforeEach((t) => {
     };
 });
 
-test.afterEach((t) => {
+test.afterEach(async (t) => {
     if (t.context.process) {
         t.context.process.kill();
+    }
+    const {server} = t.context;
+    if (server) {
+        await new Promise((resolve, reject) => {
+            server.close((error) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve();
+                }
+            });
+        });
     }
 });
 
@@ -106,5 +120,12 @@ test('GET /src', async (t) => {
 test('GET /', async (t) => {
     const localURL = await t.context.start(t, `sable --port ${port++}`, __dirname);
     const indexResponse = await get(new URL('/', localURL));
+    t.is(indexResponse.statusCode, 200);
+});
+
+test('GET /index.ts', async (t) => {
+    const portNumber = port++;
+    t.context.server = await startServer({port: portNumber, documentRoot: __dirname});
+    const indexResponse = await get(new URL(`http://localhost:${portNumber}/index.ts`));
     t.is(indexResponse.statusCode, 200);
 });

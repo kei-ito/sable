@@ -24,9 +24,7 @@ export const startServer = ({
         watch: !noWatch,
     }));
     const server = http.createServer(app);
-    server.once('error', reject);
     server.once('listening', () => {
-        server.removeListener('error', reject);
         const addressInfo = server.address();
         if (addressInfo && typeof addressInfo === 'object') {
             const {address, family, port} = addressInfo;
@@ -36,5 +34,16 @@ export const startServer = ({
         }
         resolve(server);
     });
-    server.listen(port, host);
+    const listen = (port: number, host?: string) => {
+        server
+        .once('error', (error: Error & {code: string}) => {
+            if (error.code === 'EADDRINUSE') {
+                listen(port + 1, host);
+            } else {
+                reject(error);
+            }
+        })
+        .listen(port, host);
+    };
+    listen(port, host);
 });

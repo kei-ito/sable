@@ -1,10 +1,11 @@
 import * as http from 'http';
 import * as connect from 'connect';
-import {staticLivereload} from 'middleware-static-livereload';
+import * as staticLivereload from 'middleware-static-livereload';
 
 export interface ISableOptions {
     documentRoot?: string | Array<string>,
     port?: number,
+    host?: string,
     index?: string,
     noWatch?: boolean,
 }
@@ -12,22 +13,28 @@ export interface ISableOptions {
 export const startServer = ({
     documentRoot = process.cwd(),
     port = 4000,
+    host,
     index = 'index.html',
     noWatch = false,
 }: ISableOptions = {}): Promise<http.Server> => new Promise((resolve, reject) => {
-    const server = http.createServer(
-        connect()
-        .use(staticLivereload({
-            documentRoot,
-            index,
-            watch: !noWatch,
-        })),
-    )
-    .once('error', reject)
-    .once('listening', () => {
+    const app = connect();
+    app.use(staticLivereload.middleware({
+        documentRoot,
+        index,
+        watch: !noWatch,
+    }));
+    const server = http.createServer(app);
+    server.once('error', reject);
+    server.once('listening', () => {
         server.removeListener('error', reject);
-        process.stdout.write(`Listening: ${JSON.stringify(server.address())}`);
+        const addressInfo = server.address();
+        if (addressInfo && typeof addressInfo === 'object') {
+            const {address, family, port} = addressInfo;
+            const portSuffix = port === 80 ? '' : `:${port}`;
+            const hostname = host || (portSuffix && family === 'IPv6' ? `[${address}]` : address);
+            process.stdout.write(`http://${hostname}${portSuffix}\n`);
+        }
         resolve(server);
-    })
-    .listen(port);
+    });
+    server.listen(port, host);
 });

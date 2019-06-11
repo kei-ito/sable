@@ -9,6 +9,7 @@ program
 .description('Starts a HTTP server for development')
 .usage('[options] <documentRoot ...>')
 .option('-p, --port <n>', 'A port number for HTTP, HTTPS (4000)', parseInt)
+.option('-h, --host <s>', 'Hostname')
 .option('--noWatch', 'Disable watching')
 .option('-i, --index <s>', 'A filename of index (index.html)')
 .parse(process.argv);

@@ -7,12 +7,11 @@ const packageJSON = require('../package.json');
 program
 .version(packageJSON.version)
 .description('Starts a HTTP server for development')
-.usage('[options] <documentRoot>')
+.usage('[options] <documentRoot ...>')
 .option('-p, --port <n>', 'A port number for HTTP, HTTPS (4000)', parseInt)
-.option('-w, --wsport <n>', 'A port number for WS, WSS (port + 1)', parseInt)
-.option('-b, --base <s>', 'An URL used as the 2nd argument of the URL constructor (http://localhost)')
+.option('-h, --host <s>', 'Hostname')
+.option('--noWatch', 'Disable watching')
 .option('-i, --index <s>', 'A filename of index (index.html)')
-.option('-a, --reloadscript <s>', 'An URL for autoreload script (autoreload.js)')
 .parse(process.argv);
 
 startServer(program)

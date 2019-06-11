@@ -1,35 +1,16 @@
 language: node_js
-addons:
-  chrome: stable
-node_js:
-- '10'
-before_install:
-- export GREENKEEPER=$([[ $(node -v) == v10.* ]]; echo $?)
-- if [[ ${GREENKEEPER} -eq 0 ]]; then npm install -g greenkeeper-lockfile; fi
+cache: npm
+os: osx
+node_js: '12'
 install:
-- BASE_URL=http://chromedriver.storage.googleapis.com
-- wget ${BASE_URL}/$(curl ${BASE_URL}/LATEST_RELEASE)/chromedriver_linux64.zip
-- unzip chromedriver_linux64.zip
-- npm install
-before_script:
-- if [[ ${GREENKEEPER} -eq 0 ]]; then greenkeeper-lockfile-update; fi
+  - npm ci
+  - npm install -g codecov c8
 script:
-- npm test
-- npm run lint
-after_success:
-- if [[ ${GREENKEEPER} -eq 0 ]]; then greenkeeper-lockfile-upload; fi
-- npm install -g codecov
-- codecov
-deploy:
-  provider: npm
-  email: kei.itof@gmail.com
-  api_key:
-    secure: XRIrHKj1/6PtI5YQA21HewcbDQfdVSBFEP2A08SD28pQB73/EvNrg266B1627Mvl44TXPLujFVZTY3yl8P2IvlNuImBMdk1k3Sj0s7OgIgYw2cS+hjtJAqwKGUo/ef+PfQDyNCdcRDCoxQRiVImvF/36Sotn2rd/Tn1RYBac04EZX3/WUbn3P+M7DT7D9683tPv03h6mjpHw01QCCeWCDbCTRS3LEVyheNkrFNVPvCERa7Fl5wZmeF8r42usQrHmrgzJwyTGeUmX5Pjejr6AwLCROf0umrXE2Z+v+84frVynY8gC+Itgm0kjM/x9tkf5ZLEUB8v5VgqrC/qgkvKTTQaCxXJqHbXxPkAPh0xoaEXaeNdfqftt9q1EocqTX6EQtt0fhHsHP86I3ZLC+I31w4+E7RlITyhw9IYKr0amtwEQLwA2mL99wpdvRYSUjzL+GxckaXnxFLla8RcG5CoXFrbPpSZtY42pxwLktyv2vIbuYVBRpKx2HHsaePZh0IzYq1weNP2XgywzJh/3XZyWP3E1JZBHw4JbFOxux4rxayAOmFcfBBdQGbLT9/eRJgU3w005OtwYZ3DWY6Oh9b/uSTBHQUE0UWCHQ1k/EkDC6ZLocdpxcyvUkGRb+14/+FDXSDh8lz6NjwBk+0ozqodGvKMfEgXbgcWTdJ/ZpZWQemU=
-  on:
-    tags: true
-    repo: kei-ito/sable
-    branch: master
-env:
-  global:
-  - secure: V0HsYoU5cQbgZ7u0LBMC/RBcu8DpyT33Ae+0tCCt/yVf2HYaUyO7vjf35vu/ppJgjFE9sUaj1Tqyw11984VCDUmU40x6v5dR2l7JEpo82ygE7kPsSeiXmu4HUd3Dsez9ydxSg8Gbt76AeP4eHn2xi7dnscZvxs+EO2XuvdIpzgUj4N09ahfSpncHAHF4OuoIzBYC3l0hbBix9D8/WTC2GPm8rbN42aI+W1FFb76Y4yudkW8i8EnLWSCeriiQtZJLu9V/7zOiltFGrSbne29r//V2nqlijJ41TbaAjBNjVvYaO+SudEFjQBUN2zTUs6s6EA79vp9/cH21qnbfZVcnHul7/1mV9r4swKFGQ67F8XV35mcGrWBxEZZTyKwWKQY0QEC4QMoN/jyjaI+5ZQsbIAcTYsYqrMyz30JKjiMrSx4KGzOov8WaMaDwU+vWzKyMCGuxWvnLn2yps171kplLcjwPiYVewI96h5RrKHP1aKcpFikEyALxsibBq9+SJQoLYvxz+tFUM/r+SFWUwe1SgVkI8i8Z2ua6tlnhTeRncrtz7Yz+rGWB3iSFvVChV3BAOQDB782CX1S40lVybt7FGA+a84KkXbV8Iaz0n3hAb2JSTLL6hWIN9jn+KCNNmeomNPgCRDQG7xF9SBvkuSF5bBl3SjWJitcJZydlWZVTyAc=
-  - secure: spXsFheSTbwjY3LYsVHhiqjuZNWsGoFhRXrJKROdKR67oO28KR1CrB0iJ65DZ+AR1mCpPleniiOJozsyp7B8zjuWYFUcq8JZWZe2AnC0lKDIL7ROeYLQLa4+JcqbxmlYIS57duKbFC4a+fiwD1ICjAeSQ2+rBpBB8YTD+9jEUXUpVfTq0D44+x7gXdshgjuHOKtEDLEv1ofDrSZrCIWnQt7UGYqQSnpOKm1SVdFcmu8y1TL5P6e5hKtVwNnamTZ6wzTr6KQlEQ18J8XIi5AxSCkXoWR92fx3QRxtsFTh6AzYcyqdiNjUC7WmCaNfOusAM5gK5sr5O9APzFwGAsCfzHBA9fW0DcrnbtRWz/UUwMdv3R4oyh2hVnevSZCIUiuFvuCkJCvFmcDJRKHkYi9CnvGwDLge8R9Xkc9knCWKvqU5Yvlk8Kshr8xFlOvfqsYX502e6WCEBz2ochc0CVbWtXwS0n0n1mff57bb1v3wWzWemObwh87NPuh9J4BHThuQgXOf5RFWGrpekPI+pV5AgxSU/bwQ/TrKjcwfrKnCIY+QQLDuWoG4oUPrkTHG5HXUUtEunCdQTZd7jRliLyfZaVEXpn0f4i+Itolwlwb11IRz127cR9WHANbuSK+jE9pjqtCT8co4a+MmgxPRen8qaeqD6GrC6N413NGiV0AUa1w=
+  - npm run build
+  - c8 npm run test
+  - c8 report --reporter=text-lcov > coverage.lcov
+  - codecov
+  - nvm install 10
+  - npm run test
+  - nvm install 8
+  - npm run test

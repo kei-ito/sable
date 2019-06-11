@@ -17,21 +17,70 @@
         "sable": "./bin/sable"
     },
     "scripts": {
-        "lint": "eslint bin/sable lib test",
-        "test": "tap --coverage test/*.js"
+        "lint": "eslint --ext .ts src",
+        "build": "tsc",
+        "test": "ava -v test/index.ts",
+        "version:changelog": "conventional-changelog --preset angular --infile CHANGELOG.md --same-file --release-count 0",
+        "version:add": "git add .",
+        "version": "run-s version:changelog version:add"
     },
     "dependencies": {
-        "chalk": "^2.4.2",
-        "chokidar": "^3.0.1",
-        "commander": "^2.20.0",
-        "ws": "^7.0.0"
+        "commander": "2.20.0",
+        "connect": "3.7.0",
+        "middleware-static-livereload": "1.2.1"
     },
     "devDependencies": {
-        "@nlib/lint": "^3.10.0",
-        "browserstack-local": "^1.4.0",
-        "eslint": "^5.16.0",
-        "selenium-webdriver": "4.0.0-alpha.1",
-        "tap": "^14.2.2"
+        "@commitlint/cli": "8.0.0",
+        "@commitlint/config-conventional": "8.0.0",
+        "@nlib/lint": "3.10.0",
+        "@types/connect": "3.4.32",
+        "@types/node": "12.0.7",
+        "@typescript-eslint/eslint-plugin": "1.10.2",
+        "@typescript-eslint/parser": "1.10.2",
+        "ava": "2.1.0",
+        "chokidar": "3.0.1",
+        "conventional-changelog-cli": "2.0.21",
+        "eslint": "5.16.0",
+        "husky": "2.4.0",
+        "lint-staged": "8.2.0",
+        "npm-run-all": "4.1.5",
+        "ts-node": "8.2.0",
+        "typescript": "3.5.1"
+    },
+    "eslintConfig": {
+        "extends": "./node_modules/@nlib/lint/.eslintrc.json",
+        "env": {
+            "es6": true,
+            "node": true
+        },
+        "globals": {
+            "URL": false
+        }
+    },
+    "ava": {
+        "compileEnhancements": false,
+        "extensions": [
+            "ts"
+        ],
+        "require": [
+            "ts-node/register"
+        ]
+    },
+    "commitlint": {
+        "extends": [
+            "@commitlint/config-conventional"
+        ]
+    },
+    "husky": {
+        "hooks": {
+            "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+            "pre-commit": "lint-staged"
+        }
+    },
+    "lint-staged": {
+        "*.js": [
+            "eslint"
+        ]
     },
     "renovate": {
         "extends": [

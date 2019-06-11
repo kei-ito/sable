@@ -92,8 +92,10 @@ test.afterEach((t) => {
     }
 });
 
-test.serial('GET /src', async (t) => {
-    const localURL = await t.context.start(t, 'sable', __dirname);
+let port = 9200;
+
+test('GET /src', async (t) => {
+    const localURL = await t.context.start(t, `sable --port ${port++}`, __dirname);
     const indexResponse = await get(new URL('/src', localURL));
     t.is(indexResponse.statusCode, 200);
     t.is(indexResponse.headers['content-type'], 'text/html');
@@ -101,8 +103,8 @@ test.serial('GET /src', async (t) => {
     t.true(html.includes('<script'));
 });
 
-test.serial('GET /', async (t) => {
-    const localURL = await t.context.start(t, 'sable', __dirname);
+test('GET /', async (t) => {
+    const localURL = await t.context.start(t, `sable --port ${port++}`, __dirname);
     const indexResponse = await get(new URL('/', localURL));
     t.is(indexResponse.statusCode, 200);
 });

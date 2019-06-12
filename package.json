@@ -27,7 +27,7 @@
     "dependencies": {
         "commander": "2.20.0",
         "connect": "3.7.0",
-        "middleware-static-livereload": "1.2.1"
+        "middleware-static-livereload": "1.2.2"
     },
     "devDependencies": {
         "@commitlint/cli": "8.0.0",

@@ -14,6 +14,10 @@ program
 .option('-i, --index <s>', 'A filename of index (index.html)')
 .parse(process.argv);
 
+if (program.noWatch) {
+    program.watch = false;
+}
+
 startServer(program)
 .catch((error) => {
     console.error(error);

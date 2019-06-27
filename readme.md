@@ -32,8 +32,36 @@ Options:
 
 ## Javascript API
 
-WIP
+```javascript
+import {startServer} from 'sable';
+startServer({/* options */})
+.then((server) => console.log(server.address()))
+```
+
+### Options
+
+`startServer` supports all of the options provided by [middleware-static-livereload]
+, `port` and `host`.
+
+```javascript
+interface SableOptions extends MiddlewareStaticLivereload.Options {
+    /**
+     * The first argument of server.listen()
+     * https://nodejs.org/api/net.html#net_server_listen_port_host_backlog_callback
+     * @default 4000
+     */
+    port?: number,
+    /**
+     * The second argument of server.listen()
+     * https://nodejs.org/api/net.html#net_server_listen_port_host_backlog_callback
+     * @default undefined
+     */
+    host?: string,
+}
+```
+
+[middleware-static-livereload]: https://github.com/kei-ito/middleware-static-livereload#options
 
 ## LICENSE
 
-The middleware-static-livereload project is licensed under the terms of the Apache 2.0 License.
+The sable project is licensed under the terms of the Apache 2.0 License.

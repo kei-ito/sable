@@ -1,3 +1,13 @@
+<a name="0.5.1"></a>
+## [0.5.1](https://github.com/kei-ito/sable/compare/v0.5.0...v0.5.1) (2019-06-27)
+
+
+### Features
+
+* support all options ([8a6abf7](https://github.com/kei-ito/sable/commit/8a6abf7))
+
+
+
 <a name="0.5.0"></a>
 # [0.5.0](https://github.com/kei-ito/sable/compare/v0.4.6...v0.5.0) (2019-06-11)
 

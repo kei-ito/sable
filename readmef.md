@@ -41,7 +41,7 @@ startServer({/* options */})
 ### Options
 
 `startServer` supports all of the options provided by [middleware-static-livereload]
-, `port` and `host`.
+, `port`, `host` and `middlewares`.
 
 ```javascript
 interface SableOptions extends MiddlewareStaticLivereload.Options {
@@ -57,6 +57,11 @@ interface SableOptions extends MiddlewareStaticLivereload.Options {
      * @default undefined
      */
     host?: string,
+    /**
+     * A list of middlewares.
+     * @default []
+     */
+    middlewares?: Array<connect.HandleFunction>,
 }
 ```
 

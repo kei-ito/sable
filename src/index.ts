@@ -15,10 +15,20 @@ export interface ISableOptions extends staticLivereload.IOptions {
      * @default undefined
      */
     host?: string,
+    /**
+     * A list of middlewares.
+     * @default []
+     */
+    middlewares?: Array<connect.HandleFunction>,
 }
 
-export const startServer = (options: ISableOptions = {}): Promise<http.Server> => new Promise((resolve, reject) => {
+export const startServer = (
+    options: ISableOptions = {},
+): Promise<http.Server> => new Promise((resolve, reject) => {
     const app = connect();
+    for (const middleware of (options.middlewares || [])) {
+        app.use(middleware);
+    }
     app.use(staticLivereload.middleware(options));
     const server = http.createServer(app);
     server.once('listening', () => {

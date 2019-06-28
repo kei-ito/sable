@@ -124,12 +124,16 @@ test('GET /', async (t) => {
 });
 
 test('GET /index.ts', async (t) => {
-    const portNumber = port++;
     t.context.server = await startServer({
         host: 'localhost',
-        port: portNumber,
+        port: port++,
         documentRoot: __dirname,
     });
-    const indexResponse = await get(new URL(`http://localhost:${portNumber}/index.ts`));
-    t.is(indexResponse.statusCode, 200);
+    const addressInfo = t.context.server.address();
+    if (typeof addressInfo === 'object') {
+        const indexResponse = await get(new URL(`http://localhost:${addressInfo.port}/index.ts`));
+        t.is(indexResponse.statusCode, 200);
+    } else {
+        t.is(typeof addressInfo, 'object');
+    }
 });

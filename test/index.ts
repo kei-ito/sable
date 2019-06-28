@@ -130,7 +130,7 @@ test('GET /index.ts', async (t) => {
         documentRoot: __dirname,
     });
     const addressInfo = t.context.server.address();
-    if (typeof addressInfo === 'object') {
+    if (addressInfo && typeof addressInfo === 'object') {
         const indexResponse = await get(new URL(`http://localhost:${addressInfo.port}/index.ts`));
         t.is(indexResponse.statusCode, 200);
     } else {

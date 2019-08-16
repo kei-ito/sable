@@ -34,7 +34,7 @@
         "@commitlint/config-conventional": "8.1.0",
         "@nlib/lint": "^3.10.1",
         "@types/connect": "3.4.32",
-        "@types/node": "12.7.1",
+        "@types/node": "12.7.2",
         "@typescript-eslint/eslint-plugin": "^1.11.0",
         "@typescript-eslint/parser": "^1.11.0",
         "ava": "2.2.0",

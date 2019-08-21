@@ -35,7 +35,7 @@
         "@nlib/lint": "^3.10.1",
         "@types/connect": "3.4.32",
         "@types/node": "12.7.2",
-        "@typescript-eslint/eslint-plugin": "^1.11.0",
+        "@typescript-eslint/eslint-plugin": "^2.0.0",
         "@typescript-eslint/parser": "^1.11.0",
         "ava": "2.3.0",
         "chokidar": "3.0.2",

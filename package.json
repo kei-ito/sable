@@ -25,7 +25,7 @@
         "version": "run-s version:changelog version:add"
     },
     "dependencies": {
-        "commander": "2.20.0",
+        "commander": "3.0.0",
         "connect": "3.7.0",
         "middleware-static-livereload": "^1.2.4"
     },

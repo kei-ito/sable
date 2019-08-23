@@ -22,35 +22,38 @@ export interface ISableOptions extends staticLivereload.IOptions {
     middlewares?: Array<connect.HandleFunction>,
 }
 
-export const startServer = (
+export const startServer = async (
     options: ISableOptions = {},
-): Promise<http.Server> => new Promise((resolve, reject) => {
+): Promise<http.Server> => {
     const app = connect();
     for (const middleware of (options.middlewares || [])) {
         app.use(middleware);
     }
     app.use(staticLivereload.middleware(options));
     const server = http.createServer(app);
-    server.once('listening', () => {
-        const addressInfo = server.address();
-        if (addressInfo && typeof addressInfo === 'object') {
-            const {address, family, port} = addressInfo;
-            const portSuffix = port === 80 ? '' : `:${port}`;
-            const hostname = options.host || (portSuffix && family === 'IPv6' ? `[${address}]` : address);
-            process.stdout.write(`http://${hostname}${portSuffix}\n`);
-        }
-        resolve(server);
-    });
-    const listen = (port: number, host?: string) => {
-        server
-        .once('error', (error: Error & {code: string}) => {
-            if (error.code === 'EADDRINUSE') {
-                listen(port + 1, host);
-            } else {
-                reject(error);
+    await new Promise<http.Server>((resolve, reject) => {
+        server.once('listening', () => {
+            const addressInfo = server.address();
+            if (addressInfo && typeof addressInfo === 'object') {
+                const {address, family, port} = addressInfo;
+                const portSuffix = port === 80 ? '' : `:${port}`;
+                const hostname = options.host || (portSuffix && family === 'IPv6' ? `[${address}]` : address);
+                process.stdout.write(`http://${hostname}${portSuffix}\n`);
             }
-        })
-        .listen(port, host);
-    };
-    listen(options.port || 4000, options.host);
-});
+            resolve(server);
+        });
+        const listen = (port: number, host?: string) => {
+            server
+            .once('error', (error: Error & {code: string}) => {
+                if (error.code === 'EADDRINUSE') {
+                    listen(port + 1, host);
+                } else {
+                    reject(error);
+                }
+            })
+            .listen(port, host);
+        };
+        listen(options.port || 4000, options.host);
+    });
+    return server;
+};

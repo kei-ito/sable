@@ -39,7 +39,7 @@
         "@typescript-eslint/parser": "^2.0.0",
         "ava": "2.4.0",
         "chokidar": "3.2.2",
-        "conventional-changelog-cli": "2.0.25",
+        "conventional-changelog-cli": "2.0.27",
         "eslint": "6.6.0",
         "husky": "^3.0.4",
         "lint-staged": "9.4.2",

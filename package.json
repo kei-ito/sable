@@ -25,27 +25,27 @@
         "version": "run-s version:changelog version:add"
     },
     "dependencies": {
-        "commander": "^3.0.0",
+        "commander": "^4.0.1",
         "connect": "3.7.0",
-        "middleware-static-livereload": "^1.2.6"
+        "middleware-static-livereload": "^1.2.9"
     },
     "devDependencies": {
         "@commitlint/cli": "8.2.0",
         "@commitlint/config-conventional": "8.2.0",
-        "@nlib/lint": "^3.13.3",
+        "@nlib/lint": "^3.15.0",
         "@types/connect": "3.4.32",
-        "@types/node": "12.11.7",
-        "@typescript-eslint/eslint-plugin": "^2.0.0",
-        "@typescript-eslint/parser": "^2.0.0",
+        "@types/node": "^12.12.7",
+        "@typescript-eslint/eslint-plugin": "^2.7.0",
+        "@typescript-eslint/parser": "^2.7.0",
         "ava": "2.4.0",
-        "chokidar": "3.2.2",
-        "conventional-changelog-cli": "2.0.25",
+        "chokidar": "^3.3.0",
+        "conventional-changelog-cli": "^2.0.27",
         "eslint": "6.6.0",
-        "husky": "^3.0.4",
-        "lint-staged": "9.4.2",
+        "husky": "^3.0.9",
+        "lint-staged": "^9.4.3",
         "npm-run-all": "4.1.5",
-        "ts-node": "8.4.1",
-        "typescript": "3.6.4"
+        "ts-node": "^8.5.2",
+        "typescript": "^3.7.2"
     },
     "eslintConfig": {
         "extends": "./node_modules/@nlib/lint/.eslintrc.json",

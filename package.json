@@ -22,18 +22,20 @@
         "test": "ava -v test/index.ts",
         "version:changelog": "conventional-changelog --preset angular --infile CHANGELOG.md --same-file --release-count 0",
         "version:add": "git add .",
-        "version": "run-s version:changelog version:add"
+        "version": "run-s version:changelog version:add",
+        "prepack": "remove-sourcemap lib"
     },
     "dependencies": {
         "@types/connect": "^3.4.32",
         "commander": "^4.0.1",
         "connect": "3.7.0",
-        "middleware-static-livereload": "^1.2.10"
+        "middleware-static-livereload": "^1.2.12"
     },
     "devDependencies": {
         "@commitlint/cli": "8.2.0",
         "@commitlint/config-conventional": "8.2.0",
-        "@nlib/lint": "^3.15.0",
+        "@nlib/lint": "^3.15.1",
+        "@nlib/remove-sourcemap": "^3.15.4",
         "@types/node": "^12.12.14",
         "@typescript-eslint/eslint-plugin": "^2.10.0",
         "@typescript-eslint/parser": "^2.10.0",

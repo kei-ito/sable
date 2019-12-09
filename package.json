@@ -29,13 +29,13 @@
         "@types/connect": "^3.4.32",
         "commander": "^4.0.1",
         "connect": "3.7.0",
-        "middleware-static-livereload": "^1.2.12"
+        "middleware-static-livereload": "^1.2.13"
     },
     "devDependencies": {
         "@commitlint/cli": "8.2.0",
         "@commitlint/config-conventional": "8.2.0",
         "@nlib/lint": "^3.15.1",
-        "@nlib/remove-sourcemap": "^3.15.4",
+        "@nlib/remove-sourcemap": "^3.15.6",
         "@types/node": "^12.12.14",
         "@typescript-eslint/eslint-plugin": "^2.10.0",
         "@typescript-eslint/parser": "^2.10.0",

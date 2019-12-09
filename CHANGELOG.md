@@ -1,3 +1,8 @@
+<a name="0.5.7"></a>
+## [0.5.7](https://github.com/kei-ito/sable/compare/v0.5.6...v0.5.7) (2019-12-09)
+
+
+
 <a name="0.5.6"></a>
 ## [0.5.6](https://github.com/kei-ito/sable/compare/v0.5.5...v0.5.6) (2019-12-09)
 

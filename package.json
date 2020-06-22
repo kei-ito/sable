@@ -32,7 +32,7 @@
         "middleware-static-livereload": "^1.2.13"
     },
     "devDependencies": {
-        "@commitlint/cli": "8.3.5",
+        "@commitlint/cli": "9.0.1",
         "@commitlint/config-conventional": "9.0.1",
         "@nlib/lint": "^3.17.1",
         "@nlib/remove-sourcemap": "^3.17.1",

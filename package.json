@@ -29,25 +29,25 @@
         "@types/connect": "^3.4.32",
         "commander": "^5.0.0",
         "connect": "3.7.0",
-        "middleware-static-livereload": "^1.2.13"
+        "middleware-static-livereload": "^1.2.14"
     },
     "devDependencies": {
-        "@commitlint/cli": "8.3.5",
+        "@commitlint/cli": "^9.0.1",
         "@commitlint/config-conventional": "9.0.1",
-        "@nlib/lint": "^3.17.1",
-        "@nlib/remove-sourcemap": "^3.17.1",
+        "@nlib/lint": "^3.17.2",
+        "@nlib/remove-sourcemap": "^3.17.2",
         "@types/node": "^14.0.0",
-        "@typescript-eslint/eslint-plugin": "^2.19.2",
+        "@typescript-eslint/eslint-plugin": "^3.3.0",
         "@typescript-eslint/parser": "^3.0.0",
         "ava": "3.9.0",
-        "chokidar": "^3.3.1",
-        "conventional-changelog-cli": "^2.0.31",
+        "chokidar": "^3.4.0",
+        "conventional-changelog-cli": "^2.0.34",
         "eslint": "7.3.0",
-        "husky": "^4.2.2",
-        "lint-staged": "^10.0.0",
+        "husky": "^4.2.5",
+        "lint-staged": "^10.2.11",
         "npm-run-all": "4.1.5",
-        "ts-node": "^8.6.2",
-        "typescript": "^3.7.5"
+        "ts-node": "^8.10.2",
+        "typescript": "^3.9.5"
     },
     "eslintConfig": {
         "extends": "./node_modules/@nlib/lint/.eslintrc.json",

@@ -1,6 +1,7 @@
 import * as http from 'http';
 import * as connect from 'connect';
 import * as staticLivereload from 'middleware-static-livereload';
+export {LogLevel} from 'middleware-static-livereload';
 
 export interface ISableOptions extends staticLivereload.IOptions {
     /**

@@ -1,3 +1,7 @@
+## [0.5.9](https://github.com/kei-ito/sable/compare/v0.5.8...v0.5.9) (2020-06-26)
+
+
+
 ## [0.5.8](https://github.com/kei-ito/sable/compare/v0.5.7...v0.5.8) (2020-06-22)
 
 

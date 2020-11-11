@@ -29,7 +29,7 @@
         "@types/connect": "3.4.33",
         "commander": "6.2.0",
         "connect": "3.7.0",
-        "middleware-static-livereload": "1.2.14"
+        "middleware-static-livereload": "1.2.16"
     },
     "devDependencies": {
         "@commitlint/cli": "11.0.0",

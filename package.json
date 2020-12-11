@@ -26,7 +26,7 @@
         "prepack": "remove-sourcemap lib"
     },
     "dependencies": {
-        "@types/connect": "3.4.33",
+        "@types/connect": "3.4.34",
         "commander": "6.2.0",
         "connect": "3.7.0",
         "middleware-static-livereload": "1.2.16"

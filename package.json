@@ -27,7 +27,7 @@
     },
     "dependencies": {
         "@types/connect": "3.4.34",
-        "commander": "6.2.0",
+        "commander": "6.2.1",
         "connect": "3.7.0",
         "middleware-static-livereload": "1.2.16"
     },

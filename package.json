@@ -83,6 +83,9 @@
     "lint-staged": {
         "*.js": [
             "eslint"
+        ],
+        "*.ts": [
+            "eslint"
         ]
     },
     "renovate": {

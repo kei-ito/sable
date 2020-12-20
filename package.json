@@ -29,35 +29,23 @@
         "@types/connect": "3.4.34",
         "commander": "6.2.1",
         "connect": "3.7.0",
-        "middleware-static-livereload": "1.2.16"
+        "middleware-static-livereload": "1.2.17"
     },
     "devDependencies": {
-        "@commitlint/cli": "11.0.0",
-        "@commitlint/config-conventional": "11.0.0",
-        "@nlib/lint": "3.17.2",
-        "@nlib/remove-sourcemap": "3.17.3",
+        "@nlib/changelog": "0.1.9",
+        "@nlib/eslint-config": "3.17.16",
+        "@nlib/lint-commit": "0.1.3",
         "@types/node": "14.14.14",
         "@typescript-eslint/eslint-plugin": "4.10.0",
         "@typescript-eslint/parser": "4.10.0",
         "ava": "3.14.0",
         "chokidar": "3.4.3",
-        "conventional-changelog-cli": "2.1.1",
-        "eslint": "7.15.0",
+        "eslint": "7.16.0",
         "husky": "4.3.6",
         "lint-staged": "10.5.3",
         "npm-run-all": "4.1.5",
         "ts-node": "9.1.1",
-        "typescript": "4.0.5"
-    },
-    "eslintConfig": {
-        "extends": "./node_modules/@nlib/lint/.eslintrc.json",
-        "env": {
-            "es6": true,
-            "node": true
-        },
-        "globals": {
-            "URL": false
-        }
+        "typescript": "4.1.3"
     },
     "ava": {
         "extensions": [
@@ -68,14 +56,25 @@
             "ts-node/register"
         ]
     },
-    "commitlint": {
+    "eslintConfig": {
+        "ignorePatterns": [
+            "test/src",
+            "test/test-*"
+        ],
         "extends": [
-            "@commitlint/config-conventional"
-        ]
+            "@nlib/eslint-config"
+        ],
+        "env": {
+            "es6": true,
+            "node": true
+        },
+        "rules": {
+            "@nlib/no-globals": "off"
+        }
     },
     "husky": {
         "hooks": {
-            "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+            "commit-msg": "nlib-lint-commit --input HUSKY_GIT_PARAMS",
             "pre-commit": "lint-staged"
         }
     },

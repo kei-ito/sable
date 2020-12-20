@@ -20,10 +20,9 @@
         "lint": "eslint --ext .ts src",
         "build": "tsc",
         "test": "ava -v test/index.ts",
-        "version:changelog": "conventional-changelog --preset angular --infile CHANGELOG.md --same-file --release-count 0",
-        "version:add": "git add .",
         "version": "run-s version:changelog version:add",
-        "prepack": "remove-sourcemap lib"
+        "version:changelog": "nlib-changelog --output CHANGELOG.md",
+        "version:add": "git add ."
     },
     "dependencies": {
         "@types/connect": "3.4.34",

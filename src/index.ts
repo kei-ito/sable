@@ -3,7 +3,7 @@ import * as connect from 'connect';
 import * as staticLivereload from 'middleware-static-livereload';
 export {LogLevel} from 'middleware-static-livereload';
 
-export interface ISableOptions extends staticLivereload.IOptions {
+export interface SableOptions extends staticLivereload.IOptions {
     /**
      * The first argument of server.listen()
      * https://nodejs.org/api/net.html#net_server_listen_port_host_backlog_callback
@@ -24,7 +24,7 @@ export interface ISableOptions extends staticLivereload.IOptions {
 }
 
 export const startServer = async (
-    options: ISableOptions = {},
+    options: SableOptions = {},
 ): Promise<http.Server> => {
     const app = connect();
     for (const middleware of (options.middlewares || [])) {

@@ -3,6 +3,7 @@ import {URL} from 'url';
 import * as http from 'http';
 import * as stream from 'stream';
 import * as childProcess from 'child_process';
+import fetch from 'node-fetch';
 import {startServer} from '..';
 
 interface ITextContext {
@@ -16,27 +17,6 @@ interface ITextContext {
 }
 
 const test = anyTest as TestInterface<ITextContext>;
-const get = (url: URL): Promise<http.IncomingMessage> => new Promise((resolve, reject) => {
-    http.get(`${url}`)
-    .once('response', resolve)
-    .once('error', reject);
-});
-const readStream = (readable: stream.Readable): Promise<Buffer> => new Promise((resolve, reject) => {
-    const chunks: Array<Buffer> = [];
-    let totalLength = 0;
-    readable.pipe(new stream.Writable({
-        write(chunk, _encoding, callback) {
-            chunks.push(chunk);
-            totalLength += chunk.length;
-            callback();
-        },
-        final(callback) {
-            resolve(Buffer.concat(chunks, totalLength));
-            callback();
-        },
-    }))
-    .once('error', reject);
-});
 
 test.before(async () => {
     await new Promise((resolve, reject) => {
@@ -94,7 +74,7 @@ test.afterEach(async (t) => {
     }
     const {server} = t.context;
     if (server) {
-        await new Promise((resolve, reject) => {
+        await new Promise<void>((resolve, reject) => {
             server.close((error) => {
                 if (error) {
                     reject(error);
@@ -110,17 +90,17 @@ let port = 9200;
 
 test('GET /src', async (t) => {
     const localURL = await t.context.start(t, `sable --port ${port++} --host localhost`, __dirname);
-    const indexResponse = await get(new URL('/src', localURL));
-    t.is(indexResponse.statusCode, 200);
-    t.is(indexResponse.headers['content-type'], 'text/html');
-    const html = `${await readStream(indexResponse)}`;
+    const res = await fetch(new URL('/src', localURL));
+    t.is(res.status, 200);
+    t.is(res.headers.get('content-type'), 'text/html');
+    const html = await res.text();
     t.true(html.includes('<script'));
 });
 
 test('GET /', async (t) => {
     const localURL = await t.context.start(t, `sable --port ${port++} --host localhost`, __dirname);
-    const indexResponse = await get(new URL('/', localURL));
-    t.is(indexResponse.statusCode, 200);
+    const res = await fetch(new URL('/', localURL));
+    t.is(res.status, 200);
 });
 
 test('GET /index.ts', async (t) => {
@@ -131,8 +111,8 @@ test('GET /index.ts', async (t) => {
     });
     const addressInfo = t.context.server.address();
     if (addressInfo && typeof addressInfo === 'object') {
-        const indexResponse = await get(new URL(`http://localhost:${addressInfo.port}/index.ts`));
-        t.is(indexResponse.statusCode, 200);
+        const res = await fetch(new URL(`http://localhost:${addressInfo.port}/index.ts`));
+        t.is(res.status, 200);
     } else {
         t.is(typeof addressInfo, 'object');
     }

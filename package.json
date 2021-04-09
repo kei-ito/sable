@@ -28,7 +28,7 @@
         "@types/connect": "3.4.34",
         "commander": "6.2.1",
         "connect": "3.7.0",
-        "middleware-static-livereload": "1.2.17"
+        "middleware-static-livereload": "1.2.18"
     },
     "devDependencies": {
         "@nlib/changelog": "0.1.9",

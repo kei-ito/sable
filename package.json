@@ -16,6 +16,9 @@
     "bin": {
         "sable": "./bin/sable"
     },
+    "files": [
+        "lib"
+    ],
     "scripts": {
         "lint": "eslint --ext .ts src",
         "build": "tsc --project tsconfig.build.json",

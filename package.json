@@ -19,7 +19,7 @@
     "scripts": {
         "lint": "eslint --ext .ts src",
         "build": "tsc",
-        "test": "ava -v test/index.ts",
+        "test": "ava",
         "version": "run-s version:changelog version:add",
         "version:changelog": "nlib-changelog --output CHANGELOG.md",
         "version:add": "git add ."
@@ -47,15 +47,6 @@
         "npm-run-all": "4.1.5",
         "ts-node": "9.1.1",
         "typescript": "4.2.3"
-    },
-    "ava": {
-        "extensions": [
-            "ts",
-            "js"
-        ],
-        "require": [
-            "ts-node/register"
-        ]
     },
     "eslintConfig": {
         "ignorePatterns": [

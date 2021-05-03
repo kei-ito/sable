@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.5.11 (2021-05-03)
+
+### Tests
+
+- run npm install with --no-save (ec805d3)
+- move ava config (0d39986)
+
+### Styles
+
+- fix eslint errors (c5eca94)
+
+### Documentation
+
+- update badges (1252439)
+
+### Continuous Integration
+
+- run the Publish job in the deployment environment (1dc6b5f)
+
+### Dependency Upgrades
+
+- @types/node:14.14.37→15.0.1 commander:6.2.1→7.2.0 middleware-static-livereload:1.2.18→1.2.19 typescript:4.2.3→4.2.4 (8b1d930)
+
+
 ## v0.5.10 (2020-12-20)
 
 ### Dependency Upgrades

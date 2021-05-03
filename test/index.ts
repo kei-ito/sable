@@ -4,6 +4,7 @@ import {URL} from 'url';
 import type * as http from 'http';
 import * as stream from 'stream';
 import * as childProcess from 'child_process';
+import {exec} from '@nlib/nodetool';
 import fetch from 'node-fetch';
 import {startServer} from '..';
 
@@ -19,15 +20,9 @@ interface TestContext {
 
 const test = anyTest as TestInterface<TestContext>;
 
-test.before(async () => {
-    await new Promise((resolve, reject) => {
-        childProcess.spawn('npm install', {
-            cwd: __dirname,
-            shell: true,
-        })
-        .once('error', reject)
-        .once('exit', resolve);
-    });
+test.before(async (t) => {
+    const result = await exec('npm install --no-save', {cwd: __dirname});
+    t.log(result.stdout, result.stderr);
 });
 
 test.beforeEach((beforeT) => {

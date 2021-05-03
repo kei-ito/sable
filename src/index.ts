@@ -3,7 +3,7 @@ import * as connect from 'connect';
 import * as staticLivereload from 'middleware-static-livereload';
 export {LogLevel} from 'middleware-static-livereload';
 
-export interface SableOptions extends staticLivereload.IOptions {
+export interface SableOptions extends staticLivereload.Options {
     /**
      * The first argument of server.listen()
      * https://nodejs.org/api/net.html#net_server_listen_port_host_backlog_callback
@@ -23,16 +23,14 @@ export interface SableOptions extends staticLivereload.IOptions {
     middlewares?: Array<connect.HandleFunction>,
 }
 
-export const startServer = async (
-    options: SableOptions = {},
-): Promise<http.Server> => {
+export const startServer = async (options: SableOptions = {}): Promise<http.Server> => {
     const app = connect();
     for (const middleware of (options.middlewares || [])) {
         app.use(middleware);
     }
     app.use(staticLivereload.middleware(options));
     const server = http.createServer(app);
-    await new Promise<http.Server>((resolve, reject) => {
+    return await new Promise<http.Server>((resolve, reject) => {
         server.once('listening', () => {
             const addressInfo = server.address();
             if (addressInfo && typeof addressInfo === 'object') {
@@ -44,17 +42,15 @@ export const startServer = async (
             resolve(server);
         });
         const listen = (port: number, host?: string) => {
-            server
-            .once('error', (error: Error & {code: string}) => {
+            server.once('error', (error: Error & {code: string}) => {
                 if (error.code === 'EADDRINUSE') {
                     listen(port + 1, host);
                 } else {
                     reject(error);
                 }
-            })
-            .listen(port, host);
+            });
+            server.listen(port, host);
         };
         listen(options.port || 4000, options.host);
     });
-    return server;
 };

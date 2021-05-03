@@ -1,36 +1,32 @@
-import anyTest, {TestInterface, ExecutionContext} from 'ava';
+import type {TestInterface, ExecutionContext} from 'ava';
+import anyTest from 'ava';
 import {URL} from 'url';
-import * as http from 'http';
+import type * as http from 'http';
 import * as stream from 'stream';
 import * as childProcess from 'child_process';
+import {exec} from '@nlib/nodetool';
 import fetch from 'node-fetch';
 import {startServer} from '..';
 
-interface ITextContext {
+interface TestContext {
     process?: childProcess.ChildProcess,
     server?: http.Server,
-    start(
-        t: ExecutionContext<ITextContext>,
+    start: (
+        t: ExecutionContext<TestContext>,
         command: string,
         cwd: string,
-    ): Promise<URL>,
+    ) => Promise<URL>,
 }
 
-const test = anyTest as TestInterface<ITextContext>;
+const test = anyTest as TestInterface<TestContext>;
 
-test.before(async () => {
-    await new Promise((resolve, reject) => {
-        childProcess.spawn('npm install', {
-            cwd: __dirname,
-            shell: true,
-        })
-        .once('error', reject)
-        .once('exit', resolve);
-    });
+test.before(async (t) => {
+    const result = await exec('npm install --no-save', {cwd: __dirname});
+    t.log(result.stdout, result.stderr);
 });
 
-test.beforeEach((t) => {
-    t.context.start = async (t, command, cwd) => {
+test.beforeEach((beforeT) => {
+    beforeT.context.start = async (t, command, cwd) => {
         const process = t.context.process = childProcess.spawn(
             `npx ${command}`,
             {cwd, shell: true},
@@ -42,7 +38,7 @@ test.beforeEach((t) => {
                 chunks.push(chunk);
                 totalLength += chunk.length;
                 const concatenated = Buffer.concat(chunks, totalLength);
-                const matched = `${concatenated}`.match(/http:\/\/\S+/);
+                const matched = (/http:\/\/\S+/).exec(`${concatenated}`);
                 if (matched) {
                     resolve(new URL(matched[0]));
                 }
@@ -104,12 +100,14 @@ test('GET /', async (t) => {
 });
 
 test('GET /index.ts', async (t) => {
-    t.context.server = await startServer({
+    const config = {
         host: 'localhost',
         port: port++,
         documentRoot: __dirname,
-    });
-    const addressInfo = t.context.server.address();
+    };
+    const server = await startServer(config);
+    t.context.server = server;
+    const addressInfo = server.address();
     if (addressInfo && typeof addressInfo === 'object') {
         const res = await fetch(new URL(`http://localhost:${addressInfo.port}/index.ts`));
         t.is(res.status, 200);

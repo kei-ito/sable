@@ -13,8 +13,5 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "outDir": "./lib"
-    },
-    "include": [
-        "src/**/*.ts"
-    ]
+    }
 }

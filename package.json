@@ -28,7 +28,7 @@
         "version:add": "git add ."
     },
     "dependencies": {
-        "commander": "7.2.0",
+        "commander": "8.0.0",
         "connect": "3.7.0",
         "middleware-static-livereload": "1.2.19"
     },
